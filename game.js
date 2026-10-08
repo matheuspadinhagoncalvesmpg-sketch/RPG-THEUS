@@ -2915,6 +2915,7 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 
   window.addEventListener('keydown', (e) => {
+    if (document.body.classList.contains('hk-active')) return;
     const isChatFocused = document.activeElement === chatInput;
 
     if (e.code === 'Enter') {
