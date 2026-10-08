@@ -184,6 +184,11 @@
           <button id="start-game-btn" class="adventure-action-btn">
             COMEÇAR AVENTURA! 🌟
           </button>
+          <div class="mode-divider">— ou —</div>
+          <button id="continue-hk-btn" class="adventure-action-btn continue-btn hidden">▶ CONTINUAR ABISMO</button>
+          <button id="start-hk-btn" class="adventure-action-btn hk-start-btn">
+            🕳️ ABISMO DE OOO <small>plataforma sombria, estilo Hollow Knight</small>
+          </button>
         </div>
       </div>
     </div>
@@ -359,9 +364,48 @@
         </div>
       </footer>
     </div>
+
+    <!-- ABISMO DE OOO: MODO PLATAFORMA -->
+    <div id="hk-screen" class="screen">
+      <canvas id="hk-canvas" width="480" height="270"></canvas>
+
+      <div class="hk-topbtns">
+        <button type="button" id="hk-fs" title="Tela cheia">⛶</button>
+        <button type="button" id="hk-btn-pause" title="Pausa">⏸</button>
+      </div>
+
+      <div id="hk-touch" class="hidden">
+        <div id="hk-joy-zone"><div id="hk-joy-base"><div id="hk-joy-stick"></div></div></div>
+        <button type="button" id="hk-btn-interact" class="hk-btn hk-interact hidden">🛏️ Descansar</button>
+        <button type="button" id="hk-btn-focus" class="hk-btn hk-focus" title="Curar (segure)">🩹</button>
+        <button type="button" id="hk-btn-spell" class="hk-btn hk-spell" title="Magia">✨</button>
+        <button type="button" id="hk-btn-dash" class="hk-btn hk-dash" title="Dash">💨</button>
+        <button type="button" id="hk-btn-attack" class="hk-btn hk-attack" title="Atacar">⚔️</button>
+        <button type="button" id="hk-btn-jump" class="hk-btn hk-jump" title="Pular">⤴</button>
+      </div>
+
+      <div id="hk-pause" class="hidden">
+        <div class="hk-panel">
+          <h3>Pausa</h3>
+          <div id="hk-pause-info"></div>
+          <button type="button" id="hk-resume" class="adventure-action-btn">Continuar</button>
+          <button type="button" id="hk-exit" class="adventure-action-btn hk-exit">Salvar e sair</button>
+        </div>
+      </div>
+
+      <div id="hk-bench" class="hidden">
+        <div class="hk-panel">
+          <h3>🛏️ Descanso</h3>
+          <div class="hk-bench-sub">Vidas restauradas e ponto de retorno salvo. Moedas: 🪙 <b id="hk-bench-geo">0</b></div>
+          <div id="hk-bench-items"></div>
+          <button type="button" id="hk-bench-close" class="adventure-action-btn">Levantar</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="local_server.js"></script>
   <script src="game.js"></script>
+  <script src="hollow.js"></script>
 </body>
 </html>
