@@ -180,6 +180,7 @@
             </div>
           </div>
 
+          <button id="continue-btn" class="adventure-action-btn continue-btn hidden">▶ CONTINUAR</button>
           <button id="start-game-btn" class="adventure-action-btn">
             COMEÇAR AVENTURA! 🌟
           </button>
@@ -230,6 +231,7 @@
             ⭐ <span id="hud-exp">0</span>/<span id="hud-exp-next">50</span> XP
           </div>
           <button id="install-pwa-btn" class="icon-hud-btn pwa-btn" title="Instalar Jogo no Celular">📲</button>
+          <button id="fullscreen-btn" class="icon-hud-btn" title="Tela cheia">⛶</button>
           <button id="sound-toggle-btn" class="icon-hud-btn" title="Ligar/Desligar Som">🔊</button>
         </div>
       </header>
@@ -237,6 +239,7 @@
       <!-- ÁREA PRINCIPAL DO CANVAS DO JOGO -->
       <div id="canvas-wrapper">
         <canvas id="game-canvas" width="800" height="520"></canvas>
+        <canvas id="minimap" width="110" height="82" title="Mapa"></canvas>
 
         <!-- CHAT MULTIPLAYER IN-GAME -->
         <div id="chat-container">
@@ -272,6 +275,22 @@
           <button id="respawn-btn" class="adventure-action-btn">RENASCER NA CASA DA ÁRVORE 🏠</button>
         </div>
 
+        <!-- LOJA DO BMO -->
+        <div id="shop-modal" class="hidden">
+          <div class="shop-box">
+            <h3>🎮 Loja do BMO</h3>
+            <div class="shop-gold">Suas moedas: 🪙 <b id="shop-gold">0</b></div>
+            <div id="shop-items"></div>
+            <button type="button" id="shop-close" class="adventure-action-btn">Fechar</button>
+          </div>
+        </div>
+
+        <!-- AVISO PARA GIRAR O CELULAR -->
+        <div id="rotate-hint">
+          <div>📱↻</div>
+          <p>Gire o celular para jogar na horizontal</p>
+        </div>
+
         <!-- CONTROLES TOUCH PARA CELULAR E TABLET -->
         <div id="mobile-controls" class="mobile-controls-layer">
           <!-- JOYSTICK VIRTUAL ANALÓGICO -->
@@ -284,9 +303,10 @@
           <!-- BOTÕES DE AÇÃO TOUCH -->
           <div class="mobile-action-buttons">
             <div class="touch-row-top">
-              <button type="button" id="btn-touch-chat" class="touch-btn touch-chat-btn" title="Chat">💬</button>
-              <button type="button" id="btn-touch-sandwich" class="touch-btn touch-sandwich-btn" title="Sanduíche">🥪</button>
-              <button type="button" id="btn-touch-potion" class="touch-btn touch-potion-btn" title="Poção">🧪</button>
+              <button type="button" id="btn-touch-talk" class="touch-btn touch-talk-btn hidden" title="Falar">💬 Falar</button>
+              <button type="button" id="btn-touch-chat" class="touch-btn touch-chat-btn" title="Chat">⌨️</button>
+              <button type="button" id="btn-touch-sandwich" class="touch-btn touch-sandwich-btn" title="Sanduíche">🥪<i class="badge" id="touch-sandwich-count">1</i></button>
+              <button type="button" id="btn-touch-potion" class="touch-btn touch-potion-btn" title="Poção">🧪<i class="badge" id="touch-potion-count">3</i></button>
             </div>
             <div class="touch-row-main">
               <button type="button" id="btn-touch-skill" class="touch-btn touch-skill-btn" title="Habilidade">🌀</button>
@@ -330,6 +350,7 @@
         <div class="controls-legend">
           <span><b>[WASD]</b> ou <b>[Setas]</b>: Mover</span>
           <span><b>[Espaço]</b>: Atacar</span>
+          <span><b>[T]</b>: Falar/Loja</span>
           <span><b>[E]</b>: Especial</span>
           <span><b>[Q]</b>: Curar</span>
           <span><b>[M]</b>: Som</span>
@@ -338,6 +359,7 @@
     </div>
   </div>
 
+  <script src="local_server.js"></script>
   <script src="game.js"></script>
 </body>
 </html>
