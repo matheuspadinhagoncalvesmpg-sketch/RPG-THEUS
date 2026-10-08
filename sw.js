@@ -1,10 +1,11 @@
-const CACHE_NAME = 'rpg-ooo-v3';
+const CACHE_NAME = 'rpg-ooo-v4';
 const ASSETS = [
   './',
   './index.html',
   './style.css',
   './game.js',
   './local_server.js',
+  './hollow.js',
   './manifest.json',
   './icon.svg'
 ];
