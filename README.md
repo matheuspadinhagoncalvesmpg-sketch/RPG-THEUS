@@ -2,6 +2,33 @@
 
 Um RPG em estilo pixel art inspirado em **Hora de Aventura**, agora **jogável direto no celular**.
 
+## 🕳️ NOVO: Abismo de Ooo (plataforma estilo Hollow Knight)
+
+Na tela inicial, escolha **ABISMO DE OOO**. É um metroidvania 2D sombrio, com o seu herói e o universo de Hora de Aventura:
+
+- **Combate preciso**: ataque em 4 direções (cima/baixo/lados), quique com o golpe para baixo, pulo variável, dash e magia.
+- **Almas**: cada golpe enche o vaso de alma; segure **curar** para recuperar uma vida.
+- **Mapa conectado com travas**: Colinas → Caverna Doce → Cripta Gelada → Salão do Rei Gelatina. A **Capa de Marceline** (dash) abre o poço de espinhos; as **Asas de Gunther** (pulo duplo) abrem a saída da cripta.
+- **Chefe** com 3 fases (saltos com ondas de choque, invocação, chuva de gosma).
+- **Bancos de descanso**: curam, salvam o ponto de retorno e vendem melhorias (dano, vidas).
+- **Sombra**: ao morrer você perde o geo (moedas); derrote sua sombra no local para recuperar.
+- Visual sombrio: parallax em camadas, névoa, partículas e lanterna de luz ao redor do herói.
+
+| Ação | Teclado | Celular |
+| :--- | :--- | :--- |
+| Mover / mirar cima-baixo | `A D` ou setas / `W S` | Joystick |
+| Pular | `Espaço`, `K`, `Z` | ⤴ |
+| Atacar | `J`, `X` | ⚔️ |
+| Dash | `L`, `C`, `Shift` | 💨 |
+| Magia (33 almas) | `E`, `Q` | ✨ |
+| Curar (segure) | `F`, `H` | 🩹 |
+| Descansar | `↑` perto do banco | 🛏️ |
+| Pausa | `Esc`, `P` | ⏸ |
+
+O modo clássico (vista de cima) continua em **COMEÇAR AVENTURA**.
+
+---
+
 ## 📱 Jogar no celular (sem servidor)
 
 O jogo funciona **sozinho no navegador** (modo solo) — basta abrir `index.html` hospedado em qualquer lugar estático (ex.: GitHub Pages). No celular:
