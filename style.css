@@ -241,8 +241,8 @@ body {
 
 .class-picker {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
 }
 
 .class-btn {
@@ -1192,4 +1192,32 @@ body {
   .key-bind {
     display: none; /* Oculta tags de teclas físicas */
   }
+
+  .class-picker {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* ================= ITENS EXTRAS & PWA ================= */
+.sandwich-slot {
+  background: #fef08a !important;
+  border-color: #d97706 !important;
+}
+
+.touch-sandwich-btn {
+  width: 46px;
+  height: 46px;
+  background: #f59e0b;
+  font-size: 20px;
+}
+
+.pwa-btn {
+  background: #10b981 !important;
+  color: white;
+  animation: pulseBtn 2s infinite;
+}
+
+@keyframes pulseBtn {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); box-shadow: 0 0 10px #34d399; }
 }

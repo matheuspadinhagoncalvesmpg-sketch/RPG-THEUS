@@ -175,6 +175,16 @@ const CLASS_CONFIGS = {
     skillIcon: '🏹',
     skillCooldown: 3000,
     mpCost: 18
+  },
+  vampire: {
+    name: "Vampiro",
+    quote: '"Eu sou a rainha dos vampiros! Esse som vai te arrebentar!"',
+    hp: 105, mp: 70, atk: 17, spd: 3.5,
+    attackType: 'vampire',
+    skillName: 'Acorde Sônico',
+    skillIcon: '🎸',
+    skillCooldown: 3200,
+    mpCost: 16
   }
 };
 
@@ -184,7 +194,8 @@ const heroProfile = {
   outfitColor: "#3aa3e3",
   hatColor: "#ffffff",
   skinColor: "#ffe0bd",
-  accessory: "backpack"
+  accessory: "backpack",
+  pet: "gunther"
 };
 
 // ===================================================================
@@ -233,7 +244,7 @@ class PixelArtRenderer {
     // Pernas
     const leg1 = isMoving ? Math.sin(animFrame * 0.5) * 3 : 0;
     const leg2 = isMoving ? -Math.sin(animFrame * 0.5) * 3 : 0;
-    ctx.fillStyle = '#1e3a8a';
+    ctx.fillStyle = classKey === 'vampire' ? '#0f172a' : '#1e3a8a';
     ctx.fillRect(-4 * scale, (2 + bob) * scale, 3 * scale, 4 * scale);
     ctx.fillRect(1 * scale, (2 + bob) * scale, 3 * scale, 4 * scale);
 
@@ -254,7 +265,7 @@ class PixelArtRenderer {
       ctx.fillRect(-7 * scale, (-4 + bob) * scale, 3 * scale, 6 * scale);
     }
 
-    // Chapéu/Capuz
+    // Chapéu/Cabelo
     ctx.fillStyle = hatColor;
     ctx.fillRect(-6 * scale, (-15 + bob) * scale, 12 * scale, 10 * scale);
 
@@ -271,6 +282,12 @@ class PixelArtRenderer {
     } else if (classKey === 'archer') {
       ctx.fillStyle = '#10b981';
       ctx.fillRect(3 * scale, (-19 + bob) * scale, 3 * scale, 5 * scale);
+    } else if (classKey === 'vampire') {
+      // Cabelo preto longo de rockstar estilo Marceline
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(-7 * scale, (-16 + bob) * scale, 14 * scale, 12 * scale);
+      ctx.fillRect(-8 * scale, (-8 + bob) * scale, 3 * scale, 14 * scale);
+      ctx.fillRect(5 * scale, (-8 + bob) * scale, 3 * scale, 14 * scale);
     }
 
     // Rosto
@@ -282,6 +299,12 @@ class PixelArtRenderer {
       ctx.fillRect(1 * scale, (-10 + bob) * scale, 1.5 * scale, 2 * scale);
       ctx.fillStyle = '#c2410c';
       ctx.fillRect(-1.5 * scale, (-7 + bob) * scale, 3 * scale, 1 * scale);
+      if (classKey === 'vampire') {
+        // Caninos pontudos vampíricos
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(-2 * scale, (-6 + bob) * scale, 1 * scale, 2 * scale);
+        ctx.fillRect(1 * scale, (-6 + bob) * scale, 1 * scale, 2 * scale);
+      }
     }
 
     // Armas
@@ -309,7 +332,74 @@ class PixelArtRenderer {
       ctx.fillStyle = '#92400e'; ctx.fillRect(0, -9 * scale, 2 * scale, 14 * scale);
       ctx.fillStyle = '#cbd5e1'; ctx.fillRect(-2 * scale, -8 * scale, 1 * scale, 12 * scale);
       ctx.restore();
+    } else if (classKey === 'vampire') {
+      // BAIXO-MACHADO VERMELHO DA MARCELINE
+      ctx.save();
+      ctx.translate(5 * scale, (-1 + bob) * scale);
+      if (isAttacking) ctx.rotate(-0.4 + atkAngle * 1.8);
+      // Lâminas de machado vermelhas
+      ctx.fillStyle = '#dc2626';
+      ctx.fillRect(-5 * scale, -3 * scale, 10 * scale, 7 * scale);
+      ctx.fillStyle = '#991b1b';
+      ctx.fillRect(-4 * scale, -1 * scale, 8 * scale, 3 * scale);
+      // Braço do baixo
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(-1 * scale, -14 * scale, 2 * scale, 16 * scale);
+      // Cordas prateadas
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(-0.5 * scale, -12 * scale, 1 * scale, 12 * scale);
+      ctx.restore();
     }
+
+    ctx.restore();
+  }
+
+  static drawPetGunther(ctx, x, y, animTime) {
+    const scale = 2.2;
+    ctx.save();
+    ctx.translate(Math.round(x), Math.round(y));
+
+    const waddle = Math.sin(animTime * 8) * 1.5;
+
+    // Sombra
+    ctx.fillStyle = 'rgba(0,0,0,0.2)';
+    ctx.beginPath();
+    ctx.ellipse(0, 6 * scale, 5 * scale, 2.5 * scale, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Corpinho preto do Pinguim
+    ctx.fillStyle = '#0f172a';
+    ctx.beginPath();
+    ctx.ellipse(0, (0 + waddle) * scale, 5 * scale, 6.5 * scale, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Barriguinha branca
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.ellipse(0, (1 + waddle) * scale, 3.2 * scale, 4.5 * scale, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Asas
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(-6 * scale, (-1 + waddle) * scale, 2 * scale, 4 * scale);
+    ctx.fillRect(4 * scale, (-1 + waddle) * scale, 2 * scale, 4 * scale);
+
+    // Olhos
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(-2.5 * scale, (-4 + waddle) * scale, 2 * scale, 2.5 * scale);
+    ctx.fillRect(0.5 * scale, (-4 + waddle) * scale, 2 * scale, 2.5 * scale);
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(-1.5 * scale, (-3.5 + waddle) * scale, 1 * scale, 1.5 * scale);
+    ctx.fillRect(1.5 * scale, (-3.5 + waddle) * scale, 1 * scale, 1.5 * scale);
+
+    // Bico laranja
+    ctx.fillStyle = '#f97316';
+    ctx.fillRect(-1 * scale, (-1.5 + waddle) * scale, 2 * scale, 2 * scale);
+
+    // Patinhas
+    ctx.fillStyle = '#f97316';
+    ctx.fillRect(-3 * scale, (5 + waddle) * scale, 2.5 * scale, 1.5 * scale);
+    ctx.fillRect(0.5 * scale, (5 + waddle) * scale, 2.5 * scale, 1.5 * scale);
 
     ctx.restore();
   }
@@ -426,6 +516,27 @@ class PixelArtRenderer {
       ctx.lineTo(0, (10 + bob) * scale); ctx.lineTo(6 * scale, (-3 + bob) * scale); ctx.fill();
       ctx.fillStyle = '#f59e0b'; // Coroa de rubis
       ctx.fillRect(-4 * scale, (-17 + bob) * scale, 8 * scale, 5 * scale);
+    } else if (npc.role === 'marceline') {
+      // Marceline a Rainha dos Vampiros
+      const floatBob = Math.sin(animTime * 4) * 3;
+      // Cabelo preto longo
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(-6 * scale, (-18 + floatBob) * scale, 12 * scale, 22 * scale);
+      // Pele pálida
+      ctx.fillStyle = '#cbd5e1';
+      ctx.fillRect(-3.5 * scale, (-14 + floatBob) * scale, 7 * scale, 6 * scale);
+      // Olhos vermelhos
+      ctx.fillStyle = '#dc2626';
+      ctx.fillRect(-2 * scale, (-12 + floatBob) * scale, 1.5 * scale, 2 * scale);
+      ctx.fillRect(1 * scale, (-12 + floatBob) * scale, 1.5 * scale, 2 * scale);
+      // Roupa cinza
+      ctx.fillStyle = '#475569';
+      ctx.fillRect(-3 * scale, (-8 + floatBob) * scale, 6 * scale, 10 * scale);
+      // Baixo-machado vermelho
+      ctx.fillStyle = '#dc2626';
+      ctx.fillRect(3 * scale, (-4 + floatBob) * scale, 6 * scale, 6 * scale);
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(4.5 * scale, (-12 + floatBob) * scale, 1.5 * scale, 14 * scale);
     }
 
     // Balão de fala de IA se tiver
@@ -493,7 +604,13 @@ class GameEngine {
     this.level = 1;
     this.expToNext = 50;
     this.potions = 3;
+    this.sandwiches = 1;
+    this.sandwichBuffTimer = 0;
     this.equippedItem = null;
+
+    // Pet Gunther
+    this.petX = 320;
+    this.petY = 350;
 
     // Joystick Virtual Touch para Celular
     this.joystick = { active: false, dx: 0, dy: 0, touchId: null };
@@ -624,6 +741,14 @@ class GameEngine {
       btnPotion.addEventListener('touchstart', (e) => {
         e.preventDefault();
         this.usePotion();
+      }, { passive: false });
+    }
+
+    const btnSandwich = document.getElementById('btn-touch-sandwich');
+    if (btnSandwich) {
+      btnSandwich.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        this.eatSandwich();
       }, { passive: false });
     }
 
@@ -933,7 +1058,8 @@ class GameEngine {
       { id: 1, name: "Jake o Cão", role: "jake", x: 420, y: 350, speechMsg: null, speechTimer: 0 },
       { id: 2, name: "BMO", role: "bmo", x: 270, y: 360, speechMsg: null, speechTimer: 0 },
       { id: 3, name: "Princesa Jujuba", role: "bubblegum", x: 1100, y: 220, speechMsg: null, speechTimer: 0 },
-      { id: 4, name: "Rei Gelado", role: "iceking", x: 1900, y: 750, speechMsg: null, speechTimer: 0 }
+      { id: 4, name: "Rei Gelado", role: "iceking", x: 1900, y: 750, speechMsg: null, speechTimer: 0 },
+      { id: 5, name: "Marceline", role: "marceline", x: 620, y: 260, speechMsg: null, speechTimer: 0 }
     ];
   }
 
@@ -1017,9 +1143,42 @@ class GameEngine {
       }
     }
 
+    // Buff do Sanduíche do Jake
+    if (this.sandwichBuffTimer > 0) {
+      this.sandwichBuffTimer -= dt;
+      this.hero.hp = Math.min(this.hero.maxHp, this.hero.hp + dt * 4);
+      if (Math.random() < 0.2) {
+        this.particles.push({
+          x: this.hero.x + (Math.random() - 0.5) * 20,
+          y: this.hero.y + (Math.random() - 0.5) * 20,
+          vx: 0, vy: -30, color: '#f59e0b', size: 3, life: 0.4
+        });
+      }
+    }
+
+    // Pet Gunther seguindo o herói
+    if (this.hero && this.hero.profile.pet === 'gunther') {
+      const targetPetX = this.hero.x - (this.hero.facing === 'left' ? -25 : 25);
+      const targetPetY = this.hero.y + 10;
+      this.petX += (targetPetX - this.petX) * 0.1;
+      this.petY += (targetPetY - this.petY) * 0.1;
+
+      // Gunther coleta itens caídos próximos automaticamente
+      this.worldDrops.forEach((d, idx) => {
+        if (d.floor === this.currentFloor && Math.hypot(this.petX - d.x, this.petY - d.y) < 40) {
+          sounds.itemPickup();
+          this.equipItem(d.item);
+          this.sendNet('pick_item', { itemId: d.id, playerName: this.hero.profile.name });
+          this.worldDrops.splice(idx, 1);
+          this.spawnFloatingText("Gunther coletou!", this.petX, this.petY - 20, '#38bdf8');
+        }
+      });
+    }
+
     const len = Math.sqrt(dx * dx + dy * dy);
     if (len > 0.08) {
-      const moveSpeed = this.hero.spd * 60 * dt;
+      const speedMult = this.sandwichBuffTimer > 0 ? 1.45 : 1.0;
+      const moveSpeed = this.hero.spd * 60 * dt * speedMult;
       const factor = (this.joystick && this.joystick.active) ? Math.min(1, len) : 1;
       this.hero.x += (dx / len) * moveSpeed * factor;
       this.hero.y += (dy / len) * moveSpeed * factor;
@@ -1151,6 +1310,20 @@ class GameEngine {
     this.updateHUD();
   }
 
+  eatSandwich() {
+    if (this.sandwiches <= 0) {
+      this.spawnFloatingText("Sem Sanduíches!", this.hero.x, this.hero.y - 20, '#ef4444');
+      return;
+    }
+    this.sandwiches--;
+    this.sandwichBuffTimer = 45;
+    document.getElementById('sandwich-count').innerText = this.sandwiches;
+    sounds.potionDrink();
+    sounds.levelUp();
+    this.spawnFloatingText("BUFF DO SANDUÍCHE!", this.hero.x, this.hero.y - 35, '#f59e0b');
+    this.showBanner("SANDUÍCHE PERFEITO!", "+50% Velocidade e Regeneração por 45s!");
+  }
+
   performBasicAttack() {
     if (!this.hero || this.hero.attackCooldown > 0 || this.hero.isAttacking) return;
     this.hero.isAttacking = true;
@@ -1197,6 +1370,17 @@ class GameEngine {
         color: '#fbbf24', dmg: this.hero.atk, type: 'arrow', life: 1.0
       };
       this.projectiles.push(arr); firedProjectiles.push(arr);
+    } else if (classKey === 'vampire') {
+      sounds.swordSwing();
+      const dir = this.getFacingVector();
+      const wave = {
+        x: this.hero.x, y: this.hero.y - 5,
+        vx: dir.x * 440, vy: dir.y * 440, radius: 9,
+        color: '#dc2626', dmg: this.hero.atk, type: 'sonic-wave', life: 1.1
+      };
+      this.projectiles.push(wave); firedProjectiles.push(wave);
+      this.hero.hp = Math.min(this.hero.maxHp, this.hero.hp + 2);
+      this.updateHUD();
     }
 
     this.sendNet('attack_action', {
@@ -1246,6 +1430,18 @@ class GameEngine {
           radius: 4, color: '#34d399', dmg: this.hero.atk * 1.5, type: 'arrow', life: 1.1
         });
       });
+    } else if (classKey === 'vampire') {
+      this.screenShake = 9;
+      this.spawnFloatingText("Acorde Devastador!", this.hero.x, this.hero.y - 30, '#ef4444');
+      this.particles.push({ x: this.hero.x, y: this.hero.y, type: 'shockwave', radius: 10, maxRadius: 120, color: '#dc2626', life: 0.45 });
+      this.monsters.forEach(m => {
+        if (Math.hypot(m.x - this.hero.x, m.y - this.hero.y) <= 120) {
+          this.hitMonster(m, this.hero.atk * 2.3);
+        }
+      });
+      this.hero.hp = Math.min(this.hero.maxHp, this.hero.hp + 15);
+      this.spawnFloatingText("+15 Dreno!", this.hero.x, this.hero.y - 45, '#10b981');
+      this.updateHUD();
     }
   }
 
@@ -1455,6 +1651,11 @@ class GameEngine {
         attackProgress: this.hero.attackProgress, profile: this.hero.profile
       });
       this.renderPlayerOverheadUI(this.hero, true);
+
+      // Pet Gunther companheiro
+      if (this.hero.profile.pet === 'gunther') {
+        PixelArtRenderer.drawPetGunther(this.ctx, this.petX, this.petY, this.animTime);
+      }
     }
 
     this.renderProjectiles();
@@ -1611,6 +1812,17 @@ class GameEngine {
       ctx.save(); ctx.translate(p.x, p.y);
       if (p.type === 'magic-orb') {
         ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(0, 0, p.radius, 0, Math.PI * 2); ctx.fill();
+      } else if (p.type === 'sonic-wave') {
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(0, 0, p.radius * 1.6, -0.9, 0.9);
+        ctx.stroke();
+        ctx.strokeStyle = '#fca5a5';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(0, 0, p.radius, -0.6, 0.6);
+        ctx.stroke();
       } else {
         ctx.rotate(Math.atan2(p.vy, p.vx));
         ctx.fillStyle = '#92400e'; ctx.fillRect(-8, -1.5, 16, 3);
@@ -1664,6 +1876,21 @@ class GameEngine {
     const data = this.hero.classData;
     document.getElementById('skill-2-name').innerText = data.skillName;
     document.getElementById('skill-2-icon').innerText = data.skillIcon;
+
+    const k = this.hero.profile.classKey;
+    if (k === 'warrior') {
+      document.getElementById('skill-1-icon').innerText = '⚔️';
+      document.getElementById('skill-1-name').innerText = 'Golpe Espada';
+    } else if (k === 'mage') {
+      document.getElementById('skill-1-icon').innerText = '🔮';
+      document.getElementById('skill-1-name').innerText = 'Orbe Mana';
+    } else if (k === 'archer') {
+      document.getElementById('skill-1-icon').innerText = '🏹';
+      document.getElementById('skill-1-name').innerText = 'Disparo Flecha';
+    } else if (k === 'vampire') {
+      document.getElementById('skill-1-icon').innerText = '🎸';
+      document.getElementById('skill-1-name').innerText = 'Acorde Sônico';
+    }
   }
 
   updateSkillCooldownUI() {
@@ -1743,6 +1970,13 @@ window.addEventListener('DOMContentLoaded', () => {
     updatePreview();
   }));
 
+  const petButtons = document.querySelectorAll('#pet-types .tag-btn');
+  petButtons.forEach(btn => btn.addEventListener('click', () => {
+    petButtons.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    heroProfile.pet = btn.dataset.pet;
+  }));
+
   updatePreview();
 
   const game = new GameEngine();
@@ -1786,6 +2020,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
     if (e.code === 'KeyE') game.performSpecialSkill();
     if (e.code === 'KeyQ') game.usePotion();
+    if (e.code === 'KeyF') game.eatSandwich();
     if (e.code === 'KeyM') {
       const active = sounds.toggle();
       document.getElementById('sound-toggle-btn').innerText = active ? '🔊' : '🔇';
@@ -1816,5 +2051,34 @@ window.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('skill-2-slot').addEventListener('click', () => game.performSpecialSkill());
   document.getElementById('potion-slot').addEventListener('click', () => game.usePotion());
+  document.getElementById('sandwich-slot').addEventListener('click', () => game.eatSandwich());
   document.getElementById('respawn-btn').addEventListener('click', () => game.respawn());
+
+  // Registro de PWA (Instalar App no celular)
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  }
+
+  let deferredPrompt = null;
+  const installBtn = document.getElementById('install-pwa-btn');
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (installBtn) installBtn.style.display = 'inline-block';
+  });
+
+  if (installBtn) {
+    installBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const choice = await deferredPrompt.userChoice;
+        if (choice.outcome === 'accepted') {
+          installBtn.style.display = 'none';
+        }
+        deferredPrompt = null;
+      } else {
+        alert('Para instalar o app: toque no menu do navegador (três pontinhos ou botão compartilhar) e escolha "Adicionar à Tela Inicial" / "Instalar Aplicativo"!');
+      }
+    });
+  }
 });

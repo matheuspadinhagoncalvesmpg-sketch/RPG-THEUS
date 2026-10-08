@@ -142,7 +142,8 @@ const npcs = [
   { id: 1, name: "Jake o Cão", role: "jake", x: 420, y: 350 },
   { id: 2, name: "BMO", role: "bmo", x: 270, y: 360 },
   { id: 3, name: "Princesa Jujuba", role: "bubblegum", x: 1100, y: 220 },
-  { id: 4, name: "Rei Gelado", role: "iceking", x: 1900, y: 750 }
+  { id: 4, name: "Rei Gelado", role: "iceking", x: 1900, y: 750 },
+  { id: 5, name: "Marceline", role: "marceline", x: 620, y: 260 }
 ];
 
 // Portal Cósmico para a Dungeon Infinita

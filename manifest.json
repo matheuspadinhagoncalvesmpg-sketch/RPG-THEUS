@@ -1,0 +1,18 @@
+{
+  "name": "Hora da Aventura: Crônicas de Ooo",
+  "short_name": "RPG de Ooo",
+  "description": "RPG Pixel Multiplayer na Terra de Ooo com IA Gemini",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#1a162b",
+  "theme_color": "#ffd028",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

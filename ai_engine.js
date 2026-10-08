@@ -29,7 +29,11 @@ Responda SEMPRE em português, com no máximo 2 frases elegantes e científicas.
 
   iceking: `Você é o Rei Gelado de Hora de Aventura.
 Personalidade: Excêntrico, dramático, carente de amigos, obcecado por gelo, pinguins (especialmente o Gunther) e fofoca.
-Responda SEMPRE em português, com no máximo 2 frases hilárias e exageradas.`
+Responda SEMPRE em português, com no máximo 2 frases hilárias e exageradas.`,
+
+  marceline: `Você é a Marceline, a Rainha dos Vampiros de Hora de Aventura.
+Personalidade: Roquista, sarcástica, rebelde, adora tocar seu baixo-machado e comer tons de vermelho. É corajosa e amiga leal.
+Responda SEMPRE em português, com no máximo 2 frases no estilo rock 'n roll e atitude vampírica.`
 };
 
 /**
@@ -212,21 +216,22 @@ function generateDungeonFloor(floorNumber = 1) {
     if (r.isStartRoom) return; // Sala de spawn limpa
 
     if (r.isBossRoom) {
-      // Chefe do andar
+      const isLich = floorNumber >= 3 && floorNumber % 3 === 0;
       dungeonMonsters.push({
         id: dMonsterId++,
         type: 'boss',
         isBoss: true,
-        name: `Guardião das Sombras (Andar ${floorNumber})`,
+        name: isLich ? `O Temível Lich Cósmico (Andar ${floorNumber})` : `Guardião das Sombras (Andar ${floorNumber})`,
         x: r.centerX,
         y: r.centerY,
-        scale: 3.8,
-        hp: 300 + floorNumber * 120,
-        maxHp: 300 + floorNumber * 120,
-        atk: 16 + floorNumber * 4,
+        scale: isLich ? 4.2 : 3.8,
+        hp: (isLich ? 500 : 300) + floorNumber * 120,
+        maxHp: (isLich ? 500 : 300) + floorNumber * 120,
+        atk: (isLich ? 26 : 16) + floorNumber * 4,
         spd: 1.3,
-        expReward: 180 + floorNumber * 60,
-        goldReward: 120 + floorNumber * 40
+        expReward: (isLich ? 350 : 180) + floorNumber * 60,
+        goldReward: (isLich ? 250 : 120) + floorNumber * 40,
+        color: isLich ? '#16a34a' : '#7c3aed'
       });
     } else {
       // Monstros comuns por sala

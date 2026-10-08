@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
   <title>Hora da Aventura: Crônicas de Ooo - RPG Pixel</title>
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -65,17 +67,22 @@
               <button type="button" class="class-btn selected" data-class="warrior">
                 <span class="class-icon">⚔️</span>
                 <strong>Guerreiro</strong>
-                <small>Combate corpo a corpo, espadas afiadas e grande resistência!</small>
+                <small>Combate corpo a corpo e resistência!</small>
               </button>
               <button type="button" class="class-btn" data-class="mage">
                 <span class="class-icon">🔮</span>
                 <strong>Mago</strong>
-                <small>Lança feitiços arcanos luminosos e explosões de mana!</small>
+                <small>Feitiços arcanos luminosos!</small>
               </button>
               <button type="button" class="class-btn" data-class="archer">
                 <span class="class-icon">🏹</span>
                 <strong>Arqueiro</strong>
-                <small>Disparos velozes à distância e chuva de flechas ágeis!</small>
+                <small>Disparos velozes e precisão!</small>
+              </button>
+              <button type="button" class="class-btn" data-class="vampire">
+                <span class="class-icon">🎸</span>
+                <strong>Vampiro</strong>
+                <small>Acordes sônicos e dreno de vida!</small>
               </button>
             </div>
           </div>
@@ -121,6 +128,14 @@
                 <button type="button" class="tag-btn active" data-acc="backpack">🎒 Mochila Verde</button>
                 <button type="button" class="tag-btn" data-acc="cape">🧣 Capa de Aventureiro</button>
                 <button type="button" class="tag-btn" data-acc="none">Nenhum</button>
+              </div>
+            </div>
+
+            <div class="palette-row">
+              <span>Companheiro Pet:</span>
+              <div class="accessory-options" id="pet-types">
+                <button type="button" class="tag-btn active" data-pet="gunther">🐧 Gunther o Pinguim</button>
+                <button type="button" class="tag-btn" data-pet="none">Sem Pet</button>
               </div>
             </div>
           </div>
@@ -174,6 +189,7 @@
           <div class="counter-item exp-counter">
             ⭐ <span id="hud-exp">0</span>/<span id="hud-exp-next">50</span> XP
           </div>
+          <button id="install-pwa-btn" class="icon-hud-btn pwa-btn" title="Instalar Jogo no Celular">📲</button>
           <button id="sound-toggle-btn" class="icon-hud-btn" title="Ligar/Desligar Som">🔊</button>
         </div>
       </header>
@@ -229,6 +245,7 @@
           <div class="mobile-action-buttons">
             <div class="touch-row-top">
               <button type="button" id="btn-touch-chat" class="touch-btn touch-chat-btn" title="Chat">💬</button>
+              <button type="button" id="btn-touch-sandwich" class="touch-btn touch-sandwich-btn" title="Sanduíche">🥪</button>
               <button type="button" id="btn-touch-potion" class="touch-btn touch-potion-btn" title="Poção">🧪</button>
             </div>
             <div class="touch-row-main">
@@ -256,7 +273,12 @@
           <div class="skill-slot" id="potion-slot">
             <span class="key-bind">TECLA [Q]</span>
             <span>🧪</span>
-            <small>Poção Doce (<span id="potion-count">2</span>)</small>
+            <small>Poção (<span id="potion-count">2</span>)</small>
+          </div>
+          <div class="skill-slot sandwich-slot" id="sandwich-slot" title="Comer Sanduíche Perfeito do Jake (+Buff)">
+            <span class="key-bind">TECLA [F]</span>
+            <span>🥪</span>
+            <small>Sanduíche (<span id="sandwich-count">1</span>)</small>
           </div>
           <div class="skill-slot item-slot" id="equipped-item-slot" title="Item Místico Equipado da IA">
             <span class="key-bind">RELÍQUIA IA</span>
