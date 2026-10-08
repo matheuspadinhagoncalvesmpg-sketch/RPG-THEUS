@@ -21,6 +21,9 @@ Se houver um servidor Node rodando (`npm start`), o jogo conecta nele e vira **m
 - 🛒 **Loja do BMO**: poções, sanduíches e melhorias permanentes (ataque, vida, mana).
 - 🎁 Itens melhores se equipam sozinhos; os piores viram moedas.
 - 🏰 **Dungeon infinita visível**: salas, corredores, portal de saída, portal para o próximo andar (abre ao derrotar o chefe).
+- 💨 **Esquiva (dash)** com invulnerabilidade rápida.
+- 👑 **Chefes atiram anéis de projéteis** (mais rápidos com menos vida).
+- 🌗 **Ciclo dia/noite** com luz ao redor do herói; dungeon com **3 temas** (roxo, fogo, gelo).
 - 🧭 Minimapa, limites do mundo, câmera presa ao mapa.
 - 💾 Salvamento automático (localStorage).
 - 🐞 Corrigido: no multiplayer o XP e o ouro nunca eram concedidos.
@@ -32,6 +35,7 @@ Se houver um servidor Node rodando (`npm start`), o jogo conecta nele e vira **m
 | Mover | `WASD` / Setas | Joystick (toque na metade esquerda) |
 | Atacar | `Espaço` / clique | ⚔️ (segure para atacar em sequência) |
 | Habilidade | `E` / clique direito | 🌀 |
+| Esquiva | `Shift` / `R` | 💨 |
 | Poção / Sanduíche | `Q` / `F` | 🧪 / 🥪 |
 | Falar com NPC / Loja | `T` | botão 💬 Falar (aparece perto de NPCs) |
 | Chat | `Enter` | ⌨️ |
