@@ -1,33 +1,49 @@
 # 🌟 Hora da Aventura: Crônicas de Ooo (RPG Pixel)
 
-Um RPG em estilo pixel art vibrante inspirado no universo de **Hora de Aventura** (Adventure Time) na mágica Terra de Ooo!
+Um RPG em estilo pixel art inspirado em **Hora de Aventura**, agora **jogável direto no celular**.
 
----
+## 📱 Jogar no celular (sem servidor)
 
-## 🌐 Como Jogar Online (Localhost ou Web)
+O jogo funciona **sozinho no navegador** (modo solo) — basta abrir `index.html` hospedado em qualquer lugar estático (ex.: GitHub Pages). No celular:
 
-O servidor multiplayer integrado já está pronto e rodando!
+1. Abra o link no Chrome (Android) ou Safari (iPhone).
+2. Menu do navegador → **Adicionar à tela inicial** (vira um app em tela cheia).
+3. Jogue deitado: **joystick flutuante** na metade esquerda da tela, botões de ataque/habilidade/poção/sanduíche na direita, **mira automática** nos monstros, **vibração** ao bater/apanhar.
+4. Seu progresso é **salvo sozinho** no aparelho (botão ▶ CONTINUAR na tela inicial).
 
-### 1. No seu computador (Localhost)
-1. O servidor Node.js já está rodando em: **[http://localhost:3000](http://localhost:3000)**
-2. Para testar o multiplayer agora mesmo com você mesmo:
-   - Abra **duas abas** do navegador em **[http://localhost:3000](http://localhost:3000)**
-   - Crie um personagem diferente em cada aba (por exemplo, um Guerreiro na Aba 1 e um Mago ou Arqueiro na Aba 2).
-   - Você verá os dois heróis lado a lado na tela, andando em tempo real, atacando juntos e conversando pelo chat!
+Se houver um servidor Node rodando (`npm start`), o jogo conecta nele e vira **multiplayer**; se não houver, cai automaticamente no modo solo. Use `?solo` na URL para forçar o modo solo.
 
-### 2. Para reiniciar o servidor futuramente no terminal
+## 🆕 Novidades da v2
+
+- 🗺️ **5 biomas**: Colinas de Ooo, Reino Doce, Reino Gelado, Floresta Assombrada e Ruínas dos Esqueletos, com chão, decoração e minimapa próprios.
+- 👻 **Novos monstros**: Fantasma da Floresta e Golem de Gelo. Monstros voltam para casa e renascem.
+- 📜 **9 missões em sequência** (Princesa Jujuba explica a atual), com recompensa automática.
+- 🛒 **Loja do BMO**: poções, sanduíches e melhorias permanentes (ataque, vida, mana).
+- 🎁 Itens melhores se equipam sozinhos; os piores viram moedas.
+- 🏰 **Dungeon infinita visível**: salas, corredores, portal de saída, portal para o próximo andar (abre ao derrotar o chefe).
+- 🧭 Minimapa, limites do mundo, câmera presa ao mapa.
+- 💾 Salvamento automático (localStorage).
+- 🐞 Corrigido: no multiplayer o XP e o ouro nunca eram concedidos.
+
+## 🕹️ Controles
+
+| Ação | Teclado / Mouse | Celular |
+| :--- | :--- | :--- |
+| Mover | `WASD` / Setas | Joystick (toque na metade esquerda) |
+| Atacar | `Espaço` / clique | ⚔️ (segure para atacar em sequência) |
+| Habilidade | `E` / clique direito | 🌀 |
+| Poção / Sanduíche | `Q` / `F` | 🧪 / 🥪 |
+| Falar com NPC / Loja | `T` | botão 💬 Falar (aparece perto de NPCs) |
+| Chat | `Enter` | ⌨️ |
+| Som / Tela cheia | `M` / ⛶ | 🔊 / ⛶ |
+
+## 🌐 Multiplayer (opcional)
+
 ```bash
-npm start
-# ou
-node server.js
+npm install
+npm start      # http://localhost:3000
 ```
-E acesse `http://localhost:3000`.
-
-### 3. Para jogar com outras pessoas na mesma rede Wi-Fi / Lan
-Basta passar o seu IP local para seus amigos (ex: `http://192.168.x.x:3000`).
-
-### 4. Para colocar na internet futuramente
-Você pode subir esta mesma pasta gratuitamente em serviços de hospedagem como **Render**, **Railway**, **Fly.io** ou **Vercel** para qualquer pessoa do mundo entrar pelo link!
+Opcional: `GEMINI_API_KEY` no `.env` para os NPCs conversarem com IA. Veja `HOSTINGER_DEPLOY.md` para hospedar.
 
 ---
 
