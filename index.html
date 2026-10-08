@@ -87,9 +87,68 @@
             </div>
           </div>
 
+          <div class="form-group">
+            <label>GÊNERO / IDENTIDADE:</label>
+            <div class="accessory-options" id="gender-types">
+              <button type="button" class="tag-btn active" data-gender="male">♂️ Aventureiro</button>
+              <button type="button" class="tag-btn" data-gender="female">♀️ Aventureira</button>
+              <button type="button" class="tag-btn" data-gender="nonbinary">✨ Neutro</button>
+            </div>
+          </div>
+
           <div class="form-group colors-section">
-            <label>ESTILO & CORES:</label>
+            <label>ESTILO & APARÊNCIA:</label>
             
+            <div class="palette-row">
+              <span>Cabelo / Capuz:</span>
+              <div class="palette-options" id="hat-colors">
+                <button type="button" class="color-dot active" data-color="#ffffff" style="background:#ffffff;" title="Branco Puro / Neve"></button>
+                <button type="button" class="color-dot" data-color="#f472b6" style="background:#f472b6;" title="Rosa Chiclete"></button>
+                <button type="button" class="color-dot" data-color="#ffd166" style="background:#ffd166;" title="Loiro Dourado"></button>
+                <button type="button" class="color-dot" data-color="#0f172a" style="background:#0f172a;" title="Preto Meia-Noite"></button>
+                <button type="button" class="color-dot" data-color="#3a2510" style="background:#3a2510;" title="Castanho Escuro"></button>
+                <button type="button" class="color-dot" data-color="#ef4444" style="background:#ef4444;" title="Ruivo Flamejante"></button>
+                <button type="button" class="color-dot" data-color="#38bdf8" style="background:#38bdf8;" title="Azul Gélido"></button>
+                <button type="button" class="color-dot" data-color="#a855f7" style="background:#a855f7;" title="Roxo Cósmico"></button>
+              </div>
+            </div>
+
+            <div class="palette-row">
+              <span>Cor dos Olhos:</span>
+              <div class="accessory-options" id="eye-types">
+                <button type="button" class="tag-btn active" data-eyes="hetero" title="Um olho vermelho e um azul">🔴🔵 Heterocromia</button>
+                <button type="button" class="tag-btn" data-eyes="black">⚫ Preto</button>
+                <button type="button" class="tag-btn" data-eyes="blue">🔵 Azul</button>
+                <button type="button" class="tag-btn" data-eyes="red">🔴 Vermelho</button>
+                <button type="button" class="tag-btn" data-eyes="green">🟢 Verde</button>
+              </div>
+            </div>
+
+            <div class="palette-row">
+              <span>Detalhe Facial:</span>
+              <div class="accessory-options" id="face-details">
+                <button type="button" class="tag-btn active" data-face="none">Nenhum</button>
+                <button type="button" class="tag-btn" data-face="freckles">✨ Sardas</button>
+                <button type="button" class="tag-btn" data-face="scar">⚔️ Cicatriz</button>
+                <button type="button" class="tag-btn" data-face="blush">🌸 Blush Doce</button>
+              </div>
+            </div>
+
+            <div class="palette-row">
+              <span>Cor da Pele:</span>
+              <div class="palette-options" id="skin-colors">
+                <button type="button" class="color-dot active" data-color="#ffe0bd" style="background:#ffe0bd;" title="Pele Clara"></button>
+                <button type="button" class="color-dot" data-color="#ffd1a9" style="background:#ffd1a9;" title="Pele Pêssego"></button>
+                <button type="button" class="color-dot" data-color="#e2b98f" style="background:#e2b98f;" title="Pele Média"></button>
+                <button type="button" class="color-dot" data-color="#c68642" style="background:#c68642;" title="Pele Bronzeada"></button>
+                <button type="button" class="color-dot" data-color="#8d5524" style="background:#8d5524;" title="Pele Escura"></button>
+                <button type="button" class="color-dot" data-color="#5c3818" style="background:#5c3818;" title="Pele Ébano"></button>
+                <button type="button" class="color-dot" data-color="#fbcfe8" style="background:#fbcfe8;" title="Pele Doce Jujuba"></button>
+                <button type="button" class="color-dot" data-color="#a8dadc" style="background:#a8dadc;" title="Pele Fantasma/Gelo"></button>
+                <button type="button" class="color-dot" data-color="#86efac" style="background:#86efac;" title="Pele Orc/Grama"></button>
+              </div>
+            </div>
+
             <div class="palette-row">
               <span>Roupa:</span>
               <div class="palette-options" id="outfit-colors">
@@ -98,27 +157,8 @@
                 <button type="button" class="color-dot" data-color="#3fb950" style="background:#3fb950;" title="Verde Floresta"></button>
                 <button type="button" class="color-dot" data-color="#8a42db" style="background:#8a42db;" title="Roxo Místico"></button>
                 <button type="button" class="color-dot" data-color="#ff9f1c" style="background:#ff9f1c;" title="Laranja Solar"></button>
-              </div>
-            </div>
-
-            <div class="palette-row">
-              <span>Chapéu / Cabelo:</span>
-              <div class="palette-options" id="hat-colors">
-                <button type="button" class="color-dot active" data-color="#ffffff" style="background:#ffffff;" title="Capuz Branco de Urso"></button>
-                <button type="button" class="color-dot" data-color="#ffd166" style="background:#ffd166;" title="Loiro Dourado"></button>
-                <button type="button" class="color-dot" data-color="#3a2510" style="background:#3a2510;" title="Castanho Escuro"></button>
-                <button type="button" class="color-dot" data-color="#4cc9f0" style="background:#4cc9f0;" title="Azul Gélido"></button>
-                <button type="button" class="color-dot" data-color="#f72585" style="background:#f72585;" title="Rosa Chiclete"></button>
-              </div>
-            </div>
-
-            <div class="palette-row">
-              <span>Pele:</span>
-              <div class="palette-options" id="skin-colors">
-                <button type="button" class="color-dot active" data-color="#ffe0bd" style="background:#ffe0bd;" title="Pele Clara"></button>
-                <button type="button" class="color-dot" data-color="#e2b98f" style="background:#e2b98f;" title="Pele Média"></button>
-                <button type="button" class="color-dot" data-color="#8d5524" style="background:#8d5524;" title="Pele Escura"></button>
-                <button type="button" class="color-dot" data-color="#a8dadc" style="background:#a8dadc;" title="Pele Fantasmagórica"></button>
+                <button type="button" class="color-dot" data-color="#f472b6" style="background:#f472b6;" title="Rosa Princesa"></button>
+                <button type="button" class="color-dot" data-color="#0f172a" style="background:#0f172a;" title="Preto Sombrio"></button>
               </div>
             </div>
 

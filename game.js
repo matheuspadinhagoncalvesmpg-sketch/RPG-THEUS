@@ -190,10 +190,13 @@ const CLASS_CONFIGS = {
 
 const heroProfile = {
   name: "Finnelson",
+  gender: "male",
   classKey: "warrior",
   outfitColor: "#3aa3e3",
   hatColor: "#ffffff",
   skinColor: "#ffe0bd",
+  eyes: "hetero",
+  faceDetail: "none",
   accessory: "backpack",
   pet: "gunther"
 };
@@ -211,10 +214,13 @@ class PixelArtRenderer {
     const attackProgress = options.attackProgress || 0;
 
     const {
+      gender = 'male',
       classKey = 'warrior',
       outfitColor = '#3aa3e3',
       hatColor = '#ffffff',
       skinColor = '#ffe0bd',
+      eyes = 'hetero',
+      faceDetail = 'none',
       accessory = 'backpack'
     } = options.profile || heroProfile;
 
@@ -252,9 +258,16 @@ class PixelArtRenderer {
     ctx.fillRect((-4 + (leg1 > 0 ? 1 : 0)) * scale, (5 + leg1) * scale, 3 * scale, 2 * scale);
     ctx.fillRect((1 + (leg2 > 0 ? 1 : 0)) * scale, (5 + leg2) * scale, 3 * scale, 2 * scale);
 
-    // Tronco
+    // Tronco / Roupa
     ctx.fillStyle = outfitColor;
     ctx.fillRect(-5 * scale, (-5 + bob) * scale, 10 * scale, 7 * scale);
+    
+    // Saia ou túnica para gênero feminino
+    if (gender === 'female') {
+      ctx.fillStyle = outfitColor;
+      ctx.fillRect(-5.5 * scale, (1 + bob) * scale, 11 * scale, 3.5 * scale);
+    }
+
     ctx.fillStyle = '#3a2510';
     ctx.fillRect(-5 * scale, (1 + bob) * scale, 10 * scale, 1.5 * scale);
     ctx.fillStyle = '#fbbf24';
@@ -265,26 +278,36 @@ class PixelArtRenderer {
       ctx.fillRect(-7 * scale, (-4 + bob) * scale, 3 * scale, 6 * scale);
     }
 
-    // Chapéu/Cabelo
+    // Cabelo / Capuz
     ctx.fillStyle = hatColor;
     ctx.fillRect(-6 * scale, (-15 + bob) * scale, 12 * scale, 10 * scale);
 
     if (classKey === 'warrior') {
+      // Cabelo branco aventureiro pontudo / capuz guerreiro
       ctx.fillStyle = hatColor;
-      ctx.fillRect(-6 * scale, (-18 + bob) * scale, 3 * scale, 4 * scale);
-      ctx.fillRect(3 * scale, (-18 + bob) * scale, 3 * scale, 4 * scale);
+      ctx.fillRect(-7 * scale, (-18 + bob) * scale, 3.5 * scale, 5 * scale);
+      ctx.fillRect(3.5 * scale, (-18 + bob) * scale, 3.5 * scale, 5 * scale);
+      ctx.fillRect(-1.5 * scale, (-19 + bob) * scale, 3 * scale, 5 * scale);
+      ctx.fillRect(-6.5 * scale, (-13 + bob) * scale, 2 * scale, 5 * scale);
+      ctx.fillRect(4.5 * scale, (-13 + bob) * scale, 2 * scale, 5 * scale);
     } else if (classKey === 'mage') {
+      // Cabelo rosa curto com franjinha e corte chanel
       ctx.fillStyle = hatColor;
-      ctx.fillRect(-3 * scale, (-20 + bob) * scale, 6 * scale, 6 * scale);
-      ctx.fillRect(-1.5 * scale, (-24 + bob) * scale, 3 * scale, 5 * scale);
+      ctx.fillRect(-6.5 * scale, (-16 + bob) * scale, 13 * scale, 11 * scale);
+      ctx.fillRect(-7.5 * scale, (-11 + bob) * scale, 2.5 * scale, 6 * scale);
+      ctx.fillRect(5 * scale, (-11 + bob) * scale, 2.5 * scale, 6 * scale);
+      // Tiara mística dourada
       ctx.fillStyle = '#fbbf24';
+      ctx.fillRect(-3 * scale, (-17 + bob) * scale, 6 * scale, 2 * scale);
+      ctx.fillStyle = '#ec4899';
       ctx.fillRect(-1 * scale, (-18 + bob) * scale, 2 * scale, 2 * scale);
     } else if (classKey === 'archer') {
+      // Capuz com pluma ágil
       ctx.fillStyle = '#10b981';
       ctx.fillRect(3 * scale, (-19 + bob) * scale, 3 * scale, 5 * scale);
     } else if (classKey === 'vampire') {
       // Cabelo preto longo de rockstar estilo Marceline
-      ctx.fillStyle = '#0f172a';
+      ctx.fillStyle = hatColor;
       ctx.fillRect(-7 * scale, (-16 + bob) * scale, 14 * scale, 12 * scale);
       ctx.fillRect(-8 * scale, (-8 + bob) * scale, 3 * scale, 14 * scale);
       ctx.fillRect(5 * scale, (-8 + bob) * scale, 3 * scale, 14 * scale);
@@ -294,16 +317,69 @@ class PixelArtRenderer {
     if (facing !== 'up') {
       ctx.fillStyle = skinColor;
       ctx.fillRect(-4 * scale, (-12 + bob) * scale, 8 * scale, 6 * scale);
-      ctx.fillStyle = '#0f172a';
+
+      // Cores dos olhos (com suporte a Heterocromia: Vermelho & Azul)
+      let leftEyeColor = '#0f172a';
+      let rightEyeColor = '#0f172a';
+
+      if (eyes === 'hetero') {
+        leftEyeColor = '#ef4444'; // Olho esquerdo Vermelho
+        rightEyeColor = '#38bdf8'; // Olho direito Azul
+      } else if (eyes === 'blue') {
+        leftEyeColor = '#38bdf8'; rightEyeColor = '#38bdf8';
+      } else if (eyes === 'red') {
+        leftEyeColor = '#ef4444'; rightEyeColor = '#ef4444';
+      } else if (eyes === 'green') {
+        leftEyeColor = '#22c55e'; rightEyeColor = '#22c55e';
+      }
+
+      // Olhos desenhados
+      ctx.fillStyle = leftEyeColor;
       ctx.fillRect(-2.5 * scale, (-10 + bob) * scale, 1.5 * scale, 2 * scale);
+      ctx.fillStyle = rightEyeColor;
       ctx.fillRect(1 * scale, (-10 + bob) * scale, 1.5 * scale, 2 * scale);
+
+      // Brilho dos olhos
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(-2.5 * scale, (-10 + bob) * scale, 0.8 * scale, 0.8 * scale);
+      ctx.fillRect(1 * scale, (-10 + bob) * scale, 0.8 * scale, 0.8 * scale);
+
+      // Cílios femininos sutis
+      if (gender === 'female') {
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(-3.2 * scale, (-10.5 + bob) * scale, 1 * scale, 0.8 * scale);
+        ctx.fillRect(2.2 * scale, (-10.5 + bob) * scale, 1 * scale, 0.8 * scale);
+      }
+
+      // Detalhes faciais (Sardas, Cicatriz, Blush)
+      const showFreckles = faceDetail === 'freckles' || (classKey === 'mage' && faceDetail === 'none');
+      if (showFreckles) {
+        // Sardas delicadas nas bochechas
+        ctx.fillStyle = '#b45309';
+        ctx.fillRect(-3.2 * scale, (-7.5 + bob) * scale, 0.8 * scale, 0.8 * scale);
+        ctx.fillRect(-2.2 * scale, (-7 + bob) * scale, 0.8 * scale, 0.8 * scale);
+        ctx.fillRect(1.5 * scale, (-7 + bob) * scale, 0.8 * scale, 0.8 * scale);
+        ctx.fillRect(2.5 * scale, (-7.5 + bob) * scale, 0.8 * scale, 0.8 * scale);
+      } else if (faceDetail === 'scar') {
+        // Cicatriz guerreira
+        ctx.fillStyle = '#dc2626';
+        ctx.fillRect(-2 * scale, (-11.5 + bob) * scale, 0.8 * scale, 3.5 * scale);
+      } else if (faceDetail === 'blush') {
+        // Blush doce
+        ctx.fillStyle = 'rgba(244, 114, 182, 0.7)';
+        ctx.fillRect(-3.5 * scale, (-7.5 + bob) * scale, 1.8 * scale, 1.2 * scale);
+        ctx.fillRect(1.8 * scale, (-7.5 + bob) * scale, 1.8 * scale, 1.2 * scale);
+      }
+
+      // Boca
       ctx.fillStyle = '#c2410c';
-      ctx.fillRect(-1.5 * scale, (-7 + bob) * scale, 3 * scale, 1 * scale);
+      ctx.fillRect(-1.5 * scale, (-6.5 + bob) * scale, 3 * scale, 1 * scale);
+
       if (classKey === 'vampire') {
         // Caninos pontudos vampíricos
         ctx.fillStyle = '#ffffff';
-        ctx.fillRect(-2 * scale, (-6 + bob) * scale, 1 * scale, 2 * scale);
-        ctx.fillRect(1 * scale, (-6 + bob) * scale, 1 * scale, 2 * scale);
+        ctx.fillRect(-2 * scale, (-5.5 + bob) * scale, 1 * scale, 1.5 * scale);
+        ctx.fillRect(1 * scale, (-5.5 + bob) * scale, 1 * scale, 1.5 * scale);
       }
     }
 
@@ -1930,6 +2006,18 @@ window.addEventListener('DOMContentLoaded', () => {
     PixelArtRenderer.drawHero(previewCtx, 80, 95, { scale: 4.8, facing: 'down', profile: heroProfile });
   }
 
+  function syncPaletteButtons() {
+    hatButtons.forEach(b => b.classList.toggle('active', b.dataset.color === heroProfile.hatColor));
+    skinButtons.forEach(b => b.classList.toggle('active', b.dataset.color === heroProfile.skinColor));
+    outfitButtons.forEach(b => b.classList.toggle('active', b.dataset.color === heroProfile.outfitColor));
+    
+    document.querySelectorAll('#gender-types .tag-btn').forEach(b => b.classList.toggle('active', b.dataset.gender === heroProfile.gender));
+    document.querySelectorAll('#eye-types .tag-btn').forEach(b => b.classList.toggle('active', b.dataset.eyes === heroProfile.eyes));
+    document.querySelectorAll('#face-details .tag-btn').forEach(b => b.classList.toggle('active', b.dataset.face === heroProfile.faceDetail));
+    document.querySelectorAll('#accessory-types .tag-btn').forEach(b => b.classList.toggle('active', b.dataset.acc === heroProfile.accessory));
+    document.querySelectorAll('#pet-types .tag-btn').forEach(b => b.classList.toggle('active', b.dataset.pet === heroProfile.pet));
+  }
+
   nameInput.addEventListener('input', (e) => heroProfile.name = e.target.value.trim() || 'Aventureiro');
 
   classButtons.forEach(btn => {
@@ -1937,10 +2025,62 @@ window.addEventListener('DOMContentLoaded', () => {
       classButtons.forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
       heroProfile.classKey = btn.dataset.class;
+
+      // Aparência temática padrão por classe
+      if (heroProfile.classKey === 'warrior') {
+        heroProfile.hatColor = '#ffffff'; // Cabelo branco
+        heroProfile.eyes = 'hetero';     // Um olho vermelho e um azul
+        heroProfile.faceDetail = 'none';
+        heroProfile.outfitColor = '#3aa3e3';
+      } else if (heroProfile.classKey === 'mage') {
+        heroProfile.hatColor = '#f472b6'; // Cabelo rosa curto
+        heroProfile.eyes = 'blue';        // Olhos azuis arcanos
+        heroProfile.faceDetail = 'freckles'; // Sardas fofas
+        heroProfile.outfitColor = '#8a42db';
+      } else if (heroProfile.classKey === 'archer') {
+        heroProfile.hatColor = '#ffd166'; // Loiro aventureiro
+        heroProfile.eyes = 'green';
+        heroProfile.faceDetail = 'none';
+        heroProfile.outfitColor = '#3fb950';
+      } else if (heroProfile.classKey === 'vampire') {
+        heroProfile.hatColor = '#0f172a'; // Cabelo preto longo Marceline
+        heroProfile.eyes = 'red';
+        heroProfile.faceDetail = 'none';
+        heroProfile.outfitColor = '#d63342';
+      }
+
+      syncPaletteButtons();
       sounds.swordSwing();
       updatePreview();
     });
   });
+
+  // Gênero
+  const genderButtons = document.querySelectorAll('#gender-types .tag-btn');
+  genderButtons.forEach(btn => btn.addEventListener('click', () => {
+    genderButtons.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    heroProfile.gender = btn.dataset.gender;
+    updatePreview();
+  }));
+
+  // Olhos (com suporte a Heterocromia)
+  const eyeButtons = document.querySelectorAll('#eye-types .tag-btn');
+  eyeButtons.forEach(btn => btn.addEventListener('click', () => {
+    eyeButtons.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    heroProfile.eyes = btn.dataset.eyes;
+    updatePreview();
+  }));
+
+  // Detalhe Facial (Sardas, Cicatriz, Blush)
+  const faceButtons = document.querySelectorAll('#face-details .tag-btn');
+  faceButtons.forEach(btn => btn.addEventListener('click', () => {
+    faceButtons.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    heroProfile.faceDetail = btn.dataset.face;
+    updatePreview();
+  }));
 
   outfitButtons.forEach(btn => btn.addEventListener('click', () => {
     outfitButtons.forEach(b => b.classList.remove('active'));
@@ -1977,6 +2117,7 @@ window.addEventListener('DOMContentLoaded', () => {
     heroProfile.pet = btn.dataset.pet;
   }));
 
+  syncPaletteButtons();
   updatePreview();
 
   const game = new GameEngine();
