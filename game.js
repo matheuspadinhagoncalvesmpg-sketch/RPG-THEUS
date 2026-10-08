@@ -517,12 +517,47 @@ class PixelArtRenderer {
       ctx.beginPath(); ctx.arc(0, (-2 - hop) * scale, 9 * scale, Math.PI, 0); ctx.fill();
       ctx.fillStyle = '#fef3c7';
       ctx.fillRect(-4 * scale, (-2 - hop) * scale, 8 * scale, 7 * scale);
+    } else if (m.type === 'ghost') {
+      const float = Math.sin(animTime * 3 + m.id) * 3;
+      ctx.fillStyle = 'rgba(0,0,0,0.15)';
+      ctx.beginPath(); ctx.ellipse(0, 12 * scale, 6 * scale, 2.5 * scale, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = 0.85;
+      ctx.fillStyle = m.color && m.color !== '#f8fafc' ? m.color : '#e2e8f0';
+      ctx.beginPath();
+      ctx.arc(0, (-4 + float) * scale, 8 * scale, Math.PI, 0);
+      ctx.lineTo(8 * scale, (8 + float) * scale);
+      for (let k = 3; k >= -3; k--) {
+        ctx.lineTo((k * 2.6) * scale, (8 + float + (k % 2 ? 2.5 : 0)) * scale);
+      }
+      ctx.lineTo(-8 * scale, (8 + float) * scale);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = '#1e1b4b';
+      ctx.fillRect(-4 * scale, (-5 + float) * scale, 2.5 * scale, 3.5 * scale);
+      ctx.fillRect(1.5 * scale, (-5 + float) * scale, 2.5 * scale, 3.5 * scale);
+      ctx.fillRect(-2 * scale, (1 + float) * scale, 4 * scale, 1.5 * scale);
+    } else if (m.type === 'icegolem') {
+      const stomp = Math.abs(Math.sin(animTime * 3 + m.id)) * 1.5;
+      ctx.fillStyle = 'rgba(0,0,0,0.25)';
+      ctx.beginPath(); ctx.ellipse(0, 13 * scale, 10 * scale, 3.5 * scale, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#7dd3fc';
+      ctx.fillRect(-9 * scale, (-6 - stomp) * scale, 18 * scale, 17 * scale);
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillRect(-12 * scale, (-4 - stomp) * scale, 4 * scale, 12 * scale);
+      ctx.fillRect(8 * scale, (-4 - stomp) * scale, 4 * scale, 12 * scale);
+      ctx.fillStyle = '#e0f2fe';
+      ctx.fillRect(-6 * scale, (-14 - stomp) * scale, 12 * scale, 9 * scale);
+      ctx.fillStyle = '#0c4a6e';
+      ctx.fillRect(-4 * scale, (-11 - stomp) * scale, 2.5 * scale, 2.5 * scale);
+      ctx.fillRect(1.5 * scale, (-11 - stomp) * scale, 2.5 * scale, 2.5 * scale);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(-7 * scale, (-4 - stomp) * scale, 3 * scale, 1.5 * scale);
     } else if (m.type === 'boss') {
       const squish = Math.sin(animTime * 3) * 0.15;
       ctx.fillStyle = 'rgba(0,0,0,0.3)';
       ctx.beginPath(); ctx.ellipse(0, 16 * scale, (16 + squish * 4) * scale, 5 * scale, 0, 0, Math.PI * 2); ctx.fill();
 
-      ctx.fillStyle = '#9333ea';
+      ctx.fillStyle = m.color || '#9333ea';
       ctx.beginPath(); ctx.ellipse(0, (2 - squish * 4) * scale, (15 + squish * 3) * scale, (13 - squish * 4) * scale, 0, 0, Math.PI * 2); ctx.fill();
       // Coroa
       ctx.fillStyle = '#f59e0b';
@@ -637,9 +672,64 @@ class PixelArtRenderer {
 }
 
 // ===================================================================
+// 3.5 DADOS DO MUNDO: BIOMAS, MISSÕES, FALAS
+// ===================================================================
+const BIOMES = {
+  grass:  { name: 'Colinas de Ooo',        colors: ['#79cc3b', '#72c235'], mini: '#79cc3b' },
+  candy:  { name: 'Reino Doce',            colors: ['#fbcfe8', '#f7bfdd'], mini: '#f9a8d4' },
+  ice:    { name: 'Reino Gelado',          colors: ['#dbeafe', '#cde3fb'], mini: '#bfdbfe' },
+  forest: { name: 'Floresta Assombrada',   colors: ['#2f6b3a', '#2a6034'], mini: '#2f6b3a' },
+  ruins:  { name: 'Ruínas dos Esqueletos', colors: ['#a8a29e', '#9c968f'], mini: '#a8a29e' }
+};
+
+const QUESTS = [
+  { title: 'Doce Dilema',         desc: 'Derrote 6 Slimes de Doce',            kind: 'kill',  target: 'slime',    need: 6, gold: 60,   exp: 40 },
+  { title: 'Cogumelos Chatos',    desc: 'Derrote 5 Cogumelos Saltitantes',     kind: 'kill',  target: 'mushroom', need: 5, gold: 90,   exp: 70 },
+  { title: 'Hora do Portal',      desc: 'Entre no Portal da Dungeon',          kind: 'floor', need: 1,                 gold: 70,   exp: 60 },
+  { title: 'Ossos do Ofício',     desc: 'Derrote 6 Esqueletos (leste)',        kind: 'kill',  target: 'skeleton', need: 6, gold: 160,  exp: 140 },
+  { title: 'Floresta Assombrada', desc: 'Derrote 6 Fantasmas (sul)',           kind: 'kill',  target: 'ghost',    need: 6, gold: 200,  exp: 180 },
+  { title: 'Reino Gelado',        desc: 'Derrote 4 Golems de Gelo (nordeste)', kind: 'kill',  target: 'icegolem', need: 4, gold: 260,  exp: 240 },
+  { title: 'Rei Gelatina',        desc: 'Derrote o Rei Gelatina Doce',         kind: 'boss',  need: 1,                 gold: 400,  exp: 400 },
+  { title: 'Mergulho Profundo',   desc: 'Chegue ao Andar 3 da Dungeon',        kind: 'floor', need: 3,                 gold: 500,  exp: 500 },
+  { title: 'Lenda de Ooo',        desc: 'Chegue ao Andar 6 da Dungeon',        kind: 'floor', need: 6,                 gold: 1000, exp: 1200 }
+];
+
+const NPC_TALK = {
+  jake: { avatar: '🐶', lines: [
+    "Matemático, irmão! Pegue baús e derrote monstros pra ficar forte!",
+    "Dica de ouro: o sanduíche dá velocidade e cura por 45 segundos!",
+    "Itens melhores que o seu são equipados sozinhos. Os piores viram moedas!"
+  ] },
+  bmo: { avatar: '🎮', lines: ["Beep boop! Bem-vindo à loja do BMO!"] },
+  bubblegum: { avatar: '👸', lines: [] },
+  iceking: { avatar: '🤴', lines: [
+    "Gunther, pare de me desobedecer! Os Golems de Gelo são meus melhores amigos... eram.",
+    "Alguém me chamou? Eu só queria um amigo pra tocar bateria!"
+  ] },
+  marceline: { avatar: '🧛', lines: [
+    "Tá com medo do escuro? Eu adoro. Mas cuidado com os fantasmas da floresta.",
+    "Quer uma dica? Dreno de vida é o melhor remédio. Rock n roll!"
+  ] }
+};
+
+const SAVE_KEY = 'ooo_save_v1';
+
+// ===================================================================
 // 4. MOTOR PRINCIPAL DO JOGO
 // ===================================================================
 class GameEngine {
+  static loadSave() {
+    try { return JSON.parse(localStorage.getItem(SAVE_KEY)); } catch (e) { return null; }
+  }
+
+  getBiome(x, y) {
+    if (x > 1750 && y < 1000) return 'ice';
+    if (y > 1400) return 'forest';
+    if (x > 850 && x <= 1750 && y < 620) return 'candy';
+    if (x > 1500 && y >= 1000) return 'ruins';
+    return 'grass';
+  }
+
   constructor() {
     this.canvas = document.getElementById('game-canvas');
     this.ctx = this.canvas.getContext('2d');
@@ -690,13 +780,31 @@ class GameEngine {
 
     // Joystick Virtual Touch para Celular
     this.joystick = { active: false, dx: 0, dy: 0, touchId: null };
+    this.isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    this.isSolo = false;
+    this.paused = false;
+    this.dungeon = null;
+    this.worldChests = null;
+    this.portalCooldown = 0;
+    this.nearNpc = null;
+    this.currentBiome = 'grass';
+    this.kills = {};
+    this.questIndex = 0;
+    this.questProgress = 0;
+    this.bestFloor = 0;
+    this.openedChests = [];
+    this.lastSave = 0;
+    this.holdAttack = false;
 
     this.initWorldDecorations();
     this.initNPCs();
     this.initChests();
     this.initWebSocket();
     this.initMobileControls();
+    this.initShop();
     this.resizeCanvas();
+    this.minimap = document.getElementById('minimap');
+    this.mmCtx = this.minimap ? this.minimap.getContext('2d') : null;
 
     window.addEventListener('resize', () => this.resizeCanvas());
     window.addEventListener('orientationchange', () => {
@@ -712,7 +820,7 @@ class GameEngine {
     const h = wrapper.clientHeight;
     if (w > 0 && h > 0) {
       // Ajusta resolução do canvas para coincidir proporcionalmente sem distorcer
-      if (window.innerWidth <= 860) {
+      if (window.innerWidth <= 860 || this.isTouch) {
         // Modo Mobile: resolução proporcional à tela
         const aspect = w / h;
         this.canvas.height = 480;
@@ -729,105 +837,89 @@ class GameEngine {
     const stick = document.getElementById('virtual-joystick-stick');
     const base = document.getElementById('virtual-joystick-base');
 
+    // Joystick flutuante: aparece onde o polegar encostar
     if (zone && stick && base) {
-      const maxRadius = 35;
-      let startX = 0;
-      let startY = 0;
+      const maxRadius = 42;
+      let startX = 0, startY = 0;
 
       const updateStick = (clientX, clientY) => {
         const deltaX = clientX - startX;
         const deltaY = clientY - startY;
         const dist = Math.hypot(deltaX, deltaY);
-        const angle = Math.atan2(deltaY, deltaX);
-
-        const clampedDist = Math.min(dist, maxRadius);
-        const stickX = Math.cos(angle) * clampedDist;
-        const stickY = Math.sin(angle) * clampedDist;
-
-        stick.style.transform = `translate(${stickX}px, ${stickY}px)`;
-
-        // Normalização
-        this.joystick.dx = (deltaX / (dist || 1)) * (clampedDist / maxRadius);
-        this.joystick.dy = (deltaY / (dist || 1)) * (clampedDist / maxRadius);
+        const clamped = Math.min(dist, maxRadius);
+        const nx = dist ? deltaX / dist : 0;
+        const ny = dist ? deltaY / dist : 0;
+        stick.style.transform = `translate(${nx * clamped}px, ${ny * clamped}px)`;
+        this.joystick.dx = nx * (clamped / maxRadius);
+        this.joystick.dy = ny * (clamped / maxRadius);
       };
 
-      const handleTouchStart = (e) => {
+      const reset = () => {
+        this.joystick.active = false;
+        this.joystick.dx = 0; this.joystick.dy = 0;
+        this.joystick.touchId = null;
+        stick.style.transform = 'translate(0px, 0px)';
+        base.classList.remove('active');
+        base.style.left = ''; base.style.top = ''; base.style.bottom = '';
+      };
+
+      zone.addEventListener('touchstart', (e) => {
         e.preventDefault();
+        if (this.joystick.active) return;
         const touch = e.changedTouches[0];
         this.joystick.active = true;
         this.joystick.touchId = touch.identifier;
-        const rect = base.getBoundingClientRect();
-        startX = rect.left + rect.width / 2;
-        startY = rect.top + rect.height / 2;
+        const zr = zone.getBoundingClientRect();
+        startX = touch.clientX; startY = touch.clientY;
+        base.style.left = `${touch.clientX - zr.left - base.offsetWidth / 2}px`;
+        base.style.top = `${touch.clientY - zr.top - base.offsetHeight / 2}px`;
+        base.style.bottom = 'auto';
+        base.classList.add('active');
         updateStick(touch.clientX, touch.clientY);
-      };
+      }, { passive: false });
 
-      const handleTouchMove = (e) => {
+      zone.addEventListener('touchmove', (e) => {
         if (!this.joystick.active) return;
         e.preventDefault();
-        for (let i = 0; i < e.changedTouches.length; i++) {
-          const touch = e.changedTouches[i];
-          if (touch.identifier === this.joystick.touchId) {
-            updateStick(touch.clientX, touch.clientY);
-            break;
-          }
+        for (const touch of e.changedTouches) {
+          if (touch.identifier === this.joystick.touchId) { updateStick(touch.clientX, touch.clientY); break; }
+        }
+      }, { passive: false });
+
+      const end = (e) => {
+        for (const touch of e.changedTouches) {
+          if (touch.identifier === this.joystick.touchId) { reset(); break; }
         }
       };
-
-      const handleTouchEnd = (e) => {
-        for (let i = 0; i < e.changedTouches.length; i++) {
-          if (e.changedTouches[i].identifier === this.joystick.touchId) {
-            this.joystick.active = false;
-            this.joystick.dx = 0;
-            this.joystick.dy = 0;
-            this.joystick.touchId = null;
-            stick.style.transform = 'translate(0px, 0px)';
-            break;
-          }
-        }
-      };
-
-      zone.addEventListener('touchstart', handleTouchStart, { passive: false });
-      zone.addEventListener('touchmove', handleTouchMove, { passive: false });
-      zone.addEventListener('touchend', handleTouchEnd, { passive: false });
-      zone.addEventListener('touchcancel', handleTouchEnd, { passive: false });
+      zone.addEventListener('touchend', end, { passive: false });
+      zone.addEventListener('touchcancel', end, { passive: false });
     }
 
-    // Botões de Ação Touch
-    const btnAttack = document.getElementById('btn-touch-attack');
-    const btnSkill = document.getElementById('btn-touch-skill');
-    const btnPotion = document.getElementById('btn-touch-potion');
+    // Helper: botão que reage ao toque (e ao mouse, para testes no PC)
+    const bindButton = (id, onDown, onUp) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      let touching = false;
+      el.addEventListener('touchstart', (e) => {
+        e.preventDefault(); touching = true; el.classList.add('pressed'); onDown();
+      }, { passive: false });
+      const up = (e) => { e.preventDefault(); touching = false; el.classList.remove('pressed'); if (onUp) onUp(); };
+      el.addEventListener('touchend', up, { passive: false });
+      el.addEventListener('touchcancel', up, { passive: false });
+      el.addEventListener('mousedown', (e) => { if (!touching) { el.classList.add('pressed'); onDown(); } });
+      el.addEventListener('mouseup', () => { el.classList.remove('pressed'); if (onUp) onUp(); });
+      el.addEventListener('mouseleave', () => { el.classList.remove('pressed'); if (onUp) onUp(); });
+    };
+
+    bindButton('btn-touch-attack',
+      () => { if (this.currentDialog) { this.closeDialog(); return; } this.holdAttack = true; this.performBasicAttack(); },
+      () => { this.holdAttack = false; });
+    bindButton('btn-touch-skill', () => this.performSpecialSkill());
+    bindButton('btn-touch-potion', () => this.usePotion());
+    bindButton('btn-touch-sandwich', () => this.eatSandwich());
+    bindButton('btn-touch-talk', () => this.talkToNpc(this.nearNpc));
+
     const btnChat = document.getElementById('btn-touch-chat');
-
-    if (btnAttack) {
-      btnAttack.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        this.performBasicAttack();
-      }, { passive: false });
-    }
-
-    if (btnSkill) {
-      btnSkill.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        this.performSpecialSkill();
-      }, { passive: false });
-    }
-
-    if (btnPotion) {
-      btnPotion.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        this.usePotion();
-      }, { passive: false });
-    }
-
-    const btnSandwich = document.getElementById('btn-touch-sandwich');
-    if (btnSandwich) {
-      btnSandwich.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        this.eatSandwich();
-      }, { passive: false });
-    }
-
     if (btnChat) {
       btnChat.addEventListener('touchstart', (e) => {
         e.preventDefault();
@@ -835,15 +927,42 @@ class GameEngine {
         const chatInput = document.getElementById('chat-input');
         if (chatContainer) {
           chatContainer.classList.toggle('mobile-collapsed');
-          if (!chatContainer.classList.contains('mobile-collapsed') && chatInput) {
-            chatInput.focus();
-          }
+          if (!chatContainer.classList.contains('mobile-collapsed') && chatInput) chatInput.focus();
         }
       }, { passive: false });
     }
+
+    // Tela cheia + orientação horizontal
+    const fsBtn = document.getElementById('fullscreen-btn');
+    if (fsBtn) {
+      fsBtn.addEventListener('click', async () => {
+        try {
+          if (document.fullscreenElement) { await document.exitFullscreen(); return; }
+          await document.documentElement.requestFullscreen();
+          if (screen.orientation && screen.orientation.lock) await screen.orientation.lock('landscape');
+        } catch (e) {}
+        setTimeout(() => this.resizeCanvas(), 200);
+      });
+      if (!document.documentElement.requestFullscreen) fsBtn.style.display = 'none';
+    }
+
+    // Evita zoom por toque duplo e menu de contexto no celular
+    document.addEventListener('contextmenu', (e) => { if (this.isTouch) e.preventDefault(); });
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', (e) => {
+      const now = Date.now();
+      if (now - lastTouchEnd <= 300 && !(e.target.closest && e.target.closest('input, textarea'))) e.preventDefault();
+      lastTouchEnd = now;
+    }, { passive: false });
   }
 
   initWebSocket() {
+    const host = window.location.hostname;
+    const forceSolo = /[?&]solo/.test(window.location.search) ||
+      window.location.protocol === 'file:' ||
+      /\.github\.io$/.test(host);
+    if (forceSolo) { this.startLocalMode(); return; }
+
     let wsUrl = 'ws://localhost:3000';
     if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
       const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -851,25 +970,56 @@ class GameEngine {
     }
 
     try {
-      this.socket = new WebSocket(wsUrl);
+      const ws = new WebSocket(wsUrl);
+      this.socket = ws;
 
-      this.socket.onopen = () => {
+      // Sem servidor em 3s? Joga em modo solo no próprio navegador.
+      const fallbackTimer = setTimeout(() => {
+        if (ws.readyState !== WebSocket.OPEN) { try { ws.close(); } catch (e) {} this.startLocalMode(); }
+      }, 3000);
+
+      ws.onopen = () => {
+        clearTimeout(fallbackTimer);
         this.isMultiplayer = true;
-        this.appendChatMessage("system", "🟢 Conectado ao servidor com Cérebro de IA Gemini!");
+        this.appendChatMessage("system", "🟢 Conectado ao servidor multiplayer!");
       };
 
-      this.socket.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          this.handleNetworkMessage(data);
-        } catch (err) {}
+      ws.onmessage = (event) => {
+        try { this.handleNetworkMessage(JSON.parse(event.data)); } catch (err) {}
       };
 
-      this.socket.onclose = () => {
+      ws.onerror = () => { clearTimeout(fallbackTimer); if (!this.isSolo) this.startLocalMode(); };
+
+      ws.onclose = () => {
+        clearTimeout(fallbackTimer);
         this.isMultiplayer = false;
         this.updateOnlineCount();
+        if (!this.isSolo) this.startLocalMode();
       };
-    } catch (e) {}
+    } catch (e) {
+      this.startLocalMode();
+    }
+  }
+
+  startLocalMode() {
+    if (this.isSolo || typeof LocalServer === 'undefined') return;
+    this.isSolo = true;
+    this.isMultiplayer = false;
+    this.otherPlayers.clear();
+    this.socket = new LocalServer();
+    this.socket.onmessage = (event) => {
+      try { this.handleNetworkMessage(JSON.parse(event.data)); } catch (err) { console.error(err); }
+    };
+    this.appendChatMessage("system", "🎮 Modo solo: jogando direto no seu aparelho (sem internet).");
+    this.updateOnlineCount();
+    // Se a partida já tinha começado, entra no mundo local
+    if (this.hero) {
+      this.currentFloor = 0;
+      this.sendNet('join', {
+        profile: this.hero.profile, hp: this.hero.hp, maxHp: this.hero.maxHp,
+        mp: this.hero.mp, maxMp: this.hero.maxMp, level: this.level
+      });
+    }
   }
 
   sendNet(type, payload = {}) {
@@ -888,6 +1038,10 @@ class GameEngine {
         });
         if (data.monsters) this.monsters = data.monsters;
         if (data.drops) this.worldDrops = data.drops;
+        if (data.chests) {
+          this.chests = data.chests;
+          this.chests.forEach(c => { if (this.openedChests.includes(c.id)) c.opened = true; });
+        }
         this.updateOnlineCount();
         break;
       }
@@ -947,8 +1101,16 @@ class GameEngine {
       case 'monster_killed': {
         const idx = this.monsters.findIndex(mon => mon.id === data.monsterId);
         if (idx !== -1) {
-          this.killMonster(this.monsters[idx], idx, false);
-          this.appendChatMessage("system", `⚔️ ${data.killerName} derrotou ${data.isBoss ? 'O CHEFÃO' : 'um monstro'}!`);
+          const mine = data.killerId ? data.killerId === this.selfId : data.killerName === (this.hero && this.hero.profile.name);
+          this.killMonster(this.monsters[idx], idx, mine);
+          if (!this.isSolo) this.appendChatMessage("system", `⚔️ ${data.killerName} derrotou ${data.isBoss ? 'O CHEFÃO' : 'um monstro'}!`);
+        }
+        break;
+      }
+
+      case 'monster_spawned': {
+        if (this.currentFloor === 0 && data.monster && !this.monsters.find(m => m.id === data.monster.id)) {
+          this.monsters.push(data.monster);
         }
         break;
       }
@@ -975,7 +1137,7 @@ class GameEngine {
       case 'item_picked': {
         const idx = this.worldDrops.findIndex(d => d.id === data.itemId);
         if (idx !== -1) this.worldDrops.splice(idx, 1);
-        this.appendChatMessage("system", `✨ ${data.pickerName} equipou [${data.item.name}]!`);
+        if (!this.isSolo) this.appendChatMessage("system", `✨ ${data.pickerName} pegou [${data.item.name}]!`);
         break;
       }
 
@@ -993,12 +1155,18 @@ class GameEngine {
 
       // DUNGEON CARREGADA
       case 'dungeon_loaded': {
+        if (this.currentFloor === 0) this.worldChests = this.chests;
         this.currentFloor = data.dungeon.floor;
+        this.dungeon = data.dungeon;
         this.monsters = data.dungeon.monsters;
         this.chests = data.dungeon.chests;
-        this.hero.x = data.dungeon.spawnPoint.x;
+        this.hero.x = data.dungeon.spawnPoint.x + 70;
         this.hero.y = data.dungeon.spawnPoint.y;
+        this.portalCooldown = 2.5;
+        this.projectiles = [];
+        if (this.currentFloor > this.bestFloor) { this.bestFloor = this.currentFloor; this.checkQuestProgress(); }
         document.getElementById('hud-location-tag').innerText = `📍 Dungeon Infinita - Andar ${this.currentFloor}`;
+        this.saveGame();
         this.showBanner(`DUNGEON INFINITA`, `Andar ${this.currentFloor}`);
         sounds.portalWhoosh();
         break;
@@ -1006,10 +1174,15 @@ class GameEngine {
 
       case 'return_to_surface': {
         this.currentFloor = 0;
+        this.dungeon = null;
+        if (this.worldChests) { this.chests = this.worldChests; this.worldChests = null; }
         this.monsters = data.monsters;
         this.hero.x = this.portal.x + 50;
         this.hero.y = this.portal.y + 50;
-        document.getElementById('hud-location-tag').innerText = `📍 Terra de Ooo`;
+        this.portalCooldown = 2.5;
+        this.projectiles = [];
+        this.currentBiome = '';
+        this.saveGame();
         this.showBanner(`DE VOLTA A OOO`, `Superfície da Terra dos Doces`);
         sounds.portalWhoosh();
         break;
@@ -1063,7 +1236,7 @@ class GameEngine {
     })[m]);
   }
 
-  start(profile) {
+  start(profile, save) {
     this.hero = {
       x: 350, y: 350,
       profile: { ...profile },
@@ -1086,6 +1259,15 @@ class GameEngine {
       chatTimer: 0
     };
 
+    if (save) this.applySave(save);
+    if (this.isTouch || window.innerWidth <= 860) {
+      const cc = document.getElementById('chat-container');
+      if (cc) cc.classList.add('mobile-collapsed');
+    }
+    this.updateObjective();
+    document.getElementById('potion-count').innerText = this.potions;
+    document.getElementById('sandwich-count').innerText = this.sandwiches;
+
     this.sendNet('join', {
       profile: this.hero.profile,
       hp: this.hero.hp,
@@ -1107,7 +1289,9 @@ class GameEngine {
       this.showDialog(
         "Jake o Cão",
         "🐶",
-        `E aí, ${this.hero.profile.name}! Fale com a gente pelo chat [ENTER] que agora nós temos CÉREBRO DE VERDADE com IA! E confira o Portal da Dungeon no centro!`
+        save
+          ? `Bem-vindo de volta, ${this.hero.profile.name}! Seu progresso foi carregado. Veja a missão no topo da tela!`
+          : `E aí, ${this.hero.profile.name}! Fale com a Princesa Jujuba para missões e com o BMO para comprar itens. O Portal da Dungeon fica ao leste!`
       );
     }, 600);
 
@@ -1118,15 +1302,25 @@ class GameEngine {
     this.decorations = [];
     this.treeHouse = { x: 350, y: 180, width: 160, height: 200 };
 
-    for (let i = 0; i < 90; i++) {
-      const type = (i % 5 === 0) ? 'candy-cane' : (i % 3 === 0) ? 'giant-flower' : (i % 4 === 0) ? 'lollipop' : 'adventure-tree';
-      this.decorations.push({
-        x: Math.random() * (this.worldWidth - 200) + 100,
-        y: Math.random() * (this.worldHeight - 200) + 100,
-        type: type,
-        size: 30 + Math.random() * 25
-      });
+    let seed = 1337;
+    const rand = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+    const keepOut = [[350, 330, 190], [350, 180, 130], [950, 380, 80], [1100, 220, 70], [1900, 750, 70], [620, 260, 70]];
+
+    for (let i = 0; i < 320; i++) {
+      const x = rand() * (this.worldWidth - 160) + 80;
+      const y = rand() * (this.worldHeight - 160) + 80;
+      if (keepOut.some(k => Math.hypot(x - k[0], y - k[1]) < k[2])) continue;
+      const biome = this.getBiome(x, y);
+      const r = rand();
+      let type;
+      if (biome === 'ice') type = r < 0.6 ? 'ice-crystal' : 'snow-pine';
+      else if (biome === 'forest') type = r < 0.7 ? 'dark-tree' : 'mushroom-deco';
+      else if (biome === 'candy') type = r < 0.4 ? 'lollipop' : r < 0.75 ? 'candy-cane' : 'giant-flower';
+      else if (biome === 'ruins') type = r < 0.6 ? 'rock' : 'dark-tree';
+      else type = r < 0.55 ? 'adventure-tree' : r < 0.8 ? 'giant-flower' : r < 0.9 ? 'rock' : 'lollipop';
+      this.decorations.push({ x, y, type, size: 30 + rand() * 25 });
     }
+    this.decorations.sort((a, b) => a.y - b.y);
   }
 
   initNPCs() {
@@ -1159,7 +1353,12 @@ class GameEngine {
   }
 
   update(dt) {
-    if (!this.hero || this.hero.hp <= 0) return;
+    if (!this.hero || this.hero.hp <= 0 || this.paused) return;
+
+    if (this.portalCooldown > 0) this.portalCooldown -= dt;
+    this.autoSaveTimer = (this.autoSaveTimer || 0) + dt;
+    if (this.autoSaveTimer > 10) { this.autoSaveTimer = 0; this.saveGame(true); }
+    if (this.holdAttack && !this.currentDialog) this.performBasicAttack();
 
     if (this.hero.attackCooldown > 0) this.hero.attackCooldown -= dt * 1000;
     if (this.hero.skillCooldown > 0) {
@@ -1269,6 +1468,31 @@ class GameEngine {
       this.hero.animFrame = 0;
     }
 
+    // Limites do mundo
+    const maxX = this.currentFloor === 0 ? this.worldWidth : (this.dungeon ? this.dungeon.width : this.worldWidth);
+    const maxY = this.currentFloor === 0 ? this.worldHeight : (this.dungeon ? this.dungeon.height : this.worldHeight);
+    this.hero.x = Math.max(20, Math.min(maxX - 20, this.hero.x));
+    this.hero.y = Math.max(30, Math.min(maxY - 20, this.hero.y));
+
+    // Bioma atual
+    if (this.currentFloor === 0) {
+      const biome = this.getBiome(this.hero.x, this.hero.y);
+      if (biome !== this.currentBiome) {
+        this.currentBiome = biome;
+        document.getElementById('hud-location-tag').innerText = `📍 ${BIOMES[biome].name}`;
+      }
+    }
+
+    // NPC por perto?
+    this.nearNpc = null;
+    if (this.currentFloor === 0) {
+      for (const n of this.npcs) {
+        if (Math.hypot(this.hero.x - n.x, this.hero.y - n.y) < 75) { this.nearNpc = n; break; }
+      }
+    }
+    const talkBtn = document.getElementById('btn-touch-talk');
+    if (talkBtn) talkBtn.classList.toggle('hidden', !this.nearNpc);
+
     // Sincronização periódica
     const now = performance.now();
     if (now - this.lastNetworkSync > 60) {
@@ -1284,9 +1508,11 @@ class GameEngine {
       });
     }
 
-    // Câmera
-    const targetCamX = this.hero.x - this.canvas.width / 2;
-    const targetCamY = this.hero.y - this.canvas.height / 2;
+    // Câmera (presa aos limites do mapa)
+    const camMaxX = Math.max(0, maxX - this.canvas.width);
+    const camMaxY = Math.max(0, maxY - this.canvas.height);
+    const targetCamX = Math.max(0, Math.min(camMaxX, this.hero.x - this.canvas.width / 2));
+    const targetCamY = Math.max(0, Math.min(camMaxY, this.hero.y - this.canvas.height / 2));
     this.camera.x += (targetCamX - this.camera.x) * 0.1;
     this.camera.y += (targetCamY - this.camera.y) * 0.1;
 
@@ -1321,6 +1547,7 @@ class GameEngine {
     this.hero.invulnerableTimer = 0.6;
     this.screenShake = 6;
     sounds.playerHurt();
+    if (this.isTouch && navigator.vibrate) navigator.vibrate(40);
     this.spawnFloatingText(`-${dmg}`, this.hero.x, this.hero.y - 20, '#ef4444');
     this.updateHUD();
     if (this.hero.hp <= 0) this.onGameOver();
@@ -1334,6 +1561,8 @@ class GameEngine {
     if (giveReward) {
       this.addExp(m.expReward);
       this.addGold(m.goldReward);
+      this.onKill(m);
+      if (this.isTouch && navigator.vibrate) navigator.vibrate(15);
     }
 
     const color = m.isBoss ? '#f59e0b' : m.color || '#ec4899';
@@ -1358,12 +1587,99 @@ class GameEngine {
     if (this.exp >= this.expToNext) {
       this.exp -= this.expToNext;
       this.level++;
-      this.expToNext = Math.round(this.expToNext * 1.6);
+      this.expToNext = Math.round(this.expToNext * 1.5);
       this.hero.maxHp += 20; this.hero.hp = this.hero.maxHp;
       this.hero.maxMp += 15; this.hero.mp = this.hero.maxMp;
       this.hero.atk += 4;
       sounds.levelUp();
       this.showBanner("MATEMÁTICO!", `Subiu para o NÍVEL ${this.level}!`);
+    }
+    this.updateHUD();
+  }
+
+  // ---------- MISSÕES ----------
+  currentQuest() { return QUESTS[this.questIndex] || null; }
+
+  questProgressValue(q) {
+    return q.kind === 'floor' ? Math.min(this.bestFloor, q.need) : Math.min(this.questProgress, q.need);
+  }
+
+  questObjectiveText() {
+    const q = this.currentQuest();
+    if (!q) return 'Você é uma Lenda de Ooo! Desça a Dungeon Infinita o mais fundo que puder!';
+    return `${q.title}: ${q.desc} (${this.questProgressValue(q)}/${q.need})`;
+  }
+
+  updateObjective() {
+    const el = document.getElementById('hud-objective-text');
+    if (el) el.innerText = this.questObjectiveText();
+  }
+
+  onKill(m) {
+    this.kills[m.type] = (this.kills[m.type] || 0) + 1;
+    const q = this.currentQuest();
+    if (q) {
+      if (q.kind === 'kill' && m.type === q.target) this.questProgress++;
+      else if (q.kind === 'boss' && m.isBoss && this.currentFloor === 0) this.questProgress++;
+    }
+    this.checkQuestProgress();
+  }
+
+  checkQuestProgress() {
+    let q = this.currentQuest();
+    while (q && this.questProgressValue(q) >= q.need) {
+      this.questIndex++;
+      this.questProgress = 0;
+      this.showBanner('MISSÃO COMPLETA!', `${q.title}: +${q.gold} 🪙 +${q.exp} XP`);
+      sounds.levelUp();
+      this.addGold(q.gold);
+      this.addExp(q.exp);
+      q = this.currentQuest();
+    }
+    this.updateObjective();
+    this.saveGame();
+  }
+
+  // ---------- SALVAR / CARREGAR ----------
+  saveGame(force = false) {
+    if (!this.hero) return;
+    const now = performance.now();
+    if (!force && now - this.lastSave < 1500) return;
+    this.lastSave = now;
+    const h = this.hero;
+    const data = {
+      v: 1, savedAt: Date.now(), profile: h.profile,
+      level: this.level, exp: this.exp, expToNext: this.expToNext,
+      gold: this.gold, potions: this.potions, sandwiches: this.sandwiches,
+      maxHp: h.maxHp, maxMp: h.maxMp, atk: h.atk,
+      equippedItem: this.equippedItem, questIndex: this.questIndex,
+      questProgress: this.questProgress, bestFloor: this.bestFloor,
+      kills: this.kills, upgrades: this.upgrades || 0, openedChests: this.openedChests
+    };
+    try { localStorage.setItem(SAVE_KEY, JSON.stringify(data)); } catch (e) {}
+  }
+
+  applySave(sv) {
+    const h = this.hero;
+    this.level = sv.level || 1;
+    this.exp = sv.exp || 0;
+    this.expToNext = sv.expToNext || 50;
+    this.gold = sv.gold || 0;
+    this.potions = sv.potions ?? 3;
+    this.sandwiches = sv.sandwiches ?? 1;
+    h.maxHp = sv.maxHp || h.maxHp; h.hp = h.maxHp;
+    h.maxMp = sv.maxMp || h.maxMp; h.mp = h.maxMp;
+    h.atk = sv.atk || h.atk;
+    this.questIndex = sv.questIndex || 0;
+    this.questProgress = sv.questProgress || 0;
+    this.bestFloor = sv.bestFloor || 0;
+    this.kills = sv.kills || {};
+    this.upgrades = sv.upgrades || 0;
+    this.openedChests = sv.openedChests || [];
+    this.chests.forEach(c => { if (this.openedChests.includes(c.id)) c.opened = true; });
+    if (sv.equippedItem) {
+      this.equippedItem = sv.equippedItem;
+      this.showEquippedUI(sv.equippedItem);
     }
     this.updateHUD();
   }
@@ -1522,6 +1838,22 @@ class GameEngine {
   }
 
   getFacingVector() {
+    // No celular, mira automaticamente no monstro mais próximo
+    if (this.isTouch) {
+      let best = null, bd = 380;
+      for (const m of this.monsters) {
+        if (m.hp <= 0) continue;
+        const d = Math.hypot(m.x - this.hero.x, m.y - this.hero.y);
+        if (d < bd) { bd = d; best = m; }
+      }
+      if (best) {
+        const dx = best.x - this.hero.x, dy = best.y - this.hero.y;
+        const len = Math.hypot(dx, dy) || 1;
+        if (Math.abs(dx) > Math.abs(dy)) this.hero.facing = dx > 0 ? 'right' : 'left';
+        else this.hero.facing = dy > 0 ? 'down' : 'up';
+        return { x: dx / len, y: dy / len };
+      }
+    }
     if (this.hero.facing === 'up') return { x: 0, y: -1 };
     if (this.hero.facing === 'down') return { x: 0, y: 1 };
     if (this.hero.facing === 'left') return { x: -1, y: 0 };
@@ -1579,26 +1911,30 @@ class GameEngine {
   // 5. INTERAÇÕES: PORTAIS, ITENS NO CHÃO E CHESTS
   // ===================================================================
   checkInteractions() {
-    // 1. CHECAGEM DE PORTAL CÓSMICO
+    // 1. PORTAIS
     if (this.currentFloor === 0) {
-      const distToPortal = Math.hypot(this.hero.x - this.portal.x, this.hero.y - this.portal.y);
-      if (distToPortal < 35) {
+      if (this.portalCooldown <= 0 && Math.hypot(this.hero.x - this.portal.x, this.hero.y - this.portal.y) < 35) {
+        this.portalCooldown = 2;
         this.sendNet('enter_dungeon', { floor: 1 });
       }
-    } else {
-      // Portal de saída da Dungeon ou próximo andar
-      const distToExit = Math.hypot(this.hero.x - 300, this.hero.y - 300);
-      if (distToExit < 35 && this.monsters.length === 0) {
+    } else if (this.dungeon) {
+      const ex = this.dungeon.exitPortal;
+      const sp = this.dungeon.spawnPoint;
+      const bossAlive = this.monsters.some(m => m.isBoss && m.hp > 0);
+      if (this.portalCooldown <= 0 && !bossAlive && Math.hypot(this.hero.x - ex.x, this.hero.y - ex.y) < 40) {
+        this.portalCooldown = 2;
         this.sendNet('enter_dungeon', { floor: this.currentFloor + 1 });
+      } else if (this.portalCooldown <= 0 && Math.hypot(this.hero.x - sp.x, this.hero.y - sp.y) < 35) {
+        this.portalCooldown = 2;
+        this.sendNet('exit_dungeon');
       }
     }
 
-    // 2. COLETA DE ITENS DA IA NO CHÃO
+    // 2. COLETA DE ITENS NO CHÃO
     for (let i = this.worldDrops.length - 1; i >= 0; i--) {
       const d = this.worldDrops[i];
       if (d.floor === this.currentFloor) {
-        const dist = Math.hypot(this.hero.x - d.x, this.hero.y - d.y);
-        if (dist < 32) {
+        if (Math.hypot(this.hero.x - d.x, this.hero.y - d.y) < 32) {
           sounds.itemPickup();
           this.equipItem(d.item);
           this.sendNet('pick_item', { itemId: d.id, playerName: this.hero.profile.name });
@@ -1609,33 +1945,130 @@ class GameEngine {
 
     // 3. BAÚS
     this.chests.forEach(chest => {
-      if (!chest.opened) {
-        if (Math.hypot(this.hero.x - chest.x, this.hero.y - chest.y) < 40) {
-          chest.opened = true;
-          this.addGold(chest.gold);
-          this.potions += chest.potion;
-          document.getElementById('potion-count').innerText = this.potions;
-          this.sendNet('open_chest', { chestId: chest.id, playerName: this.hero.profile.name });
-        }
+      if (!chest.opened && Math.hypot(this.hero.x - chest.x, this.hero.y - chest.y) < 40) {
+        chest.opened = true;
+        if (this.currentFloor === 0) this.openedChests.push(chest.id);
+        this.addGold(chest.gold);
+        this.potions += chest.potion;
+        document.getElementById('potion-count').innerText = this.potions;
+        this.updateHUD();
+        this.sendNet('open_chest', { chestId: chest.id, playerName: this.hero.profile.name });
+        this.saveGame();
       }
     });
   }
 
+  itemScore(it) {
+    return (it.bonusAtk || 0) * 3 + (it.bonusHp || 0) * 0.5 + (it.bonusMp || 0) * 0.3;
+  }
+
+  showEquippedUI(item) {
+    document.getElementById('equipped-item-icon').innerText = item.icon || '✨';
+    document.getElementById('equipped-item-name').innerText = item.name;
+    document.getElementById('equipped-item-slot').style.borderColor = item.rarityColor;
+  }
+
   equipItem(item) {
+    const old = this.equippedItem;
+    // Item pior que o atual? Vira moedas.
+    if (old && this.itemScore(item) <= this.itemScore(old)) {
+      const gold = Math.round(this.itemScore(item) * 1.5) + 5;
+      this.addGold(gold);
+      this.spawnFloatingText(`${item.name} vendido`, this.hero.x, this.hero.y - 60, item.rarityColor || '#fff');
+      return;
+    }
+    // Troca: remove bônus do antigo, aplica os do novo
+    if (old) {
+      this.hero.atk -= old.bonusAtk || 0;
+      this.hero.maxHp -= old.bonusHp || 0;
+      this.hero.maxMp -= old.bonusMp || 0;
+      this.hero.hp = Math.min(this.hero.hp, this.hero.maxHp);
+      this.hero.mp = Math.min(this.hero.mp, this.hero.maxMp);
+    }
     this.equippedItem = item;
-    // Bônus de Atributos
     this.hero.atk += item.bonusAtk || 0;
     this.hero.maxHp += item.bonusHp || 0;
     this.hero.hp = Math.min(this.hero.maxHp, this.hero.hp + (item.bonusHp || 0));
     this.hero.maxMp += item.bonusMp || 0;
 
-    // Atualiza HUD
-    document.getElementById('equipped-item-icon').innerText = item.icon || '✨';
-    document.getElementById('equipped-item-name').innerText = item.name;
-    document.getElementById('equipped-item-slot').style.borderColor = item.rarityColor;
-
+    this.showEquippedUI(item);
     this.showBanner(`EQUIPOU: ${item.name}!`, `+${item.bonusAtk} ATK | +${item.bonusHp} HP | Raridade: ${item.rarityLabel}`);
     this.updateHUD();
+    this.saveGame();
+  }
+
+  // ---------- NPCs & LOJA ----------
+  talkToNpc(npc) {
+    if (!npc || this.currentDialog || this.paused) return;
+    const info = NPC_TALK[npc.role];
+    if (!info) return;
+    if (npc.role === 'bmo') { this.openShop(); return; }
+    let text;
+    if (npc.role === 'bubblegum') {
+      const q = this.currentQuest();
+      text = q
+        ? `Missão atual — ${q.title}: ${q.desc}. Progresso: ${this.questProgressValue(q)}/${q.need}. Recompensa: ${q.gold} moedas e ${q.exp} XP, entregues automaticamente!`
+        : "Fascinante! Você completou todas as missões do reino. A Dungeon Infinita é o seu desafio final!";
+    } else {
+      text = info.lines[Math.floor(Math.random() * info.lines.length)];
+    }
+    this.showDialog(npc.name, info.avatar, text);
+  }
+
+  initShop() {
+    const closeBtn = document.getElementById('shop-close');
+    if (closeBtn) closeBtn.addEventListener('click', () => this.closeShop());
+  }
+
+  shopItems() {
+    const up = this.upgrades || 0;
+    const costAtk = 120 + up * 90;
+    const costHp = 100 + up * 80;
+    return [
+      { icon: '🧪', name: 'Poção Doce', desc: 'Cura 50% da vida', cost: 25, buy: () => { this.potions++; } },
+      { icon: '🧪', name: 'Poção x3', desc: 'Pacote econômico', cost: 65, buy: () => { this.potions += 3; } },
+      { icon: '🥪', name: 'Sanduíche Perfeito', desc: '+velocidade e regeneração', cost: 60, buy: () => { this.sandwiches++; } },
+      { icon: '⚔️', name: 'Afiar Arma', desc: '+3 de ataque', cost: costAtk, buy: () => { this.hero.atk += 3; this.upgrades = up + 1; } },
+      { icon: '❤️', name: 'Coração de Gelatina', desc: '+25 de vida máxima', cost: costHp, buy: () => { this.hero.maxHp += 25; this.hero.hp += 25; this.upgrades = up + 1; } },
+      { icon: '🔮', name: 'Cristal de Mana', desc: '+20 de mana máxima', cost: costHp, buy: () => { this.hero.maxMp += 20; this.hero.mp += 20; this.upgrades = up + 1; } }
+    ];
+  }
+
+  openShop() {
+    this.paused = true;
+    this.holdAttack = false;
+    this.joystick.dx = 0; this.joystick.dy = 0;
+    this.renderShop();
+    document.getElementById('shop-modal').classList.remove('hidden');
+  }
+
+  closeShop() {
+    this.paused = false;
+    document.getElementById('shop-modal').classList.add('hidden');
+    this.saveGame(true);
+  }
+
+  renderShop() {
+    document.getElementById('shop-gold').innerText = this.gold;
+    const box = document.getElementById('shop-items');
+    box.innerHTML = '';
+    this.shopItems().forEach(it => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'shop-item' + (this.gold < it.cost ? ' too-expensive' : '');
+      b.innerHTML = `<span class="shop-icon">${it.icon}</span><span class="shop-text"><b>${it.name}</b><small>${it.desc}</small></span><span class="shop-cost">🪙 ${it.cost}</span>`;
+      b.addEventListener('click', () => {
+        if (this.gold < it.cost) { sounds.playerHurt(); return; }
+        this.gold -= it.cost;
+        it.buy();
+        sounds.itemPickup();
+        document.getElementById('potion-count').innerText = this.potions;
+        document.getElementById('sandwich-count').innerText = this.sandwiches;
+        this.updateHUD();
+        this.renderShop();
+      });
+      box.appendChild(b);
+    });
   }
 
   showDialog(speaker, avatar, text) {
@@ -1671,6 +2104,7 @@ class GameEngine {
     if (this.currentFloor > 0) this.sendNet('exit_dungeon');
     document.getElementById('game-over-screen').classList.add('hidden');
     this.updateHUD();
+    this.saveGame(true);
   }
 
   // ===================================================================
@@ -1685,12 +2119,13 @@ class GameEngine {
     this.renderWorldBackground();
     this.ctx.translate(-Math.round(this.camera.x), -Math.round(this.camera.y));
 
-    // Decorações
+    // Chão, decorações e portais
     if (this.currentFloor === 0) {
+      this.renderGround();
       this.renderDecorations();
       this.renderCosmicPortal();
     } else {
-      this.renderDungeonAtmosphere();
+      this.renderDungeon();
     }
 
     // Itens Caídos no Chão
@@ -1737,7 +2172,158 @@ class GameEngine {
     this.renderProjectiles();
     this.renderParticles();
     this.renderFloatingTexts();
+    this.renderTalkPrompt();
     this.ctx.restore();
+    this.renderMinimap();
+  }
+
+  renderTalkPrompt() {
+    if (!this.nearNpc || this.currentDialog) return;
+    const ctx = this.ctx;
+    const n = this.nearNpc;
+    const label = this.isTouch ? 'Toque em 💬 Falar' : '[T] Falar';
+    ctx.save();
+    ctx.font = 'bold 11px Fredoka, sans-serif';
+    ctx.textAlign = 'center';
+    const w = ctx.measureText(label).width + 14;
+    ctx.fillStyle = 'rgba(15,23,42,0.85)';
+    ctx.beginPath(); ctx.roundRect(n.x - w / 2, n.y - 78, w, 20, 6); ctx.fill();
+    ctx.fillStyle = '#fef08a';
+    ctx.fillText(label, n.x, n.y - 64);
+    ctx.restore();
+  }
+
+  renderGround() {
+    const ctx = this.ctx;
+    const T = 64;
+    const x0 = Math.max(0, Math.floor(this.camera.x / T));
+    const y0 = Math.max(0, Math.floor(this.camera.y / T));
+    const x1 = Math.min(Math.ceil(this.worldWidth / T), Math.ceil((this.camera.x + this.canvas.width) / T));
+    const y1 = Math.min(Math.ceil(this.worldHeight / T), Math.ceil((this.camera.y + this.canvas.height) / T));
+    for (let ty = y0; ty < y1; ty++) {
+      for (let tx = x0; tx < x1; tx++) {
+        const biome = this.getBiome(tx * T + T / 2, ty * T + T / 2);
+        ctx.fillStyle = BIOMES[biome].colors[(tx + ty) & 1];
+        ctx.fillRect(tx * T, ty * T, T + 1, T + 1);
+        const h = (tx * 73856093 ^ ty * 19349663) >>> 0;
+        if (h % 7 === 0) {
+          ctx.fillStyle = biome === 'ice' ? '#ffffff' : biome === 'candy' ? '#f472b6' : 'rgba(0,0,0,0.12)';
+          ctx.fillRect(tx * T + (h % 40) + 8, ty * T + ((h >> 6) % 40) + 8, 4, 4);
+          ctx.fillRect(tx * T + (h % 40) + 12, ty * T + ((h >> 6) % 40) + 4, 3, 3);
+        }
+      }
+    }
+    // Borda do mundo
+    ctx.strokeStyle = '#1a162b'; ctx.lineWidth = 8;
+    ctx.strokeRect(0, 0, this.worldWidth, this.worldHeight);
+  }
+
+  renderDungeon() {
+    const d = this.dungeon;
+    if (!d) return;
+    const ctx = this.ctx;
+    // Fundo da dungeon
+    ctx.fillStyle = '#0d0b17';
+    ctx.fillRect(0, 0, d.width, d.height);
+    // Corredores
+    ctx.strokeStyle = '#26223d'; ctx.lineWidth = 60; ctx.lineCap = 'round';
+    for (let i = 1; i < d.rooms.length; i++) {
+      const a = d.rooms[i - 1], b = d.rooms[i];
+      ctx.beginPath(); ctx.moveTo(a.centerX, a.centerY); ctx.lineTo(b.centerX, a.centerY); ctx.lineTo(b.centerX, b.centerY); ctx.stroke();
+    }
+    // Salas
+    d.rooms.forEach(r => {
+      ctx.fillStyle = r.isBossRoom ? '#3b1626' : '#2f2b4a';
+      ctx.fillRect(r.x, r.y, r.w, r.h);
+      ctx.fillStyle = r.isBossRoom ? '#4a1d2e' : '#383458';
+      for (let tx = 0; tx < r.w; tx += 40) {
+        for (let ty = 0; ty < r.h; ty += 40) {
+          if (((tx + ty) / 40) % 2 === 0) ctx.fillRect(r.x + tx, r.y + ty, Math.min(40, r.w - tx), Math.min(40, r.h - ty));
+        }
+      }
+      ctx.strokeStyle = r.isBossRoom ? '#be123c' : '#5b5690'; ctx.lineWidth = 4;
+      ctx.strokeRect(r.x, r.y, r.w, r.h);
+    });
+
+    // Tochas
+    for (let tx = 100; tx < d.width; tx += 300) {
+      const flicker = Math.sin(this.animTime * 10 + tx) * 2;
+      ctx.fillStyle = '#ea580c';
+      ctx.beginPath(); ctx.arc(tx, 60, 6 + flicker, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#fef08a';
+      ctx.beginPath(); ctx.arc(tx, 60, 3, 0, Math.PI * 2); ctx.fill();
+    }
+
+    const drawPortal = (x, y, c1, c2, label) => {
+      const t = this.animTime * 3;
+      ctx.save();
+      ctx.translate(x, y); ctx.rotate(t);
+      ctx.fillStyle = c1; ctx.beginPath(); ctx.ellipse(0, 0, 30, 17, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.rotate(-t * 2);
+      ctx.fillStyle = c2; ctx.beginPath(); ctx.ellipse(0, 0, 20, 9, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+      ctx.font = 'bold 9px Press Start 2P, monospace';
+      ctx.fillStyle = '#e2e8f0'; ctx.textAlign = 'center';
+      ctx.fillText(label, x, y - 30);
+    };
+    const bossAlive = this.monsters.some(m => m.isBoss && m.hp > 0);
+    drawPortal(d.spawnPoint.x, d.spawnPoint.y, '#0ea5e9', '#bae6fd', 'SAÍDA');
+    if (bossAlive) drawPortal(d.exitPortal.x, d.exitPortal.y, '#475569', '#94a3b8', 'TRANCADO');
+    else drawPortal(d.exitPortal.x, d.exitPortal.y, '#9333ea', '#e9d5ff', 'PRÓXIMO ANDAR');
+  }
+
+  renderMinimap() {
+    const mm = this.mmCtx;
+    if (!mm || !this.hero) return;
+    const W = this.minimap.width, H = this.minimap.height;
+    const floor0 = this.currentFloor === 0;
+    const worldW = floor0 ? this.worldWidth : (this.dungeon ? this.dungeon.width : 1800);
+    const worldH = floor0 ? this.worldHeight : (this.dungeon ? this.dungeon.height : 1400);
+    const sx = W / worldW, sy = H / worldH;
+    mm.clearRect(0, 0, W, H);
+
+    if (floor0) {
+      const cw = 150 * sx * 1, ch = 150 * sy * 1;
+      const step = 120;
+      for (let y = 0; y < worldH; y += step) {
+        for (let x = 0; x < worldW; x += step) {
+          mm.fillStyle = BIOMES[this.getBiome(x + step / 2, y + step / 2)].mini;
+          mm.fillRect(x * sx, y * sy, step * sx + 1, step * sy + 1);
+        }
+      }
+      mm.fillStyle = '#6366f1';
+      mm.fillRect(this.portal.x * sx - 3, this.portal.y * sy - 3, 6, 6);
+      mm.fillStyle = '#2563eb';
+      this.npcs.forEach(n => mm.fillRect(n.x * sx - 1.5, n.y * sy - 1.5, 3, 3));
+      mm.fillStyle = '#fbbf24';
+      this.chests.forEach(c => { if (!c.opened) mm.fillRect(c.x * sx - 1.5, c.y * sy - 1.5, 3, 3); });
+    } else if (this.dungeon) {
+      mm.fillStyle = '#0d0b17'; mm.fillRect(0, 0, W, H);
+      this.dungeon.rooms.forEach(r => {
+        mm.fillStyle = r.isBossRoom ? '#9f1239' : '#4c4670';
+        mm.fillRect(r.x * sx, r.y * sy, r.w * sx, r.h * sy);
+      });
+      mm.fillStyle = '#9333ea';
+      mm.fillRect(this.dungeon.exitPortal.x * sx - 3, this.dungeon.exitPortal.y * sy - 3, 6, 6);
+      mm.fillStyle = '#0ea5e9';
+      mm.fillRect(this.dungeon.spawnPoint.x * sx - 3, this.dungeon.spawnPoint.y * sy - 3, 6, 6);
+    }
+
+    this.monsters.forEach(m => {
+      if (m.hp <= 0) return;
+      mm.fillStyle = m.isBoss ? '#fde047' : '#ef4444';
+      const r = m.isBoss ? 3 : 1.6;
+      mm.fillRect(m.x * sx - r / 2, m.y * sy - r / 2, r, r);
+    });
+    this.otherPlayers.forEach(p => {
+      if ((p.currentFloor || 0) === this.currentFloor) {
+        mm.fillStyle = '#38bdf8'; mm.fillRect(p.x * sx - 2, p.y * sy - 2, 4, 4);
+      }
+    });
+    mm.fillStyle = '#ffffff';
+    mm.fillRect(this.hero.x * sx - 2.5, this.hero.y * sy - 2.5, 5, 5);
+    mm.strokeStyle = '#0f172a'; mm.lineWidth = 1;
+    mm.strokeRect(this.hero.x * sx - 2.5, this.hero.y * sy - 2.5, 5, 5);
   }
 
   renderCosmicPortal() {
@@ -1811,20 +2397,8 @@ class GameEngine {
   }
 
   renderWorldBackground() {
-    if (this.currentFloor === 0) {
-      this.ctx.fillStyle = '#79cc3b';
-      this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-    } else {
-      // Chão de Pedra Mística de Dungeon
-      this.ctx.fillStyle = '#18181b';
-      this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-      this.ctx.fillStyle = '#27272a';
-      for (let i = 0; i < 15; i++) {
-        for (let j = 0; j < 10; j++) {
-          this.ctx.fillRect(i * 60 + 2, j * 60 + 2, 56, 56);
-        }
-      }
-    }
+    this.ctx.fillStyle = this.currentFloor === 0 ? '#1a162b' : '#0d0b17';
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
   renderDecorations() {
@@ -1836,10 +2410,67 @@ class GameEngine {
     ctx.fillStyle = '#ef4444';
     ctx.beginPath(); ctx.moveTo(th.x - 35, th.y - 10); ctx.lineTo(th.x, th.y - 35); ctx.lineTo(th.x + 35, th.y - 10); ctx.fill();
 
+    const vx0 = this.camera.x - 60, vx1 = this.camera.x + this.canvas.width + 60;
+    const vy0 = this.camera.y - 60, vy1 = this.camera.y + this.canvas.height + 100;
+
     this.decorations.forEach(dec => {
-      if (dec.type === 'adventure-tree') {
-        ctx.fillStyle = '#78350f'; ctx.fillRect(dec.x - 3, dec.y - 20, 6, 25);
-        ctx.fillStyle = '#22c55e'; ctx.beginPath(); ctx.arc(dec.x, dec.y - 30, dec.size * 0.45, 0, Math.PI * 2); ctx.fill();
+      if (dec.x < vx0 || dec.x > vx1 || dec.y < vy0 || dec.y > vy1) return;
+      const x = dec.x, y = dec.y, sz = dec.size;
+      switch (dec.type) {
+        case 'adventure-tree':
+          ctx.fillStyle = '#78350f'; ctx.fillRect(x - 3, y - 20, 6, 25);
+          ctx.fillStyle = '#22c55e'; ctx.beginPath(); ctx.arc(x, y - 30, sz * 0.45, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#16a34a'; ctx.beginPath(); ctx.arc(x - sz * 0.15, y - 26, sz * 0.25, 0, Math.PI * 2); ctx.fill();
+          break;
+        case 'dark-tree':
+          ctx.fillStyle = '#292524'; ctx.fillRect(x - 3, y - 22, 6, 27);
+          ctx.fillStyle = '#14532d'; ctx.beginPath(); ctx.arc(x, y - 32, sz * 0.5, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#052e16'; ctx.beginPath(); ctx.arc(x + sz * 0.15, y - 28, sz * 0.28, 0, Math.PI * 2); ctx.fill();
+          break;
+        case 'snow-pine':
+          ctx.fillStyle = '#57534e'; ctx.fillRect(x - 3, y - 6, 6, 12);
+          ctx.fillStyle = '#0f766e';
+          ctx.beginPath(); ctx.moveTo(x - sz * 0.4, y - 4); ctx.lineTo(x, y - sz); ctx.lineTo(x + sz * 0.4, y - 4); ctx.fill();
+          ctx.fillStyle = '#f0f9ff';
+          ctx.beginPath(); ctx.moveTo(x - sz * 0.18, y - sz * 0.62); ctx.lineTo(x, y - sz); ctx.lineTo(x + sz * 0.18, y - sz * 0.62); ctx.fill();
+          break;
+        case 'ice-crystal':
+          ctx.fillStyle = '#7dd3fc';
+          ctx.beginPath(); ctx.moveTo(x - 8, y); ctx.lineTo(x - 3, y - sz * 0.9); ctx.lineTo(x + 3, y); ctx.fill();
+          ctx.fillStyle = '#bae6fd';
+          ctx.beginPath(); ctx.moveTo(x - 1, y); ctx.lineTo(x + 6, y - sz * 0.6); ctx.lineTo(x + 11, y); ctx.fill();
+          break;
+        case 'mushroom-deco':
+          ctx.fillStyle = '#e7e5e4'; ctx.fillRect(x - 3, y - 10, 6, 12);
+          ctx.fillStyle = '#7c3aed'; ctx.beginPath(); ctx.arc(x, y - 10, 11, Math.PI, 0); ctx.fill();
+          ctx.fillStyle = '#ddd6fe'; ctx.fillRect(x - 5, y - 15, 3, 3); ctx.fillRect(x + 2, y - 13, 3, 3);
+          break;
+        case 'giant-flower':
+          ctx.fillStyle = '#16a34a'; ctx.fillRect(x - 1.5, y - 14, 3, 16);
+          ctx.fillStyle = '#f472b6';
+          for (let k = 0; k < 5; k++) {
+            const a = k * Math.PI * 2 / 5;
+            ctx.beginPath(); ctx.arc(x + Math.cos(a) * 6, y - 18 + Math.sin(a) * 6, 4.5, 0, Math.PI * 2); ctx.fill();
+          }
+          ctx.fillStyle = '#fde047'; ctx.beginPath(); ctx.arc(x, y - 18, 3.5, 0, Math.PI * 2); ctx.fill();
+          break;
+        case 'lollipop':
+          ctx.fillStyle = '#f5f5f4'; ctx.fillRect(x - 1.5, y - 22, 3, 26);
+          ctx.fillStyle = '#ec4899'; ctx.beginPath(); ctx.arc(x, y - 26, 10, 0, Math.PI * 2); ctx.fill();
+          ctx.strokeStyle = '#fdf2f8'; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.arc(x, y - 26, 6, 0, Math.PI * 1.5); ctx.stroke();
+          break;
+        case 'candy-cane':
+          ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 5;
+          ctx.beginPath(); ctx.moveTo(x, y + 2); ctx.lineTo(x, y - 24); ctx.arc(x + 7, y - 24, 7, Math.PI, 0); ctx.stroke();
+          ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 5; ctx.setLineDash([4, 5]);
+          ctx.beginPath(); ctx.moveTo(x, y + 2); ctx.lineTo(x, y - 24); ctx.arc(x + 7, y - 24, 7, Math.PI, 0); ctx.stroke();
+          ctx.setLineDash([]);
+          break;
+        case 'rock':
+          ctx.fillStyle = '#78716c'; ctx.beginPath(); ctx.ellipse(x, y - 4, 13, 9, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#a8a29e'; ctx.beginPath(); ctx.ellipse(x - 3, y - 7, 6, 4, 0, 0, Math.PI * 2); ctx.fill();
+          break;
       }
     });
   }
@@ -1946,6 +2577,9 @@ class GameEngine {
     document.getElementById('hud-gold').innerText = this.gold;
     document.getElementById('hud-exp').innerText = this.exp;
     document.getElementById('hud-exp-next').innerText = this.expToNext;
+    const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.innerText = v; };
+    setTxt('potion-count', this.potions); setTxt('touch-potion-count', this.potions);
+    setTxt('sandwich-count', this.sandwiches); setTxt('touch-sandwich-count', this.sandwiches);
   }
 
   updateSkillDock() {
@@ -2121,14 +2755,33 @@ window.addEventListener('DOMContentLoaded', () => {
   updatePreview();
 
   const game = new GameEngine();
+  window.__game = game;
 
-  startBtn.addEventListener('click', () => {
+  const beginGame = (save) => {
     sounds.init();
     sounds.levelUp();
     document.getElementById('character-creation-screen').classList.remove('active');
     document.getElementById('game-screen').classList.add('active');
-    game.start(heroProfile);
-  });
+    game.resizeCanvas();
+    game.start(heroProfile, save);
+  };
+
+  startBtn.addEventListener('click', () => beginGame(null));
+
+  const saved = GameEngine.loadSave();
+  const continueBtn = document.getElementById('continue-btn');
+  if (saved && saved.profile && continueBtn) {
+    continueBtn.textContent = `▶ CONTINUAR: ${saved.profile.name} (Nv. ${saved.level})`;
+    continueBtn.classList.remove('hidden');
+    continueBtn.addEventListener('click', () => {
+      Object.assign(heroProfile, saved.profile);
+      beginGame(saved);
+    });
+  }
+
+  // Salva ao sair/trocar de aba
+  document.addEventListener('visibilitychange', () => { if (document.hidden) game.saveGame(true); });
+  window.addEventListener('pagehide', () => game.saveGame(true));
 
   // Chat Form
   const chatForm = document.getElementById('chat-form');
@@ -2162,6 +2815,8 @@ window.addEventListener('DOMContentLoaded', () => {
     if (e.code === 'KeyE') game.performSpecialSkill();
     if (e.code === 'KeyQ') game.usePotion();
     if (e.code === 'KeyF') game.eatSandwich();
+    if (e.code === 'KeyT') game.talkToNpc(game.nearNpc);
+    if (e.code === 'Escape' && game.paused) game.closeShop();
     if (e.code === 'KeyM') {
       const active = sounds.toggle();
       document.getElementById('sound-toggle-btn').innerText = active ? '🔊' : '🔇';
@@ -2197,7 +2852,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Registro de PWA (Instalar App no celular)
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
   }
 
   let deferredPrompt = null;
