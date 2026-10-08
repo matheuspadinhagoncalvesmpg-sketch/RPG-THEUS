@@ -252,3 +252,4 @@ if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') wind
 
 applySettings();
 toTitle();
+window.__theusReady = true;

@@ -178,6 +178,33 @@
     <p>Gire o celular para jogar na horizontal</p>
   </div>
 
+  <div id="boot-error" class="hidden"></div>
+  <script>
+    // Mostra na tela qualquer erro de carregamento (útil para descobrir problemas no celular).
+    (function () {
+      function show(msg) {
+        var el = document.getElementById('boot-error');
+        el.textContent = msg + '
+
+Navegador: ' + navigator.userAgent;
+        el.className = '';
+      }
+      window.__bootError = show;
+      window.addEventListener('error', function (e) {
+        // Depois de carregado, só mostra erros do próprio jogo.
+        if (window.__theusReady && String(e.filename || '').indexOf('/src/') < 0) return;
+        show('Erro: ' + e.message + ' (' + String(e.filename || '').split('/').pop() + ':' + e.lineno + ')');
+      });
+      window.addEventListener('unhandledrejection', function (e) {
+        if (window.__theusReady) return;
+        show('Erro: ' + (e.reason && e.reason.message ? e.reason.message : e.reason));
+      });
+      setTimeout(function () {
+        if (!window.__theusReady) show('O jogo não terminou de carregar. Atualize a página; se continuar, o navegador do celular pode estar desatualizado.');
+      }, 8000);
+    })();
+  </script>
+  <script nomodule>window.__bootError('Este navegador é antigo demais para o jogo. Atualize o Chrome ou o Safari do celular.');</script>
   <script type="module" src="src/main.js"></script>
 </body>
 </html>
