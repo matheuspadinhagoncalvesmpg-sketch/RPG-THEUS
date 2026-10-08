@@ -324,10 +324,23 @@ wss.on('connection', (ws) => {
                 type: 'monster_killed',
                 monsterId: m.id,
                 isBoss: !!m.isBoss,
+                monsterType: m.type,
                 expReward: m.expReward,
                 goldReward: m.goldReward,
-                killerName: data.killerName
+                killerName: data.killerName,
+                killerId: playerId
               });
+
+              // Remove o monstro morto e faz ele renascer depois (mundo aberto)
+              const deadIdx = currentList.indexOf(m);
+              if (deadIdx !== -1) currentList.splice(deadIdx, 1);
+              if (ws.currentFloor === 0) {
+                const template = { ...m, hp: m.maxHp, id: monsterCounter++ };
+                setTimeout(() => {
+                  monsters.push(template);
+                  broadcastToFloor({ type: 'monster_spawned', monster: template }, 0);
+                }, m.isBoss ? 180000 : 25000);
+              }
             }
           }
           break;
