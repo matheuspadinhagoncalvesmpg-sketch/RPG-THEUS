@@ -27,6 +27,7 @@
       <div class="hud-col">
         <div id="masks"></div>
         <div id="geo"><span class="geo-ico"></span><span id="geo-n">0</span></div>
+        <div id="ai-badge" class="hidden"></div>
       </div>
     </div>
     <div class="hud-right">
@@ -107,6 +108,21 @@
       <p class="shop-geo"><span class="geo-ico"></span><span id="shop-geo">0</span></p>
       <div id="shop-list"></div>
       <button id="btn-shop-close" class="menu-btn subtle">Sair</button>
+    </div>
+  </div>
+
+  <div id="npc-chat" class="overlay hidden">
+    <div class="panel chat-panel">
+      <h3 id="chat-name"></h3>
+      <div id="chat-log"></div>
+      <form id="chat-form">
+        <input id="chat-input" type="text" maxlength="120" placeholder="Pergunte algo..." autocomplete="off" enterkeyhint="send">
+        <button type="submit" class="menu-btn">Enviar</button>
+      </form>
+      <div class="chat-actions">
+        <button id="chat-shop" type="button" class="menu-btn hidden">Ver loja</button>
+        <button id="chat-close" type="button" class="menu-btn subtle">Sair</button>
+      </div>
     </div>
   </div>
 

@@ -73,7 +73,7 @@ export class Crawler extends Enemy {
     this.t++;
     if (this.flash > 0) this.flash--;
     if (this.knockback(game)) return;
-    this.vx = this.dir * 0.9;
+    this.vx = this.dir * 0.9 * game.ai.tactics.speed;
     if (this.onGround && (!groundAhead(this, game.room, game.world, this.dir) || wallAhead(this, game.room, game.world, this.dir, true))) this.dir *= -1;
     this.fallStep(game);
   }
@@ -110,13 +110,14 @@ export class Hopper extends Enemy {
     if (this.knockback(game)) return;
     if (this.onGround) {
       this.vx = approach(this.vx, 0, 0.4);
+      const T = game.ai.tactics;
       this.wait--;
-      if (this.wait <= 0 && this.dist(game) < 300) {
+      if (this.wait <= 0 && this.dist(game) < 200 + T.aggression * 180) {
         this.dir = this.toward(game);
-        this.vx = this.dir * 2.9;
+        this.vx = this.dir * 2.9 * T.speed;
         this.vy = -8.6;
         this.onGround = false;
-        this.wait = rand(45, 85);
+        this.wait = rand(45, 85) * T.cooldown;
       } else if (this.wait <= 0) this.wait = 20;
     }
     const hit = this.fallStep(game);
@@ -156,10 +157,22 @@ export class Flyer extends Enemy {
     if (this.flash > 0) this.flash--;
     if (this.knockback(game)) return;
     const p = game.player;
+    const T = game.ai.tactics;
     const d = this.dist(game);
-    let tx, ty, acc = 0.12, max = 2.3;
-    if (d < 300 && !p.dead) { tx = p.cx; ty = p.cy - 8; }
-    else { tx = this.home.x + Math.sin(this.t * 0.02) * 30; ty = this.home.y + Math.sin(this.t * 0.05) * 10; acc = 0.05; max = 1; }
+    let tx, ty, acc = 0.12, max = 2.3 * T.speed;
+    const range = T.tactic === 'ambush' ? 170 : 220 + T.aggression * 120;
+    if (d < range && !p.dead) {
+      if (this.side == null) this.side = this.cx < p.cx ? -1 : 1;
+      this.diveTimer = (this.diveTimer ?? 90) - 1;
+      const diving = this.diveTimer < 0;
+      if (this.diveTimer < -40) this.diveTimer = 70 + 60 * T.cooldown;
+      if (T.tactic === 'flank' && !diving) { tx = p.cx + this.side * 80; ty = p.cy - 50; }
+      else if (T.tactic === 'kite' && !diving) {
+        // Fica fora do alcance da lâmina e mergulha de vez em quando.
+        const away = d < 130 ? -1 : 1;
+        tx = this.cx + (p.cx - this.cx) * away; ty = p.cy - 70;
+      } else { tx = p.cx; ty = p.cy - 8; if (T.tactic === 'ambush' || diving) max *= 1.3; }
+    } else { tx = this.home.x + Math.sin(this.t * 0.02) * 30; ty = this.home.y + Math.sin(this.t * 0.05) * 10; acc = 0.05; max = 1; this.side = null; }
     const dx = tx - this.cx, dy = ty - this.cy, dd = Math.hypot(dx, dy) || 1;
     this.vx = clamp(this.vx + (dx / dd) * acc, -max, max);
     this.vy = clamp(this.vy + (dy / dd) * acc + Math.sin(this.t * 0.15) * 0.05, -max, max);
@@ -202,9 +215,9 @@ export class Spitter extends Enemy {
         game.spawnProjectile(new Projectile(this.cx + this.dir * 8, this.y + 6, clamp(dx / 42, -4.2, 4.2), -5.6,
           { kind: 'blob', grav: 0.22, r: 6, life: 160 }));
         game.audio.play('spit');
-        this.cool = rand(90, 130);
+        this.cool = rand(90, 130) * game.ai.tactics.cooldown;
       }
-    } else if (--this.cool <= 0 && this.dist(game) < 360 && !p.dead) this.wind = 28;
+    } else if (--this.cool <= 0 && this.dist(game) < (game.ai.tactics.tactic === 'ambush' ? 220 : 360) && !p.dead) this.wind = 28;
   }
   draw(ctx, pal) {
     const swell = this.wind > 0 ? 1 + (1 - this.wind / 28) * 0.25 : 1 + Math.sin(this.t * 0.06) * 0.03;
@@ -232,12 +245,15 @@ export class Guard extends Enemy {
     if (this.flash > 0) this.flash--;
     if (this.knockback(game)) return;
     const p = game.player;
+    const T = game.ai.tactics;
     const dx = p.cx - this.cx, dy = Math.abs(p.cy - this.cy);
     switch (this.state) {
       case 'patrol':
-        this.vx = this.dir * 0.7;
+        this.vx = this.dir * 0.7 * T.speed;
         if (this.onGround && (!groundAhead(this, game.room, game.world, this.dir) || wallAhead(this, game.room, game.world, this.dir, true))) this.dir *= -1;
-        if (Math.abs(dx) < 200 && dy < 60 && !p.dead) { this.dir = sign(dx) || 1; this.state = 'wind'; this.timer = 26; this.vx = 0; }
+        if (Math.abs(dx) < 150 + T.aggression * 100 && dy < 60 && !p.dead) {
+          this.dir = sign(dx) || 1; this.state = 'wind'; this.timer = Math.round(26 * (1.2 - T.aggression * 0.4)); this.vx = 0;
+        }
         break;
       case 'wind':
         this.vx = 0;
@@ -247,7 +263,7 @@ export class Guard extends Enemy {
         this.vx = this.dir * 7.2;
         if (this.t % 2 === 0) game.particles.dust(this.cx, this.y + this.h, -this.dir, 1);
         if (--this.timer <= 0 || wallAhead(this, game.room, game.world, this.dir, true) || !groundAhead(this, game.room, game.world, this.dir)) {
-          this.state = 'recover'; this.timer = 38;
+          this.state = 'recover'; this.timer = Math.round(38 * T.cooldown);
         }
         break;
       case 'recover':

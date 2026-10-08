@@ -7,6 +7,7 @@ import { BOSS_TYPES } from './bosses.js';
 import { spawnRoomEntities, GeoCoin, ShadeEcho, GeoRock } from './entities.js';
 import { Particles } from './fx.js';
 import { Renderer } from './render.js';
+import { AIDirector } from './ai.js';
 import { writeSave } from './save.js';
 import { overlap, sign, clamp, rand } from './util.js';
 
@@ -21,6 +22,7 @@ export class Game {
     this.ui = ui;
     this.particles = new Particles();
     this.player = new Player();
+    this.bubbles = [];
     this.cam = { x: 0, y: 0 };
     this.shakeMag = 0;
     this.state = 'off';
@@ -28,7 +30,10 @@ export class Game {
     this.raf = null;
     this.onExit = null;
     this.onEnding = null;
-    window.addEventListener('resize', () => { this.renderer.resize(); this.updateCamera(true); });
+    const onResize = () => { this.renderer.resize(); this.updateCamera(true); };
+    window.addEventListener('resize', onResize);
+    window.addEventListener('orientationchange', () => setTimeout(onResize, 300));
+    document.addEventListener('fullscreenchange', () => setTimeout(onResize, 100));
   }
 
   // ───────── Início ─────────
@@ -39,6 +44,7 @@ export class Game {
     this.masks = save.masksMax;
     this.soul = 0;
     this.lastArea = null;
+    if (!this.ai) this.ai = new AIDirector(this);
     this.ui.resetHud();
     this.ui.refreshButtons(save.abilities);
     this.respawn(true);
@@ -101,6 +107,8 @@ export class Game {
     this.hostileBoxes = [];
     this.particles.clear();
     this.spikeTimer = 0;
+    this.bubbles = [];
+    this.ai.onRoomEnter();
 
     const p = this.player;
     const keep = { vx: p.vx, vy: p.vy, facing: p.facing, airDash: p.airDash, canDouble: p.canDouble, dashTimer: p.dashTimer, dashDir: p.dashDir, jumpHeld: p.jumpHeld };
@@ -156,9 +164,15 @@ export class Game {
     if (dt > 250) dt = 250;
     this.acc += dt;
     let steps = 0;
-    while (this.acc >= STEP && steps < 5) { this.step(); this.acc -= STEP; steps++; }
-    if (steps === 5) this.acc = 0;
-    if (this.state !== 'off') this.render();
+    try {
+      while (this.acc >= STEP && steps < 5) { this.step(); this.acc -= STEP; steps++; }
+      if (steps === 5) this.acc = 0;
+      if (this.state !== 'off') this.render();
+    } catch (e) {
+      // Um erro num quadro não pode congelar o jogo inteiro: registra e segue.
+      console.error(e);
+      if (!this.errorShown) { this.errorShown = true; this.ui.toast('Erro: ' + e.message, 6000); }
+    }
   }
 
   step() {
@@ -187,6 +201,9 @@ export class Game {
         break;
       case 'shop':
         if (inp.pressed.pause) this.closeShop();
+        break;
+      case 'chat':
+        if (inp.pressed.pause) this.closeChat();
         break;
       case 'dead':
         this.deathTimer--;
@@ -244,6 +261,10 @@ export class Game {
       if (!e.dead && e.state !== 'intro' && (e.alpha == null || e.alpha > 0.5) && overlap(hb, e)) this.damagePlayer(e.contact, e.cx);
     for (const b of this.hostileBoxes) if (overlap(hb, b)) this.damagePlayer(1, b.x + b.w / 2);
 
+    this.ai.update();
+    for (const b of this.bubbles) b.t--;
+    this.bubbles = this.bubbles.filter((b) => b.t > 0 && !b.target.dead);
+
     this.updateInteract();
     if (this.state !== 'play') return;
     this.checkExit();
@@ -269,6 +290,7 @@ export class Game {
       const kx = dir === 'side' ? p.facing : sign(e.cx - p.cx) * 0.4;
       const ky = dir === 'up' ? -1 : dir === 'down' ? 1 : 0;
       e.hurt(this, this.save.nail, kx, ky);
+      if (!enemyHit) this.ai.record(dir);
       enemyHit = true;
       if (dir === 'down') pogo = true;
       this.soul = Math.min(SOUL_MAX, this.soul + SOUL_PER_HIT);
@@ -380,6 +402,7 @@ export class Game {
     const p = this.player;
     if (p.invuln > 0 || p.dead || this.state !== 'play' || this.spikeTimer > 0) return;
     this.masks -= dmg;
+    this.ai.record('hurt');
     p.hurt(fromX);
     this.hitstop(9);
     this.shake(9);
@@ -408,6 +431,7 @@ export class Game {
 
   heal() {
     this.soul -= SOUL_COST;
+    this.ai.record('heal');
     this.masks = Math.min(this.save.masksMax, this.masks + 1);
     this.audio.play('heal');
     this.input.vibrate(30);
@@ -420,6 +444,7 @@ export class Game {
     const p = this.player;
     p.dead = true;
     this.state = 'dead';
+    this.ai.onDeath(this.room.id);
     this.deathTimer = 110;
     this.audio.play('death');
     this.input.vibrate(200);
@@ -498,7 +523,8 @@ export class Game {
     this.showDialog(npc.data.name, lines, () => {
       this.save.talked[npc.id] = true;
       this.persist();
-      if (npc.data.shop) this.openShop();
+      if (this.ai.enabled) this.openChat(npc);
+      else if (npc.data.shop) this.openShop();
     });
   }
 
@@ -561,6 +587,7 @@ export class Game {
     this.shake(6);
     this.ui.bossTitle(boss.title, boss.subtitle);
     this.audio.intense = true;
+    this.ai.onBossStart();
   }
 
   onBossDefeated(key) {
@@ -608,6 +635,50 @@ export class Game {
     this.state = 'play';
   }
 
+  // ───────── Conversa livre (Gemini) ─────────
+  openChat(npc) {
+    this.state = 'chat';
+    document.body.classList.add('menu-open');
+    this.ui.openChat(npc, this.ai.histories[npc.id] || [], {
+      send: (text) => this.ai.npcReply(npc.id, text),
+      shop: npc.data.shop ? () => { this.closeChat(); this.openShop(); } : null,
+      close: () => this.closeChat(),
+      sound: () => this.audio.play('talk'),
+    });
+  }
+
+  closeChat() {
+    this.ui.closeChat();
+    document.body.classList.remove('menu-open');
+    if (this.state === 'chat') this.state = 'play';
+  }
+
+  // Balão de fala acima de um inimigo/chefe (falas geradas pela IA).
+  say(target, text) {
+    if (this.frame - (this.lastSay || -999) < 480) return;
+    this.lastSay = this.frame;
+    this.bubbles = [{ target, text, t: 240 }];
+  }
+
+  drawBubbles(ctx) {
+    for (const b of this.bubbles) {
+      const e = b.target;
+      const a = Math.min(1, b.t / 30, (240 - b.t) / 15);
+      ctx.save();
+      ctx.globalAlpha = a;
+      ctx.font = 'italic 600 11px "Cormorant Garamond", serif';
+      ctx.textAlign = 'center';
+      const w = Math.min(260, ctx.measureText(b.text).width + 16);
+      const x = Math.max(w / 2 + 4, Math.min(this.room.pxW - w / 2 - 4, e.cx));
+      const y = e.y - 34;
+      ctx.fillStyle = 'rgba(8,6,12,0.82)';
+      ctx.fillRect(x - w / 2, y - 12, w, 18);
+      ctx.fillStyle = '#ffd36e';
+      ctx.fillText(b.text, x, y + 1, w - 10);
+      ctx.restore();
+    }
+  }
+
   // ───────── Câmera ─────────
   updateCamera(snap) {
     if (!this.room) return;
@@ -622,7 +693,8 @@ export class Game {
     let ty = p.cy - vh * 0.55 + this.lookY;
     tx = room.pxW <= vw ? (room.pxW - vw) / 2 : clamp(tx, 0, room.pxW - vw);
     ty = room.pxH <= vh ? (room.pxH - vh) / 2 : clamp(ty, 0, room.pxH - vh);
-    if (snap) { this.cam.x = tx; this.cam.y = ty; }
+    if (!isFinite(tx) || !isFinite(ty)) return;
+    if (snap || !isFinite(this.cam.x) || !isFinite(this.cam.y)) { this.cam.x = tx; this.cam.y = ty; }
     else {
       this.cam.x += (tx - this.cam.x) * 0.1;
       this.cam.y += (ty - this.cam.y) * (p.vy > 6 ? 0.25 : 0.12);
@@ -653,6 +725,7 @@ export class Game {
     for (const pr of this.projectiles) pr.draw(ctx);
     this.particles.draw(ctx);
     r.drawAmbient(ctx, this);
+    this.drawBubbles(ctx);
     if (this.interactTarget && !this.input.touchMode && this.state === 'play') this.drawPrompt(ctx, this.interactTarget);
     r.drawLighting(this, camX, camY);
 

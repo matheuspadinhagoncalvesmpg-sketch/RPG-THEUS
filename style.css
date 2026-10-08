@@ -423,3 +423,28 @@ body.menu-open #touch-ui { display: none !important; }
   background: #0b0812; color: #f4efe6; padding: 24px; white-space: pre-wrap;
   font: 15px/1.4 monospace; overflow: auto; user-select: text; -webkit-user-select: text;
 }
+
+/* IA Gemini */
+#ai-badge {
+  font-family: var(--serif); font-size: 11px; letter-spacing: 0.08em; color: #ffd36e;
+  background: rgba(10, 8, 16, 0.55); border: 1px solid rgba(255, 211, 110, 0.35);
+  padding: 2px 8px; border-radius: 10px; align-self: flex-start;
+}
+#npc-chat { align-items: start; }
+.chat-panel { width: min(560px, 100%); text-align: left; display: flex; flex-direction: column; max-height: 100%; }
+#chat-name { font-family: var(--serif); color: var(--gold); letter-spacing: 0.08em; margin-bottom: 6px; }
+#chat-log { flex: 1; min-height: 60px; max-height: 38vh; overflow-y: auto; touch-action: pan-y; margin-bottom: 8px; }
+#chat-log p { font-size: 18px; line-height: 1.3; margin: 5px 0; }
+.chat-player { color: var(--ink-dim); font-style: italic; text-align: right; }
+.chat-npc { color: var(--ink); }
+.chat-hint { color: var(--ink-dim); font-size: 15px !important; font-style: italic; }
+#chat-form { display: flex; gap: 8px; }
+#chat-form .menu-btn { width: auto; margin: 0; }
+#chat-input {
+  flex: 1; min-width: 0; padding: 9px 12px; font-family: var(--text); font-size: 18px; color: var(--ink);
+  background: rgba(244, 239, 230, 0.06); border: 1px solid var(--line); border-radius: 3px; outline: none;
+  user-select: text; -webkit-user-select: text; touch-action: manipulation;
+}
+#chat-input:focus { border-color: var(--gold); }
+.chat-actions { display: flex; gap: 8px; }
+.chat-actions .menu-btn { margin: 6px 0 0; }

@@ -2,6 +2,7 @@
 import { AREAS, TILE, T, SOUL_MAX } from './config.js';
 import { SHOP_ITEMS } from './dialog.js';
 import { rgba } from './util.js';
+import { TACTIC_NAMES } from './ai.js';
 
 const $ = (s) => document.querySelector(s);
 
@@ -26,6 +27,13 @@ export class UI {
     this.shopScreen = $('#shop-screen');
     this.last = {};
     this.dialog = null;
+    this.aiBadge = $('#ai-badge');
+    this.chatEl = $('#npc-chat');
+    this.chatLog = $('#chat-log');
+    this.chatInput = $('#chat-input');
+    $('#chat-form').addEventListener('submit', (e) => { e.preventDefault(); this.sendChat(); });
+    $('#chat-close').addEventListener('click', () => this.chat && this.chat.close());
+    $('#chat-shop').addEventListener('click', () => this.chat && this.chat.shop && this.chat.shop());
   }
 
   show(el, on = true) { el.classList.toggle('hidden', !on); }
@@ -53,6 +61,13 @@ export class UI {
     if (this.last.geo !== s.geo) { this.last.geo = s.geo; this.geoEl.textContent = s.geo; }
     const boss = game.boss && !game.boss.dead ? game.boss : null;
     this.show(this.bossBar, !!boss && boss.state !== 'intro');
+    const t = game.ai.tactics;
+    const badge = t.source === 'gemini' && game.enemies.length ? `✦ Gemini · ${TACTIC_NAMES[t.tactic] || t.tactic}` : '';
+    if (this.last.badge !== badge) {
+      this.last.badge = badge;
+      this.aiBadge.textContent = badge;
+      this.show(this.aiBadge, !!badge);
+    }
     if (boss) this.bossFill.style.transform = `scaleX(${Math.max(0, boss.hp / boss.maxHp)})`;
   }
 
@@ -201,6 +216,54 @@ export class UI {
     mark(game.room.x + p.cx / TILE, game.room.y + p.cy / TILE, '#ff3b4f', 5);
     mark(game.room.x + p.cx / TILE, game.room.y + p.cy / TILE, '#ffffff', 2);
     $('#map-room').textContent = `${AREAS[game.room.area].name} — ${game.room.name}`;
+  }
+
+  // ───── Conversa livre com personagens (Gemini) ─────
+  openChat(npc, history, handlers) {
+    this.chat = handlers;
+    $('#chat-name').textContent = npc.data.name;
+    this.chatLog.innerHTML = '';
+    for (const h of history) this.addChatLine(h.who, h.text);
+    if (!history.length) this.addChatLine('hint', 'Escreva qualquer coisa para conversar.');
+    this.show($('#chat-shop'), !!handlers.shop);
+    this.chatInput.value = '';
+    this.chatInput.disabled = false;
+    this.show(this.chatEl);
+    if (!document.body.classList.contains('touch-mode')) this.chatInput.focus();
+  }
+
+  closeChat() {
+    this.chatInput.blur();
+    this.show(this.chatEl, false);
+    this.chat = null;
+  }
+
+  addChatLine(who, text) {
+    const el = document.createElement('p');
+    el.className = 'chat-' + who;
+    el.textContent = text;
+    this.chatLog.appendChild(el);
+    this.chatLog.scrollTop = this.chatLog.scrollHeight;
+    return el;
+  }
+
+  async sendChat() {
+    const text = this.chatInput.value.trim().slice(0, 120);
+    if (!text || !this.chat || this.chatInput.disabled) return;
+    const chat = this.chat;
+    this.chatInput.value = '';
+    this.chatInput.disabled = true;
+    this.addChatLine('player', text);
+    const wait = this.addChatLine('npc', '...');
+    try {
+      wait.textContent = await chat.send(text);
+      chat.sound();
+    } catch (e) {
+      wait.textContent = '(parece distraído e não respondeu... tente de novo)';
+    }
+    this.chatInput.disabled = false;
+    this.chatLog.scrollTop = this.chatLog.scrollHeight;
+    if (!document.body.classList.contains('touch-mode') && this.chat) this.chatInput.focus();
   }
 
   // ───── Loja ─────

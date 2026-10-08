@@ -15,12 +15,18 @@ export class Renderer {
     this.chunks = new Map();
     this.layers = {};
     this.ambient = [];
+    this.scale = 1;
+    this.viewW = VIEW_H * 16 / 9;
+    this.viewH = VIEW_H;
     this.resize();
   }
 
   resize() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const cssW = window.innerWidth, cssH = window.innerHeight;
+    // Celulares às vezes informam tamanho 0 por um instante (tela cheia, rotação,
+    // barra de endereço). Ignora esse momento em vez de gerar escala 0/NaN.
+    if (!(cssW > 0 && cssH > 0)) return;
     let bh = Math.round(cssH * dpr);
     let scale = bh / VIEW_H;
     if (scale > MAX_RENDER_SCALE) { scale = MAX_RENDER_SCALE; bh = Math.round(VIEW_H * scale); }

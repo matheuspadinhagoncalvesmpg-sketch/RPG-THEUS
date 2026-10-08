@@ -37,7 +37,11 @@ class Boss extends Enemy {
     game.dropGeo(this.cx, this.cy, this.geo);
     game.onBossDefeated(this.key);
   }
-  idle(frames) { this.state = 'idle'; this.timer = Math.round(frames * (this.phase2 ? 0.65 : 1)); }
+  idle(frames, game) {
+    const cd = game ? game.ai.tactics.cooldown : 1;
+    this.state = 'idle';
+    this.timer = Math.round(frames * (this.phase2 ? 0.65 : 1) * cd);
+  }
   face(game) { this.facing = sign(game.player.cx - this.cx) || this.facing; }
   gravityStep(game, g = 0.6) {
     this.vy = Math.min(this.vy + g, 13);
@@ -65,7 +69,7 @@ export class MossKnight extends Boss {
       case 'intro':
         this.face(game);
         if (this.timer === 70) game.audio.play('roar');
-        if (--this.timer <= 0) this.idle(40);
+        if (--this.timer <= 0) this.idle(40, game);
         break;
       case 'idle': {
         this.vx = approach(this.vx, 0, 0.5);
@@ -73,8 +77,9 @@ export class MossKnight extends Boss {
         if (--this.timer > 0) break;
         const far = Math.abs(p.cx - this.cx) > 190;
         const r = Math.random();
-        if (far) this.start(r < 0.5 ? 'chargeWind' : 'leap', game);
-        else this.start(r < 0.45 ? 'approach' : r < 0.75 ? 'leap' : 'chargeWind', game);
+        const choice = game.ai.pick(['charge', 'leap', 'combo'], () =>
+          far ? (r < 0.5 ? 'charge' : 'leap') : r < 0.45 ? 'combo' : r < 0.75 ? 'leap' : 'charge');
+        this.start({ charge: 'chargeWind', leap: 'leap', combo: 'approach' }[choice], game);
         break;
       }
       case 'chargeWind':
@@ -96,7 +101,7 @@ export class MossKnight extends Boss {
         break;
       case 'stun':
         this.vx = 0;
-        if (--this.timer <= 0) this.idle(30);
+        if (--this.timer <= 0) this.idle(30, game);
         break;
       case 'leap':
         if (this.onGround && this.vy >= 0 && this.timer-- <= 0) {
@@ -108,7 +113,7 @@ export class MossKnight extends Boss {
             for (const d of [-1, 1])
               game.spawnProjectile(new Projectile(this.cx + d * 24, this.y + this.h - 12, d * (5 + i * 2), 0, { kind: 'wave', r: 9, life: 110, ground: true }));
           game.particles.dust(this.cx, this.y + this.h, 0, 14);
-          this.idle(50);
+          this.idle(50, game);
         }
         break;
       case 'approach':
@@ -125,7 +130,7 @@ export class MossKnight extends Boss {
         game.hostileBox({ x: this.facing > 0 ? this.cx : this.cx - 74, y: this.y - 6, w: 74, h: this.h + 6 });
         if (--this.timer <= 0) {
           if (--this.swings > 0) { this.face(game); this.state = 'swingWind'; this.timer = p2 ? 9 : 13; }
-          else this.idle(55);
+          else this.idle(55, game);
         }
         break;
     }
@@ -220,7 +225,7 @@ export class HollowKing extends Boss {
       case 'intro':
         this.face(game);
         if (this.timer === 70) game.audio.play('roar');
-        if (--this.timer <= 0) this.idle(40);
+        if (--this.timer <= 0) this.idle(40, game);
         break;
       case 'idle': {
         this.vx = approach(this.vx, 0, 0.4);
@@ -228,7 +233,7 @@ export class HollowKing extends Boss {
         if (--this.timer > 0) break;
         const opts = ['tele', 'orbs', 'dive'];
         if (Math.abs(p.cx - this.cx) < 120) opts.push('tele');
-        this.begin(pick(opts), game);
+        this.begin(game.ai.pick(['tele', 'orbs', 'dive'], () => pick(opts)), game);
         break;
       }
       case 'teleOut':
@@ -254,7 +259,7 @@ export class HollowKing extends Boss {
         game.hostileBox({ x: this.facing > 0 ? this.cx - 10 : this.cx - 110, y: this.y - 10, w: 120, h: this.h + 10 });
         if (--this.timer <= 0) {
           if (p2 && this.combo-- > 0) this.begin('tele', game, true);
-          else this.idle(48);
+          else this.idle(48, game);
         }
         break;
       case 'rise':
@@ -278,7 +283,7 @@ export class HollowKing extends Boss {
         }
         break;
       case 'fall':
-        if (this.onGround) this.idle(40);
+        if (this.onGround) this.idle(40, game);
         break;
       case 'diveOut':
         this.alpha = this.timer / 14;
@@ -305,7 +310,7 @@ export class HollowKing extends Boss {
             game.spawnProjectile(new Projectile(this.cx + d * 20, this.y + this.h - 12, d * (p2 ? 6.5 : 5), 0, { kind: 'wave', r: 9, life: 110, ground: true }));
           game.particles.dust(this.cx, this.y + this.h, 0, 16);
           if (p2 && this.combo-- > 0) this.begin('dive', game, true);
-          else this.idle(50);
+          else this.idle(50, game);
         }
         break;
     }

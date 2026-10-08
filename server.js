@@ -1,12 +1,16 @@
 // Servidor estático simples para jogar localmente ou hospedar (Hostinger, Render...).
-// O jogo é 100% client-side: também funciona em qualquer hospedagem estática.
+// Também responde às rotas da IA Gemini (/api/ai/*). Sem chave, o jogo funciona offline.
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { loadEnv, handleAI } from './ai_server.js';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
+loadEnv(ROOT);
 const PORT = process.env.PORT || process.argv[2] || 3000;
+// Arquivos que nunca devem ser servidos (a chave da IA fica no .env).
+const PRIVATE = /(^|\/)\.|^\/(server|ai_server)\.js$|^\/(tools|node_modules)\//;
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -20,10 +24,12 @@ const MIME = {
 };
 
 const server = http.createServer((req, res) => {
-  let url = decodeURIComponent(req.url.split('?')[0]);
+  if (handleAI(req, res)) return;
+  let url;
+  try { url = decodeURIComponent(req.url.split('?')[0]); } catch (e) { res.writeHead(400); return res.end(); }
   if (url === '/') url = '/index.html';
   const file = path.join(ROOT, url);
-  if (!file.startsWith(ROOT + path.sep) || url.startsWith('/tools/') || url.startsWith('/node_modules/')) {
+  if (!file.startsWith(ROOT + path.sep) || PRIVATE.test(url)) {
     res.writeHead(403);
     return res.end('Proibido');
   }
@@ -42,4 +48,5 @@ const server = http.createServer((req, res) => {
 
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`THEUS: Ecos de Vésper rodando em http://localhost:${PORT}`);
+  console.log(`IA Gemini: ${process.env.GEMINI_API_KEY ? 'ligada' : 'desligada (defina GEMINI_API_KEY)'}`);
 });

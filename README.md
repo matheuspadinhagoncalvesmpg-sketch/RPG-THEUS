@@ -53,13 +53,23 @@ No celular dá para **deslizar o dedo** de um botão para outro (por exemplo, do
 
 ---
 
+## 🧠 IA Gemini
+
+Com a variável `GEMINI_API_KEY` no servidor (veja `.env.example`):
+- **Personagens vivos**: depois das falas, você conversa em texto livre com Oren, Mira e o Eco. Eles respondem no personagem, sabendo do seu progresso, e dão dicas do próximo passo.
+- **Diretor tático dos inimigos**: a cada poucos segundos o Gemini analisa como você joga (vida, mortes na sala, se usa pogo, dash, distância) e define a estratégia da sala: agressividade, velocidade, intervalo entre ataques e tática (*enxame*, *flanco*, *distância*, *emboscada*). Também escolhe quais ataques os chefes priorizam e escreve as provocações deles.
+- O movimento quadro a quadro continua local (a IA leva cerca de 1 s para responder). Sem chave ou sem internet, um diretor local faz o mesmo papel com regras fixas.
+
+---
+
 ## 🧩 Estrutura do código
 
 ```
 index.html        telas e interface
 style.css         visual e layout (adaptado a celular, com safe-area)
 sw.js             cache offline (PWA)
-server.js         servidor estático simples (sem dependências)
+server.js         servidor (arquivos + rotas da IA), sem dependências
+ai_server.js      integração com o Gemini (chave só no servidor)
 src/
   main.js         título, criação do herói, opções
   game.js         núcleo: salas, transições, combate, câmera
@@ -72,6 +82,7 @@ src/
   physics.js      colisão
   render.js       fundo em paralaxe, blocos, luz
   art.js          desenho vetorial do herói e objetos
+  ai.js           diretor tático e conversa com personagens (cliente)
   input.js        teclado, controle e toque multitoque
   audio.js        efeitos e música sintetizados
   ui.js           HUD, diálogos, mapa, loja

@@ -89,6 +89,7 @@ export class Player {
       if (!this.onGround) this.airDash = false;
       this.vy = 0; this.wallSliding = false; this.attackTimer = 0;
       game.audio.play('dash');
+      game.ai.record('dash');
       game.particles.dust(this.cx, this.y + this.h, -dir, 8, 'rgba(230,240,255,0.5)');
     }
 
