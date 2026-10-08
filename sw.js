@@ -1,16 +1,17 @@
-const CACHE_NAME = 'rpg-ooo-v1';
+const CACHE_NAME = 'rpg-ooo-v3';
 const ASSETS = [
-  '/',
-  '/index.html',
-  '/style.css',
-  '/game.js',
-  '/manifest.json',
-  '/icon.svg'
+  './',
+  './index.html',
+  './style.css',
+  './game.js',
+  './local_server.js',
+  './manifest.json',
+  './icon.svg'
 ];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)).catch(() => {})
   );
   self.skipWaiting();
 });
@@ -26,12 +27,16 @@ self.addEventListener('activate', (e) => {
   self.clients.claim();
 });
 
+// Rede primeiro (sempre a versão mais nova); se estiver offline, usa o cache.
 self.addEventListener('fetch', (e) => {
-  // Ignora requisições WebSocket
-  if (e.request.url.startsWith('ws:') || e.request.url.startsWith('wss:')) {
-    return;
-  }
+  if (e.request.method !== 'GET' || !e.request.url.startsWith('http')) return;
   e.respondWith(
-    fetch(e.request).catch(() => caches.match(e.request))
+    fetch(e.request).then((res) => {
+      if (res && res.ok && new URL(e.request.url).origin === self.location.origin) {
+        const copy = res.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(e.request, copy));
+      }
+      return res;
+    }).catch(() => caches.match(e.request))
   );
 });
