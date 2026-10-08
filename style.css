@@ -1383,3 +1383,90 @@ body {
 
 .touch-dash-btn { width: 48px !important; height: 48px !important; background: #38bdf8; font-size: 22px !important; }
 .touch-btn.cooling { filter: grayscale(1) brightness(0.8); }
+
+/* =========================================================
+   ABISMO DE OOO (modo plataforma estilo Hollow Knight)
+   ========================================================= */
+.mode-divider { text-align: center; margin: 12px 0 8px; color: #64748b; font-size: 13px; }
+.hk-start-btn {
+  background: linear-gradient(#1f1b3a, #0d0a1e) !important;
+  color: #e8eef9 !important;
+  border-color: #6d5cae !important;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+.hk-start-btn small { font-size: 11px; font-weight: 400; color: #a5b4fc; letter-spacing: 0.3px; }
+
+body.hk-active { padding: 0; background: #000; min-height: 100dvh; }
+body.hk-active #game-container {
+  width: 100vw; max-width: 100vw; height: 100vh; height: 100dvh;
+  border: none; border-radius: 0; box-shadow: none; background: #000;
+}
+#hk-screen { position: relative; width: 100%; height: 100%; background: #000; overflow: hidden; }
+#hk-canvas {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: contain; image-rendering: pixelated; image-rendering: crisp-edges;
+  touch-action: none;
+}
+.hk-topbtns { position: absolute; top: 8px; right: 8px; display: flex; gap: 8px; z-index: 30; }
+.hk-topbtns button {
+  width: 38px; height: 38px; border-radius: 10px; border: 2px solid rgba(255,255,255,0.35);
+  background: rgba(10,8,22,0.6); color: #e8eef9; font-size: 18px; cursor: pointer;
+}
+#hk-touch { position: absolute; inset: 0; z-index: 20; pointer-events: none; }
+#hk-touch.hidden { display: none !important; }
+#hk-joy-zone { position: absolute; left: 0; bottom: 0; width: 48%; height: 80%; pointer-events: auto; touch-action: none; }
+#hk-joy-base {
+  position: absolute; left: 24px; bottom: 24px; width: 110px; height: 110px; border-radius: 50%;
+  background: rgba(220,230,255,0.10); border: 2px solid rgba(255,255,255,0.35); opacity: 0.6;
+  display: flex; align-items: center; justify-content: center; transition: opacity .15s;
+}
+#hk-joy-base.active { opacity: 1; }
+#hk-joy-stick { width: 46px; height: 46px; border-radius: 50%; background: rgba(240,246,255,0.85); border: 2px solid #fff; pointer-events: none; }
+.hk-btn {
+  position: absolute; pointer-events: auto; touch-action: none; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.55); background: rgba(14,12,30,0.62); color: #fff;
+  display: flex; align-items: center; justify-content: center; font-family: inherit;
+  -webkit-tap-highlight-color: transparent; user-select: none; cursor: pointer;
+}
+.hk-btn.pressed { background: rgba(200,220,255,0.55); transform: scale(0.93); }
+.hk-jump   { right: 18px;  bottom: 18px;  width: 84px; height: 84px; font-size: 34px; background: rgba(70,110,200,0.55); }
+.hk-attack { right: 116px; bottom: 30px;  width: 74px; height: 74px; font-size: 30px; background: rgba(190,60,60,0.55); }
+.hk-dash   { right: 24px;  bottom: 116px; width: 56px; height: 56px; font-size: 24px; }
+.hk-spell  { right: 92px;  bottom: 120px; width: 54px; height: 54px; font-size: 22px; }
+.hk-focus  { right: 156px; bottom: 112px; width: 54px; height: 54px; font-size: 22px; }
+.hk-dash.locked { opacity: 0.25; }
+.hk-interact { right: auto; left: 50%; bottom: 20px; transform: translateX(-50%); border-radius: 22px; padding: 0 16px; height: 44px; font-size: 14px; font-weight: 700; background: rgba(250,220,120,0.85); color: #1a1030; }
+.hk-interact.hidden { display: none !important; }
+
+#hk-pause, #hk-bench {
+  position: absolute; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center;
+  background: rgba(2,1,8,0.82); padding: 10px;
+}
+#hk-pause.hidden, #hk-bench.hidden { display: none !important; }
+.hk-panel {
+  background: #0e0b1e; color: #e8eef9; border: 2px solid #6d5cae; border-radius: 12px;
+  padding: 16px 18px; width: min(440px, 100%); max-height: 100%; overflow-y: auto; text-align: center;
+  box-shadow: 0 0 40px rgba(120,100,220,0.35);
+}
+.hk-panel h3 { font-family: Georgia, serif; font-style: italic; font-size: 24px; margin-bottom: 8px; font-weight: 600; }
+#hk-pause-info div { margin: 6px 0; font-size: 14px; }
+.hk-keys { color: #94a3b8; font-size: 12px !important; }
+.hk-panel .adventure-action-btn { width: 100%; margin-top: 10px; }
+.hk-exit { background: #334155 !important; color: #e2e8f0 !important; }
+.hk-bench-sub { font-size: 13px; color: #cbd5e1; margin-bottom: 10px; }
+#hk-bench-items { display: grid; gap: 8px; }
+.hk-bench-item {
+  display: flex; align-items: center; gap: 10px; background: #19152f; color: #e8eef9;
+  border: 2px solid #4b4390; border-radius: 10px; padding: 10px; cursor: pointer; font-family: inherit; text-align: left;
+}
+.hk-bench-item .t { display: flex; flex-direction: column; flex: 1; font-size: 14px; }
+.hk-bench-item small { color: #94a3b8; font-size: 12px; }
+.hk-bench-item .c { color: #fcd34d; font-weight: 700; font-size: 13px; }
+.hk-bench-item.off { opacity: 0.45; }
+@media (max-height: 420px) {
+  .hk-jump { width: 72px; height: 72px; right: 14px; bottom: 12px; }
+  .hk-attack { width: 64px; height: 64px; right: 98px; bottom: 20px; }
+  .hk-dash { right: 18px; bottom: 96px; width: 48px; height: 48px; }
+  .hk-spell { right: 78px; bottom: 98px; width: 46px; height: 46px; }
+  .hk-focus { right: 134px; bottom: 92px; width: 46px; height: 46px; }
+}
