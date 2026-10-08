@@ -795,6 +795,11 @@ class GameEngine {
     this.openedChests = [];
     this.lastSave = 0;
     this.holdAttack = false;
+    this.dashTimer = 0;
+    this.dashCd = 0;
+    this.dashDir = { x: 0, y: 1 };
+    this.enemyProjectiles = [];
+    this.dayTime = 0;
 
     this.initWorldDecorations();
     this.initNPCs();
@@ -915,6 +920,7 @@ class GameEngine {
       () => { if (this.currentDialog) { this.closeDialog(); return; } this.holdAttack = true; this.performBasicAttack(); },
       () => { this.holdAttack = false; });
     bindButton('btn-touch-skill', () => this.performSpecialSkill());
+    bindButton('btn-touch-dash', () => this.performDash());
     bindButton('btn-touch-potion', () => this.usePotion());
     bindButton('btn-touch-sandwich', () => this.eatSandwich());
     bindButton('btn-touch-talk', () => this.talkToNpc(this.nearNpc));
@@ -1164,6 +1170,7 @@ class GameEngine {
         this.hero.y = data.dungeon.spawnPoint.y;
         this.portalCooldown = 2.5;
         this.projectiles = [];
+        this.enemyProjectiles = [];
         if (this.currentFloor > this.bestFloor) { this.bestFloor = this.currentFloor; this.checkQuestProgress(); }
         document.getElementById('hud-location-tag').innerText = `📍 Dungeon Infinita - Andar ${this.currentFloor}`;
         this.saveGame();
@@ -1181,6 +1188,7 @@ class GameEngine {
         this.hero.y = this.portal.y + 50;
         this.portalCooldown = 2.5;
         this.projectiles = [];
+        this.enemyProjectiles = [];
         this.currentBiome = '';
         this.saveGame();
         this.showBanner(`DE VOLTA A OOO`, `Superfície da Terra dos Doces`);
@@ -1450,6 +1458,15 @@ class GameEngine {
       });
     }
 
+    if (this.dashCd > 0) this.dashCd -= dt;
+    if (this.dashTimer > 0) {
+      this.dashTimer -= dt;
+      this.hero.x += this.dashDir.x * 640 * dt;
+      this.hero.y += this.dashDir.y * 640 * dt;
+      this.particles.push({ x: this.hero.x, y: this.hero.y + 8, vx: 0, vy: 0, color: '#e0f2fe', size: 5, life: 0.25 });
+    }
+    this.dayTime += dt;
+
     const len = Math.sqrt(dx * dx + dy * dy);
     if (len > 0.08) {
       const speedMult = this.sandwichBuffTimer > 0 ? 1.45 : 1.0;
@@ -1530,10 +1547,43 @@ class GameEngine {
     this.checkInteractions();
   }
 
+  updateEnemyProjectiles(dt) {
+    for (let i = this.enemyProjectiles.length - 1; i >= 0; i--) {
+      const p = this.enemyProjectiles[i];
+      p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt;
+      if (this.hero.hp > 0 && this.hero.invulnerableTimer <= 0 && Math.hypot(p.x - this.hero.x, p.y - this.hero.y) < p.radius + 12) {
+        this.damageHero(p.dmg);
+        p.life = 0;
+      }
+      if (p.life <= 0) this.enemyProjectiles.splice(i, 1);
+    }
+  }
+
+  bossRingAttack(m) {
+    const n = m.isBoss && m.hp < m.maxHp * 0.5 ? 16 : 10;
+    const off = Math.random() * Math.PI;
+    for (let k = 0; k < n; k++) {
+      const a = off + (k / n) * Math.PI * 2;
+      this.enemyProjectiles.push({
+        x: m.x, y: m.y, vx: Math.cos(a) * 150, vy: Math.sin(a) * 150,
+        radius: 7, dmg: Math.max(4, Math.round(m.atk * 0.6)), life: 2.8, color: m.color || '#c084fc'
+      });
+    }
+    this.screenShake = Math.max(this.screenShake, 4);
+  }
+
   updateMonsters(dt) {
+    this.updateEnemyProjectiles(dt);
     for (let i = this.monsters.length - 1; i >= 0; i--) {
       const m = this.monsters[i];
       if (m.hurtTimer > 0) m.hurtTimer -= dt;
+      if (m.isBoss && m.hp > 0) {
+        m.attackTimer = (m.attackTimer === undefined ? 3 : m.attackTimer) - dt;
+        if (m.attackTimer <= 0 && Math.hypot(this.hero.x - m.x, this.hero.y - m.y) < 480) {
+          this.bossRingAttack(m);
+          m.attackTimer = m.hp < m.maxHp * 0.5 ? 3 : 4.5;
+        }
+      }
 
       const dist = Math.hypot(this.hero.x - m.x, this.hero.y - m.y);
       if (dist < 28 && this.hero.invulnerableTimer <= 0 && m.hp > 0) {
@@ -1714,6 +1764,30 @@ class GameEngine {
     sounds.levelUp();
     this.spawnFloatingText("BUFF DO SANDUÍCHE!", this.hero.x, this.hero.y - 35, '#f59e0b');
     this.showBanner("SANDUÍCHE PERFEITO!", "+50% Velocidade e Regeneração por 45s!");
+  }
+
+  moveVector() {
+    let dx = 0, dy = 0;
+    if (this.keys['KeyW'] || this.keys['ArrowUp']) dy -= 1;
+    if (this.keys['KeyS'] || this.keys['ArrowDown']) dy += 1;
+    if (this.keys['KeyA'] || this.keys['ArrowLeft']) dx -= 1;
+    if (this.keys['KeyD'] || this.keys['ArrowRight']) dx += 1;
+    if (this.joystick.active) { dx = this.joystick.dx; dy = this.joystick.dy; }
+    const len = Math.hypot(dx, dy);
+    if (len > 0.08) return { x: dx / len, y: dy / len };
+    const f = this.hero.facing;
+    return { x: f === 'left' ? -1 : f === 'right' ? 1 : 0, y: f === 'up' ? -1 : f === 'down' ? 1 : 0 };
+  }
+
+  performDash() {
+    if (!this.hero || this.hero.hp <= 0 || this.dashCd > 0 || this.paused) return;
+    this.dashDir = this.moveVector();
+    this.dashTimer = 0.18;
+    this.dashCd = 1.1;
+    this.hero.invulnerableTimer = Math.max(this.hero.invulnerableTimer, 0.35);
+    sounds.swordSwing();
+    const btn = document.getElementById('btn-touch-dash');
+    if (btn) { btn.classList.add('cooling'); setTimeout(() => btn.classList.remove('cooling'), 1100); }
   }
 
   performBasicAttack() {
@@ -2101,6 +2175,7 @@ class GameEngine {
     this.hero.hp = this.hero.maxHp;
     this.hero.mp = this.hero.maxMp;
     this.hero.x = 350; this.hero.y = 350;
+    this.enemyProjectiles = [];
     if (this.currentFloor > 0) this.sendNet('exit_dungeon');
     document.getElementById('game-over-screen').classList.add('hidden');
     this.updateHUD();
@@ -2170,11 +2245,47 @@ class GameEngine {
     }
 
     this.renderProjectiles();
+    this.renderEnemyProjectiles();
     this.renderParticles();
     this.renderFloatingTexts();
     this.renderTalkPrompt();
     this.ctx.restore();
+    this.renderLighting();
     this.renderMinimap();
+  }
+
+  renderEnemyProjectiles() {
+    const ctx = this.ctx;
+    this.enemyProjectiles.forEach(p => {
+      ctx.fillStyle = 'rgba(0,0,0,0.25)';
+      ctx.beginPath(); ctx.ellipse(p.x, p.y + 8, p.radius, p.radius * 0.5, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = p.color;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.radius * 0.4, 0, Math.PI * 2); ctx.fill();
+    });
+  }
+
+  // Ciclo dia/noite na superfície e penumbra na dungeon, com luz ao redor do herói
+  renderLighting() {
+    if (!this.hero) return;
+    let alpha;
+    if (this.currentFloor === 0) {
+      const phase = Math.sin((this.dayTime / 240) * Math.PI * 2);
+      alpha = Math.max(0, -phase) * 0.55;
+    } else {
+      alpha = 0.38;
+    }
+    if (alpha < 0.03) return;
+    const ctx = this.ctx;
+    const sx = this.hero.x - this.camera.x, sy = this.hero.y - this.camera.y;
+    const r = this.currentFloor === 0 ? 190 : 230;
+    const grad = ctx.createRadialGradient(sx, sy, r * 0.25, sx, sy, r);
+    const tint = this.currentFloor === 0 ? '8,10,50' : '4,2,16';
+    grad.addColorStop(0, `rgba(${tint},0)`);
+    grad.addColorStop(1, `rgba(${tint},${alpha})`);
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
   renderTalkPrompt() {
@@ -2222,26 +2333,32 @@ class GameEngine {
     const d = this.dungeon;
     if (!d) return;
     const ctx = this.ctx;
+    const THEMES = [
+      { bg: '#0d0b17', cor: '#26223d', room: '#2f2b4a', alt: '#383458', edge: '#5b5690' },
+      { bg: '#1a0a08', cor: '#3a1a12', room: '#4a2218', alt: '#57291d', edge: '#f97316' },
+      { bg: '#08131f', cor: '#12283f', room: '#1e3a5f', alt: '#24456f', edge: '#7dd3fc' }
+    ];
+    const th = THEMES[(d.floor - 1) % 3];
     // Fundo da dungeon
-    ctx.fillStyle = '#0d0b17';
+    ctx.fillStyle = th.bg;
     ctx.fillRect(0, 0, d.width, d.height);
     // Corredores
-    ctx.strokeStyle = '#26223d'; ctx.lineWidth = 60; ctx.lineCap = 'round';
+    ctx.strokeStyle = th.cor; ctx.lineWidth = 60; ctx.lineCap = 'round';
     for (let i = 1; i < d.rooms.length; i++) {
       const a = d.rooms[i - 1], b = d.rooms[i];
       ctx.beginPath(); ctx.moveTo(a.centerX, a.centerY); ctx.lineTo(b.centerX, a.centerY); ctx.lineTo(b.centerX, b.centerY); ctx.stroke();
     }
     // Salas
     d.rooms.forEach(r => {
-      ctx.fillStyle = r.isBossRoom ? '#3b1626' : '#2f2b4a';
+      ctx.fillStyle = r.isBossRoom ? '#3b1626' : th.room;
       ctx.fillRect(r.x, r.y, r.w, r.h);
-      ctx.fillStyle = r.isBossRoom ? '#4a1d2e' : '#383458';
+      ctx.fillStyle = r.isBossRoom ? '#4a1d2e' : th.alt;
       for (let tx = 0; tx < r.w; tx += 40) {
         for (let ty = 0; ty < r.h; ty += 40) {
           if (((tx + ty) / 40) % 2 === 0) ctx.fillRect(r.x + tx, r.y + ty, Math.min(40, r.w - tx), Math.min(40, r.h - ty));
         }
       }
-      ctx.strokeStyle = r.isBossRoom ? '#be123c' : '#5b5690'; ctx.lineWidth = 4;
+      ctx.strokeStyle = r.isBossRoom ? '#be123c' : th.edge; ctx.lineWidth = 4;
       ctx.strokeRect(r.x, r.y, r.w, r.h);
     });
 
@@ -2816,6 +2933,7 @@ window.addEventListener('DOMContentLoaded', () => {
     if (e.code === 'KeyQ') game.usePotion();
     if (e.code === 'KeyF') game.eatSandwich();
     if (e.code === 'KeyT') game.talkToNpc(game.nearNpc);
+    if (e.code === 'ShiftLeft' || e.code === 'ShiftRight' || e.code === 'KeyR') game.performDash();
     if (e.code === 'Escape' && game.paused) game.closeShop();
     if (e.code === 'KeyM') {
       const active = sounds.toggle();
