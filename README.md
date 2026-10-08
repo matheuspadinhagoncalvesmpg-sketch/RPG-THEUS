@@ -1,75 +1,83 @@
-# 🌟 Hora da Aventura: Crônicas de Ooo (RPG Pixel)
+# THEUS: Ecos de Vésper
 
-Um RPG em estilo pixel art vibrante inspirado no universo de **Hora de Aventura** (Adventure Time) na mágica Terra de Ooo!
+Um metroidvania 2D inspirado em **Hollow Knight**, feito em JavaScript puro com canvas e pensado primeiro para **jogar no celular** (e também no PC, com teclado ou controle).
+
+> Em Vésper o sol parou no crepúsculo. O Rei Sem Coroa roubou a Coroa da Aurora, e só um Errante, com um olho da cor do ocaso e outro da aurora, pode devolver o dia ao reino.
 
 ---
 
-## 🌐 Como Jogar Online (Localhost ou Web)
+## ▶️ Como jogar
 
-O servidor multiplayer integrado já está pronto e rodando!
-
-### 1. No seu computador (Localhost)
-1. O servidor Node.js já está rodando em: **[http://localhost:3000](http://localhost:3000)**
-2. Para testar o multiplayer agora mesmo com você mesmo:
-   - Abra **duas abas** do navegador em **[http://localhost:3000](http://localhost:3000)**
-   - Crie um personagem diferente em cada aba (por exemplo, um Guerreiro na Aba 1 e um Mago ou Arqueiro na Aba 2).
-   - Você verá os dois heróis lado a lado na tela, andando em tempo real, atacando juntos e conversando pelo chat!
-
-### 2. Para reiniciar o servidor futuramente no terminal
 ```bash
 npm start
-# ou
-node server.js
 ```
-E acesse `http://localhost:3000`.
+Abra **http://localhost:3000**. Para jogar no celular na mesma rede Wi-Fi, acesse `http://SEU-IP:3000`.
 
-### 3. Para jogar com outras pessoas na mesma rede Wi-Fi / Lan
-Basta passar o seu IP local para seus amigos (ex: `http://192.168.x.x:3000`).
+Também funciona em qualquer hospedagem estática (veja [HOSTINGER_DEPLOY.md](HOSTINGER_DEPLOY.md)) e pode ser **instalado como app** (PWA) pelo menu "Adicionar à tela inicial". Depois da primeira visita, roda offline.
 
-### 4. Para colocar na internet futuramente
-Você pode subir esta mesma pasta gratuitamente em serviços de hospedagem como **Render**, **Railway**, **Fly.io** ou **Vercel** para qualquer pessoa do mundo entrar pelo link!
+### Controles
 
----
+| Ação | Celular | Teclado | Controle |
+| :--- | :--- | :--- | :--- |
+| Mover / olhar | Joystick (lado esquerdo, aparece onde você tocar) | ← → ↑ ↓ ou WASD | Analógico / D-pad |
+| Pular (segure para pular mais alto) | ▲ | Espaço, Z ou K | A |
+| Atacar (↑ ou ↓ + ataque mira para cima/baixo) | ⚔ | X ou J | X |
+| Dash | » | C, Shift ou L | RB / RT |
+| ALMA: segure para **curar**, toque para **magia** | ✦ | V ou F | B |
+| Falar / descansar / ler | ↑ ou botão que aparece | ↑ ou E | Y |
+| Mapa | botão no topo | M ou Tab | Select |
+| Pausa | botão no topo | Esc ou P | Start |
 
-## 🧙‍♂️ Criação de Personagem
-
-Antes de iniciar sua jornada, você pode personalizar seu herói:
-- **Nome do Aventureiro**: Escolha o nome da sua lenda.
-- **3 Classes Iniciais**:
-  1. ⚔️ **Guerreiro**: Especialista em combate corpo a corpo com a espada heroica, mais vida e defesa, além da habilidade especial *Ataque Furacão* (giro de 360° com dano em área).
-  2. 🔮 **Mago**: Mestre das artes místicas, lança projéteis arcanos luminosos e possui a habilidade *Explosão Arcana / Nova Cósmica* devastadora.
-  3. 🏹 **Arqueiro**: Rápido e preciso, dispara flechas à distância com alta velocidade e usa a habilidade *Chuva de Flechas* em leque.
-- **Customização Visual em Pixel Art**:
-  - Cor da roupa/túnica (Azul Clássico, Vermelho Rubro, Verde Floresta, Roxo Místico, Laranja Solar).
-  - Cor do chapéu/cabelo (Capuz de Urso Branco estilo Finn, Loiro, Castanho, Azul Gélido, Rosa Chiclete).
-  - Tom de pele.
-  - Acessórios (Mochila verde de aventura, Capa de herói ou Nenhum).
-- **Preview em Tempo Real**: Veja como seu personagem fica em grande escala antes de entrar no mundo!
+No celular dá para **deslizar o dedo** de um botão para outro (por exemplo, do pulo para o ataque). Tamanho e transparência dos botões, vibração e som ficam em **Pausa → opções**.
 
 ---
 
-## 🕹️ Controles
+## 🗺️ O mundo
 
-| Ação | Tecla / Mouse |
-| :--- | :--- |
-| **Mover o Herói** | `W`, `A`, `S`, `D` ou `Setas do Teclado` |
-| **Atacar / Interagir** | `Barra de Espaço` ou `Clique Esquerdo do Mouse` |
-| **Habilidade Especial** | Tecla `E` ou `Clique Direito do Mouse` |
-| **Tomar Poção Doce** | Tecla `Q` |
-| **Ligar/Desligar Som** | Tecla `M` ou botão `🔊` no topo |
-| **Conversar com NPCs** | Aproxime-se e pressione `Espaço` |
+15 salas conectadas, em 4 regiões, com mapa automático:
+
+- **Campos do Crepúsculo**: colinas sob um pôr do sol eterno. Abrigo com banco, Oren o andarilho e Mira a mercadora.
+- **Bosque das Lanternas**: floresta escura e cheia de vaga-lumes. Esconde um segredo atrás de uma parede.
+- **Ruínas Suspensas**: ilhas flutuando entre as nuvens, uma torre para escalar e o trono do Rei.
+- **Cavernas de Cristal**: chega-se por um chão rachado no Abrigo (golpeie para baixo...).
+
+### Mecânicas no estilo Hollow Knight
+- Pulo com altura variável, *coyote time* e *buffer* de pulo.
+- Golpe para os lados, para cima e para baixo, com **quique (pogo)** em inimigos e espinhos.
+- **ALMA**: cada golpe acerta e enche o vaso; segure para curar uma máscara.
+- **Bancos** salvam o jogo e restauram a vida.
+- Ao morrer, você deixa sua **sombra** com todo o geo. Volte até ela para recuperar.
+- Habilidades que abrem caminhos novos: **Manto do Vento** (dash), **Garras de Pedra** (escalar paredes), **Asas de Cinza** (pulo duplo) e **Chama da Alma** (magia).
+- Chefes: **Cavaleiro de Musgo** e **O Rei Sem Coroa**, cada um com segunda fase.
+- Loja, vasos de vida escondidos, paredes e chãos quebráveis, rochas de geo.
 
 ---
 
-## 🗺️ O Que Há na Terra de Ooo
+## 🧩 Estrutura do código
 
-- **Casa da Árvore**: O ponto de partida clássico de Finn e Jake.
-- **NPCs Amigáveis**: Converse com o **Jake o Cão** e com o **BMO** para receber dicas e diálogos divertidos ("Matemático!").
-- **Inimigos**:
-  - Slimes de Gelatina Doce saltitantes.
-  - Cogumelos Travessos com saltos rápidos.
-  - Esqueletos Guardiões nas ruínas.
-  - 👑 **O Grande Rei Gelatina Doce** (Chefão com coroa e vida massiva no norte).
-- **Baús de Tesouro**: Encontre baús dourados escondidos pelo mapa contendo moedas de ouro e poções extras.
-- **Progressão**: Ganhe XP derrotando monstros para subir de nível, aumentar sua vida máxima, mana e ataque!
-- **Áudio Sintetizado**: Músicas e efeitos retrô chiptune integrados diretamente via Web Audio API sem necessidade de downloads adicionais.
+```
+index.html        telas e interface
+style.css         visual e layout (adaptado a celular, com safe-area)
+sw.js             cache offline (PWA)
+server.js         servidor estático simples (sem dependências)
+src/
+  main.js         título, criação do herói, opções
+  game.js         núcleo: salas, transições, combate, câmera
+  player.js       física e ações do herói
+  enemies.js      inimigos comuns e projéteis
+  bosses.js       chefes
+  entities.js     bancos, personagens, itens, geo, sombra
+  rooms.js        mapa do mundo (editável)
+  world.js        grade de blocos e conexão entre salas
+  physics.js      colisão
+  render.js       fundo em paralaxe, blocos, luz
+  art.js          desenho vetorial do herói e objetos
+  input.js        teclado, controle e toque multitoque
+  audio.js        efeitos e música sintetizados
+  ui.js           HUD, diálogos, mapa, loja
+  dialog.js       falas e itens da loja
+  save.js         salvamento local
+tools/check-world.mjs   valida as conexões entre as salas (npm run check)
+```
+
+Para criar ou editar salas, mexa em `src/rooms.js` e rode `npm run check` para conferir se as aberturas entre salas batem.

@@ -2,342 +2,182 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#120d1c">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="THEUS">
+  <title>THEUS: Ecos de Vésper</title>
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/svg+xml" href="icon.svg">
-  <title>Hora da Aventura: Crônicas de Ooo - RPG Pixel</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="apple-touch-icon" href="icon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="game-container">
-    <!-- TELA 1: CRIAÇÃO DE PERSONAGEM -->
-    <div id="character-creation-screen" class="screen active">
-      <div class="adventure-title-badge">
-        <span class="sparkle">✨</span> HORA DA AVENTURA <span class="sparkle">✨</span>
-        <h2>CRÔNICAS DE OOO</h2>
-      </div>
+  <canvas id="game"></canvas>
 
-      <div class="creator-layout">
-        <!-- PREVIEW DO PERSONAGEM -->
-        <div class="preview-panel">
-          <div class="pixel-frame">
-            <canvas id="preview-canvas" width="160" height="160"></canvas>
-          </div>
-          <div class="preview-caption">
-            <span id="preview-class-name">Guerreiro</span>
-            <small id="preview-quote">"Matemático! Pronto para a aventura!"</small>
-          </div>
-          <div class="stats-preview">
-            <div class="stat-row">
-              <span>VIDA (HP)</span>
-              <div class="stat-bar"><div id="stat-hp" class="bar-fill hp" style="width: 85%;"></div></div>
-            </div>
-            <div class="stat-row">
-              <span>MANA (MP)</span>
-              <div class="stat-bar"><div id="stat-mp" class="bar-fill mp" style="width: 40%;"></div></div>
-            </div>
-            <div class="stat-row">
-              <span>FORÇA/DANO</span>
-              <div class="stat-bar"><div id="stat-atk" class="bar-fill atk" style="width: 80%;"></div></div>
-            </div>
-            <div class="stat-row">
-              <span>VELOCIDADE</span>
-              <div class="stat-bar"><div id="stat-spd" class="bar-fill spd" style="width: 60%;"></div></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- FORMULÁRIO DE CUSTOMIZAÇÃO -->
-        <div class="controls-panel">
-          <h3>CRIE SEU HERÓI</h3>
-
-          <div class="form-group">
-            <label for="char-name">NOME DO AVENTUREIRO:</label>
-            <input type="text" id="char-name" maxlength="14" value="Finnelson" placeholder="Nome do herói">
-          </div>
-
-          <div class="form-group">
-            <label>CLASSE:</label>
-            <div class="class-picker">
-              <button type="button" class="class-btn selected" data-class="warrior">
-                <span class="class-icon">⚔️</span>
-                <strong>Guerreiro</strong>
-                <small>Combate corpo a corpo e resistência!</small>
-              </button>
-              <button type="button" class="class-btn" data-class="mage">
-                <span class="class-icon">🔮</span>
-                <strong>Mago</strong>
-                <small>Feitiços arcanos luminosos!</small>
-              </button>
-              <button type="button" class="class-btn" data-class="archer">
-                <span class="class-icon">🏹</span>
-                <strong>Arqueiro</strong>
-                <small>Disparos velozes e precisão!</small>
-              </button>
-              <button type="button" class="class-btn" data-class="vampire">
-                <span class="class-icon">🎸</span>
-                <strong>Vampiro</strong>
-                <small>Acordes sônicos e dreno de vida!</small>
-              </button>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label>GÊNERO / IDENTIDADE:</label>
-            <div class="accessory-options" id="gender-types">
-              <button type="button" class="tag-btn active" data-gender="male">♂️ Aventureiro</button>
-              <button type="button" class="tag-btn" data-gender="female">♀️ Aventureira</button>
-              <button type="button" class="tag-btn" data-gender="nonbinary">✨ Neutro</button>
-            </div>
-          </div>
-
-          <div class="form-group colors-section">
-            <label>ESTILO & APARÊNCIA:</label>
-            
-            <div class="palette-row">
-              <span>Cabelo / Capuz:</span>
-              <div class="palette-options" id="hat-colors">
-                <button type="button" class="color-dot active" data-color="#ffffff" style="background:#ffffff;" title="Branco Puro / Neve"></button>
-                <button type="button" class="color-dot" data-color="#f472b6" style="background:#f472b6;" title="Rosa Chiclete"></button>
-                <button type="button" class="color-dot" data-color="#ffd166" style="background:#ffd166;" title="Loiro Dourado"></button>
-                <button type="button" class="color-dot" data-color="#0f172a" style="background:#0f172a;" title="Preto Meia-Noite"></button>
-                <button type="button" class="color-dot" data-color="#3a2510" style="background:#3a2510;" title="Castanho Escuro"></button>
-                <button type="button" class="color-dot" data-color="#ef4444" style="background:#ef4444;" title="Ruivo Flamejante"></button>
-                <button type="button" class="color-dot" data-color="#38bdf8" style="background:#38bdf8;" title="Azul Gélido"></button>
-                <button type="button" class="color-dot" data-color="#a855f7" style="background:#a855f7;" title="Roxo Cósmico"></button>
-              </div>
-            </div>
-
-            <div class="palette-row">
-              <span>Cor dos Olhos:</span>
-              <div class="accessory-options" id="eye-types">
-                <button type="button" class="tag-btn active" data-eyes="hetero" title="Um olho vermelho e um azul">🔴🔵 Heterocromia</button>
-                <button type="button" class="tag-btn" data-eyes="black">⚫ Preto</button>
-                <button type="button" class="tag-btn" data-eyes="blue">🔵 Azul</button>
-                <button type="button" class="tag-btn" data-eyes="red">🔴 Vermelho</button>
-                <button type="button" class="tag-btn" data-eyes="green">🟢 Verde</button>
-              </div>
-            </div>
-
-            <div class="palette-row">
-              <span>Detalhe Facial:</span>
-              <div class="accessory-options" id="face-details">
-                <button type="button" class="tag-btn active" data-face="none">Nenhum</button>
-                <button type="button" class="tag-btn" data-face="freckles">✨ Sardas</button>
-                <button type="button" class="tag-btn" data-face="scar">⚔️ Cicatriz</button>
-                <button type="button" class="tag-btn" data-face="blush">🌸 Blush Doce</button>
-              </div>
-            </div>
-
-            <div class="palette-row">
-              <span>Cor da Pele:</span>
-              <div class="palette-options" id="skin-colors">
-                <button type="button" class="color-dot active" data-color="#ffe0bd" style="background:#ffe0bd;" title="Pele Clara"></button>
-                <button type="button" class="color-dot" data-color="#ffd1a9" style="background:#ffd1a9;" title="Pele Pêssego"></button>
-                <button type="button" class="color-dot" data-color="#e2b98f" style="background:#e2b98f;" title="Pele Média"></button>
-                <button type="button" class="color-dot" data-color="#c68642" style="background:#c68642;" title="Pele Bronzeada"></button>
-                <button type="button" class="color-dot" data-color="#8d5524" style="background:#8d5524;" title="Pele Escura"></button>
-                <button type="button" class="color-dot" data-color="#5c3818" style="background:#5c3818;" title="Pele Ébano"></button>
-                <button type="button" class="color-dot" data-color="#fbcfe8" style="background:#fbcfe8;" title="Pele Doce Jujuba"></button>
-                <button type="button" class="color-dot" data-color="#a8dadc" style="background:#a8dadc;" title="Pele Fantasma/Gelo"></button>
-                <button type="button" class="color-dot" data-color="#86efac" style="background:#86efac;" title="Pele Orc/Grama"></button>
-              </div>
-            </div>
-
-            <div class="palette-row">
-              <span>Roupa:</span>
-              <div class="palette-options" id="outfit-colors">
-                <button type="button" class="color-dot active" data-color="#3aa3e3" style="background:#3aa3e3;" title="Azul Clássico"></button>
-                <button type="button" class="color-dot" data-color="#d63342" style="background:#d63342;" title="Vermelho Rubro"></button>
-                <button type="button" class="color-dot" data-color="#3fb950" style="background:#3fb950;" title="Verde Floresta"></button>
-                <button type="button" class="color-dot" data-color="#8a42db" style="background:#8a42db;" title="Roxo Místico"></button>
-                <button type="button" class="color-dot" data-color="#ff9f1c" style="background:#ff9f1c;" title="Laranja Solar"></button>
-                <button type="button" class="color-dot" data-color="#f472b6" style="background:#f472b6;" title="Rosa Princesa"></button>
-                <button type="button" class="color-dot" data-color="#0f172a" style="background:#0f172a;" title="Preto Sombrio"></button>
-              </div>
-            </div>
-
-            <div class="palette-row">
-              <span>Acessório:</span>
-              <div class="accessory-options" id="accessory-types">
-                <button type="button" class="tag-btn active" data-acc="backpack">🎒 Mochila Verde</button>
-                <button type="button" class="tag-btn" data-acc="cape">🧣 Capa de Aventureiro</button>
-                <button type="button" class="tag-btn" data-acc="none">Nenhum</button>
-              </div>
-            </div>
-
-            <div class="palette-row">
-              <span>Companheiro Pet:</span>
-              <div class="accessory-options" id="pet-types">
-                <button type="button" class="tag-btn active" data-pet="gunther">🐧 Gunther o Pinguim</button>
-                <button type="button" class="tag-btn" data-pet="none">Sem Pet</button>
-              </div>
-            </div>
-          </div>
-
-          <button id="start-game-btn" class="adventure-action-btn">
-            COMEÇAR AVENTURA! 🌟
-          </button>
-        </div>
+  <!-- ═════════ HUD ═════════ -->
+  <div id="hud" class="hidden">
+    <div class="hud-left">
+      <div id="soul"><div id="soul-fill"></div></div>
+      <div class="hud-col">
+        <div id="masks"></div>
+        <div id="geo"><span class="geo-ico"></span><span id="geo-n">0</span></div>
       </div>
     </div>
-
-    <!-- TELA 2: O JOGO EM EXECUÇÃO -->
-    <div id="game-screen" class="screen">
-      <!-- HUD SUPERIOR -->
-      <header id="game-hud">
-        <div class="hud-hero-info">
-          <div class="hud-avatar">
-            <canvas id="hud-avatar-canvas" width="40" height="40"></canvas>
-          </div>
-          <div class="hud-bars">
-            <div class="hud-name-lvl">
-              <span id="hud-char-name">Finnelson</span>
-              <span class="badge-lvl">NÍVEL <b id="hud-lvl">1</b></span>
-            </div>
-            <div class="hud-bar-wrapper hp-wrapper">
-              <div id="hud-hp-fill" class="hud-fill"></div>
-              <span id="hud-hp-text">100 / 100</span>
-            </div>
-            <div class="hud-bar-wrapper mp-wrapper">
-              <div id="hud-mp-fill" class="hud-fill"></div>
-              <span id="hud-mp-text">50 / 50</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="hud-objective-box">
-          <div class="location-header">
-            <span class="obj-tag">LOCAL:</span>
-            <span id="hud-location-tag" class="location-badge">📍 Terra de Ooo</span>
-          </div>
-          <span id="hud-objective-text">Explore as Colinas e derrote o Monstro Gelatina!</span>
-        </div>
-
-        <div class="hud-counters">
-          <div class="counter-item online-counter" title="Jogadores conectados na Terra de Ooo">
-            🟢 <span id="hud-online-count">1</span> Online
-          </div>
-          <div class="counter-item gold-counter">
-            🪙 <span id="hud-gold">0</span>
-          </div>
-          <div class="counter-item exp-counter">
-            ⭐ <span id="hud-exp">0</span>/<span id="hud-exp-next">50</span> XP
-          </div>
-          <button id="install-pwa-btn" class="icon-hud-btn pwa-btn" title="Instalar Jogo no Celular">📲</button>
-          <button id="sound-toggle-btn" class="icon-hud-btn" title="Ligar/Desligar Som">🔊</button>
-        </div>
-      </header>
-
-      <!-- ÁREA PRINCIPAL DO CANVAS DO JOGO -->
-      <div id="canvas-wrapper">
-        <canvas id="game-canvas" width="800" height="520"></canvas>
-
-        <!-- CHAT MULTIPLAYER IN-GAME -->
-        <div id="chat-container">
-          <div id="chat-messages">
-            <div class="chat-msg system">🌟 Conectado à Terra de Ooo! Pressione [ENTER] para falar no chat.</div>
-          </div>
-          <form id="chat-form" class="chat-input-bar">
-            <input type="text" id="chat-input" maxlength="60" placeholder="Pressione [ENTER] para falar..." autocomplete="off">
-            <button type="submit" id="chat-send-btn">Enviar</button>
-          </form>
-        </div>
-
-        <!-- CAIXA DE DIÁLOGO / MENSAGENS ESTILO ADVENTURE TIME -->
-        <div id="dialog-box" class="hidden">
-          <div class="dialog-avatar" id="dialog-avatar">🐶</div>
-          <div class="dialog-content">
-            <h4 id="dialog-speaker">Jake o Cão Falante</h4>
-            <p id="dialog-text">E aí, cara! É hora de chutar uns monstros pelas colinas de Ooo! Matemático!</p>
-            <span class="dialog-hint">Pressione [ESPAÇO] ou clique para continuar...</span>
-          </div>
-        </div>
-
-        <!-- MENSAGEM DE LEVEL UP OU VITÓRIA -->
-        <div id="banner-notice" class="hidden">
-          <h2 id="banner-title">MATEMÁTICO!</h2>
-          <p id="banner-sub">Você subiu para o Nível 2!</p>
-        </div>
-
-        <!-- OVERLAY DE MORTE / RESTART -->
-        <div id="game-over-screen" class="hidden">
-          <h2>AH NÃO, CARA!</h2>
-          <p>Você foi nocauteado pelos monstros da Terra de Ooo!</p>
-          <button id="respawn-btn" class="adventure-action-btn">RENASCER NA CASA DA ÁRVORE 🏠</button>
-        </div>
-
-        <!-- CONTROLES TOUCH PARA CELULAR E TABLET -->
-        <div id="mobile-controls" class="mobile-controls-layer">
-          <!-- JOYSTICK VIRTUAL ANALÓGICO -->
-          <div id="virtual-joystick-zone" class="joystick-zone">
-            <div id="virtual-joystick-base" class="joystick-base">
-              <div id="virtual-joystick-stick" class="joystick-stick"></div>
-            </div>
-          </div>
-
-          <!-- BOTÕES DE AÇÃO TOUCH -->
-          <div class="mobile-action-buttons">
-            <div class="touch-row-top">
-              <button type="button" id="btn-touch-chat" class="touch-btn touch-chat-btn" title="Chat">💬</button>
-              <button type="button" id="btn-touch-sandwich" class="touch-btn touch-sandwich-btn" title="Sanduíche">🥪</button>
-              <button type="button" id="btn-touch-potion" class="touch-btn touch-potion-btn" title="Poção">🧪</button>
-            </div>
-            <div class="touch-row-main">
-              <button type="button" id="btn-touch-skill" class="touch-btn touch-skill-btn" title="Habilidade">🌀</button>
-              <button type="button" id="btn-touch-attack" class="touch-btn touch-attack-btn" title="Ataque">⚔️</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- BARRA DE HABILIDADES & CONTROLES INFERIOR -->
-      <footer id="game-footer">
-        <div class="skills-dock">
-          <div class="skill-slot active">
-            <span class="key-bind">ESPAÇO / CLIQUE</span>
-            <span id="skill-1-icon">⚔️</span>
-            <small id="skill-1-name">Ataque Básico</small>
-          </div>
-          <div class="skill-slot" id="skill-2-slot">
-            <span class="key-bind">TECLA [E]</span>
-            <span id="skill-2-icon">🌀</span>
-            <small id="skill-2-name">Habilidade Especial</small>
-            <div id="skill-cd-overlay" class="cd-overlay"></div>
-          </div>
-          <div class="skill-slot" id="potion-slot">
-            <span class="key-bind">TECLA [Q]</span>
-            <span>🧪</span>
-            <small>Poção (<span id="potion-count">2</span>)</small>
-          </div>
-          <div class="skill-slot sandwich-slot" id="sandwich-slot" title="Comer Sanduíche Perfeito do Jake (+Buff)">
-            <span class="key-bind">TECLA [F]</span>
-            <span>🥪</span>
-            <small>Sanduíche (<span id="sandwich-count">1</span>)</small>
-          </div>
-          <div class="skill-slot item-slot" id="equipped-item-slot" title="Item Místico Equipado da IA">
-            <span class="key-bind">RELÍQUIA IA</span>
-            <span id="equipped-item-icon">✨</span>
-            <small id="equipped-item-name">Nenhum</small>
-          </div>
-        </div>
-
-        <div class="controls-legend">
-          <span><b>[WASD]</b> ou <b>[Setas]</b>: Mover</span>
-          <span><b>[Espaço]</b>: Atacar</span>
-          <span><b>[E]</b>: Especial</span>
-          <span><b>[Q]</b>: Curar</span>
-          <span><b>[M]</b>: Som</span>
-        </div>
-      </footer>
+    <div class="hud-right">
+      <button id="btn-map" class="hud-btn" aria-label="Mapa">
+        <svg viewBox="0 0 24 24"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z M9 4v14 M15 6v14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+      </button>
+      <button id="btn-pause" class="hud-btn" aria-label="Pausar">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14 M16 5v14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+      </button>
     </div>
   </div>
 
-  <script src="game.js"></script>
+  <div id="boss-bar" class="hidden"><div id="boss-name"></div><div class="bar"><div id="boss-fill"></div></div></div>
+  <div id="area-title" class="hidden"><span class="ornament"></span><h2></h2><p></p><span class="ornament"></span></div>
+  <div id="boss-title" class="hidden"><p></p><h2></h2></div>
+  <div id="toast" class="hidden"></div>
+
+  <div id="dialog" class="hidden">
+    <div id="dialog-speaker"></div>
+    <div id="dialog-text"></div>
+    <div id="dialog-next">▾</div>
+  </div>
+
+  <!-- ═════════ CONTROLES DE TOQUE ═════════ -->
+  <div id="touch-ui">
+    <div id="joy-base"></div>
+    <div id="joy-knob"></div>
+    <div id="pad">
+      <button class="tbtn" data-act="spell" aria-label="Alma: toque para magia, segure para curar">✦</button>
+      <button class="tbtn" data-act="dash" aria-label="Dash">»</button>
+      <button class="tbtn" data-act="attack" aria-label="Atacar">⚔</button>
+      <button class="tbtn big" data-act="jump" aria-label="Pular">▲</button>
+    </div>
+    <button id="tb-interact" class="tbtn ctx hidden" data-act="interact"></button>
+  </div>
+
+  <!-- ═════════ SOBREPOSIÇÕES ═════════ -->
+  <div id="banner" class="overlay hidden">
+    <div class="banner-box">
+      <div class="banner-icon"></div>
+      <h2></h2>
+      <p class="desc"></p>
+      <p class="keys"></p>
+      <p class="hint">toque para continuar</p>
+    </div>
+  </div>
+
+  <div id="map-screen" class="overlay hidden">
+    <div class="panel map-panel">
+      <h3 id="map-room"></h3>
+      <canvas id="map-canvas"></canvas>
+      <p class="legend"><i class="lg-you"></i> você <i class="lg-bench"></i> banco <i class="lg-shade"></i> sombra</p>
+      <p class="hint">toque para fechar</p>
+    </div>
+  </div>
+
+  <div id="pause-screen" class="overlay hidden">
+    <div class="panel">
+      <h2>Pausado</h2>
+      <button id="btn-resume" class="menu-btn">Continuar</button>
+      <button id="btn-pause-map" class="menu-btn">Mapa</button>
+      <div class="options">
+        <div class="opt"><span>Som</span><button class="opt-btn" data-setting="muted"></button></div>
+        <div class="opt"><span>Vibração</span><button class="opt-btn" data-setting="vibration"></button></div>
+        <div class="opt"><span>Botões</span>
+          <span class="seg"><button data-size="0.85">P</button><button data-size="1">M</button><button data-size="1.18">G</button></span>
+        </div>
+        <div class="opt"><span>Transparência</span><input class="opt-opacity" type="range" min="0.25" max="0.9" step="0.05"></div>
+        <div class="opt"><span>Tela cheia</span><button class="opt-btn opt-fullscreen">Alternar</button></div>
+      </div>
+      <button id="btn-quit" class="menu-btn subtle">Salvar e sair para o título</button>
+    </div>
+  </div>
+
+  <div id="shop-screen" class="overlay hidden">
+    <div class="panel">
+      <h2>Mochila da Mira</h2>
+      <p class="shop-geo"><span class="geo-ico"></span><span id="shop-geo">0</span></p>
+      <div id="shop-list"></div>
+      <button id="btn-shop-close" class="menu-btn subtle">Sair</button>
+    </div>
+  </div>
+
+  <div id="ending-screen" class="overlay hidden">
+    <div class="panel ending">
+      <p class="eyebrow">A Coroa da Aurora retorna</p>
+      <h2>O sol volta a nascer em Vésper</h2>
+      <p>O Rei Sem Coroa caiu. Pela primeira vez em eras, a luz atravessa as nuvens.</p>
+      <p class="stat">Tempo de jornada: <b id="end-time"></b></p>
+      <button id="btn-end-continue" class="menu-btn">Continuar explorando</button>
+      <button id="btn-end-title" class="menu-btn subtle">Tela inicial</button>
+    </div>
+  </div>
+
+  <!-- ═════════ TÍTULO ═════════ -->
+  <div id="title-screen" class="screen">
+    <div class="title-sky"><div class="sun"></div><div class="hills h1"></div><div class="hills h2"></div><div class="hills h3"></div></div>
+    <canvas id="title-canvas"></canvas>
+    <div class="title-content">
+      <h1>THEUS</h1>
+      <p class="subtitle">Ecos de Vésper</p>
+      <div class="title-menu">
+        <button id="btn-continue" class="menu-btn hidden">Continuar <small id="continue-info"></small></button>
+        <button id="btn-new" class="menu-btn">Novo jogo</button>
+        <div id="new-confirm" class="confirm hidden">
+          <p>Começar de novo apaga o progresso salvo.</p>
+          <button id="btn-new-yes" class="menu-btn danger">Apagar e começar</button>
+          <button id="btn-new-no" class="menu-btn subtle">Cancelar</button>
+        </div>
+        <button id="btn-options" class="menu-btn subtle">Opções</button>
+        <div id="title-options" class="options hidden">
+          <div class="opt"><span>Som</span><button class="opt-btn" data-setting="muted"></button></div>
+          <div class="opt"><span>Vibração</span><button class="opt-btn" data-setting="vibration"></button></div>
+          <div class="opt"><span>Botões</span>
+            <span class="seg"><button data-size="0.85">P</button><button data-size="1">M</button><button data-size="1.18">G</button></span>
+          </div>
+          <div class="opt"><span>Transparência</span><input class="opt-opacity" type="range" min="0.25" max="0.9" step="0.05"></div>
+        </div>
+        <button id="btn-install" class="menu-btn subtle hidden">Instalar como app</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═════════ CRIAÇÃO DO HERÓI ═════════ -->
+  <div id="creator-screen" class="screen hidden">
+    <div class="creator">
+      <div class="creator-preview">
+        <canvas id="preview"></canvas>
+      </div>
+      <div class="creator-form">
+        <h2>O Errante</h2>
+        <label class="field">Nome
+          <input id="hero-name" type="text" maxlength="14" autocomplete="off" spellcheck="false">
+        </label>
+        <div class="field">Capa<div id="pick-cloak" class="swatches"></div></div>
+        <div class="field">Cabelo<div id="pick-hair" class="swatches"></div></div>
+        <div class="field">Pele<div id="pick-skin" class="swatches"></div></div>
+        <div class="field">Olhos<div id="pick-eyes" class="chips"></div></div>
+        <div class="creator-actions">
+          <button id="btn-creator-back" class="menu-btn subtle">Voltar</button>
+          <button id="btn-start" class="menu-btn primary">Despertar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="rotate-hint">
+    <div class="phone"></div>
+    <p>Gire o celular para jogar na horizontal</p>
+  </div>
+
+  <script type="module" src="src/main.js"></script>
 </body>
 </html>

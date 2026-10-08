@@ -1,18 +1,14 @@
 {
-  "name": "Hora da Aventura: Crônicas de Ooo",
-  "short_name": "RPG de Ooo",
-  "description": "RPG Pixel Multiplayer na Terra de Ooo com IA Gemini",
-  "start_url": "/",
-  "display": "standalone",
+  "name": "THEUS: Ecos de Vésper",
+  "short_name": "THEUS",
+  "description": "Metroidvania 2D: explore Vésper, enfrente o Rei Sem Coroa e devolva o dia ao reino.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
   "orientation": "landscape",
-  "background_color": "#1a162b",
-  "theme_color": "#ffd028",
+  "background_color": "#07050b",
+  "theme_color": "#120d1c",
   "icons": [
-    {
-      "src": "icon.svg",
-      "sizes": "192x192 512x512",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
   ]
 }
