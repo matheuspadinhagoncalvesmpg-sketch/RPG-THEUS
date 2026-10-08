@@ -1,0 +1,811 @@
+/* =========================================================
+   HORA DA AVENTURA - CRÔNICAS DE OOO (ESTILO PIXEL RPG)
+   ========================================================= */
+
+:root {
+  --bg-sky: #79d2ff;
+  --grass-green: #79cc3b;
+  --grass-dark: #589e24;
+  --bubblegum-pink: #ff6dae;
+  --candy-yellow: #ffd028;
+  --adventure-blue: #2389da;
+  --panel-bg: #fff8e7;
+  --panel-border: #2c221e;
+  --text-dark: #2c221e;
+  --hp-red: #ff3344;
+  --mp-blue: #3b82f6;
+  --exp-gold: #fbbf24;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+body {
+  background-color: #1a162b;
+  background-image: 
+    radial-gradient(#392c57 15%, transparent 16%),
+    radial-gradient(#2d2247 15%, transparent 16%);
+  background-size: 60px 60px;
+  background-position: 0 0, 30px 30px;
+  font-family: 'Fredoka', cursive, sans-serif;
+  color: var(--text-dark);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 10px;
+  overflow-x: hidden;
+}
+
+#game-container {
+  width: 860px;
+  max-width: 98vw;
+  background: var(--panel-bg);
+  border: 5px solid var(--panel-border);
+  border-radius: 18px;
+  box-shadow: 0 12px 0px #0e0a14, 0 18px 25px rgba(0,0,0,0.5);
+  position: relative;
+  overflow: hidden;
+}
+
+/* ================= TELAS ================= */
+.screen {
+  display: none;
+  flex-direction: column;
+}
+
+.screen.active {
+  display: flex;
+}
+
+/* ================= TELA DE CRIAÇÃO ================= */
+#character-creation-screen {
+  padding: 24px;
+  background: linear-gradient(180deg, #b8edff 0%, #e6f8ff 45%, #e1f7c8 100%);
+}
+
+.adventure-title-badge {
+  text-align: center;
+  background: var(--candy-yellow);
+  border: 4px solid var(--panel-border);
+  border-radius: 12px;
+  padding: 8px 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 5px 0 var(--panel-border);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+
+.adventure-title-badge h2 {
+  font-family: 'Fredoka', cursive, sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: #c92a2a;
+  text-shadow: 2px 2px 0 #fff, -1px -1px 0 #fff;
+  margin-top: 4px;
+}
+
+.sparkle {
+  color: #ff9800;
+  font-size: 16px;
+}
+
+.creator-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 20px;
+  background: #ffffff;
+  border: 4px solid var(--panel-border);
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.15);
+}
+
+/* PAINEL DE PREVIEW */
+.preview-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #f4fafe;
+  border: 3px solid #bce1f8;
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.pixel-frame {
+  width: 170px;
+  height: 170px;
+  background: #79d2ff;
+  background-image: 
+    radial-gradient(circle at 50% 120%, #79cc3b 45%, transparent 46%),
+    radial-gradient(circle at 85% 20%, #fff 8%, transparent 9%),
+    radial-gradient(circle at 15% 30%, #fff 6%, transparent 7%);
+  border: 4px solid var(--panel-border);
+  border-radius: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: inset 0 -8px 0 rgba(0, 0, 0, 0.12);
+}
+
+#preview-canvas {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  width: 160px;
+  height: 160px;
+}
+
+.preview-caption {
+  text-align: center;
+  margin: 10px 0;
+}
+
+.preview-caption span {
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--adventure-blue);
+  display: block;
+}
+
+.preview-caption small {
+  font-style: italic;
+  font-size: 12px;
+  color: #666;
+}
+
+.stats-preview {
+  width: 100%;
+  margin-top: 6px;
+}
+
+.stat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 5px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.stat-row span {
+  width: 90px;
+}
+
+.stat-bar {
+  flex: 1;
+  height: 10px;
+  background: #e2e8f0;
+  border: 2px solid var(--panel-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.bar-fill.hp { background: var(--hp-red); }
+.bar-fill.mp { background: var(--mp-blue); }
+.bar-fill.atk { background: #f59e0b; }
+.bar-fill.spd { background: #10b981; }
+
+/* PAINEL DE CONTROLES DO CRIADOR */
+.controls-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.controls-panel h3 {
+  font-size: 18px;
+  color: var(--panel-border);
+  border-bottom: 3px dashed #cbd5e1;
+  padding-bottom: 4px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #334155;
+  letter-spacing: 0.5px;
+}
+
+#char-name {
+  font-family: 'Fredoka', cursive, sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 8px 12px;
+  border: 3px solid var(--panel-border);
+  border-radius: 8px;
+  outline: none;
+  background: #fffdf5;
+  transition: 0.2s;
+}
+
+#char-name:focus {
+  border-color: var(--adventure-blue);
+  box-shadow: 0 0 0 3px rgba(35, 137, 218, 0.25);
+}
+
+.class-picker {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.class-btn {
+  background: #f8fafc;
+  border: 3px solid #94a3b8;
+  border-radius: 10px;
+  padding: 10px 6px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.class-btn:hover {
+  transform: translateY(-2px);
+  background: #f0f9ff;
+  border-color: var(--adventure-blue);
+}
+
+.class-btn.selected {
+  background: #dbeafe;
+  border-color: var(--adventure-blue);
+  box-shadow: 0 4px 0 var(--adventure-blue);
+  transform: translateY(-2px);
+}
+
+.class-icon {
+  font-size: 26px;
+}
+
+.class-btn strong {
+  font-size: 14px;
+  color: #0f172a;
+}
+
+.class-btn small {
+  font-size: 10px;
+  color: #64748b;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* PALETAS DE CORES */
+.palette-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.palette-row span {
+  width: 110px;
+  color: #475569;
+}
+
+.palette-options {
+  display: flex;
+  gap: 8px;
+}
+
+.color-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 3px solid var(--panel-border);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.color-dot:hover {
+  transform: scale(1.2);
+}
+
+.color-dot.active {
+  transform: scale(1.25);
+  box-shadow: 0 0 0 3px #fbbf24;
+}
+
+.accessory-options {
+  display: flex;
+  gap: 8px;
+}
+
+.tag-btn {
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 10px;
+  background: #f1f5f9;
+  border: 2px solid #94a3b8;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.tag-btn.active {
+  background: var(--candy-yellow);
+  border-color: var(--panel-border);
+  box-shadow: 0 2px 0 var(--panel-border);
+}
+
+.adventure-action-btn {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 13px;
+  padding: 14px 20px;
+  background: #10b981;
+  color: white;
+  border: 4px solid var(--panel-border);
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 6px 0 var(--panel-border);
+  margin-top: 8px;
+  transition: all 0.1s ease;
+  text-shadow: 1px 1px 0 #065f46;
+}
+
+.adventure-action-btn:hover {
+  background: #34d399;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 0 var(--panel-border);
+}
+
+.adventure-action-btn:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 var(--panel-border);
+}
+
+/* ================= TELA DO JOGO ================= */
+#game-screen {
+  background: #a8e6cf;
+}
+
+/* HUD SUPERIOR */
+#game-hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;
+  border-bottom: 4px solid var(--panel-border);
+  padding: 10px 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
+}
+
+.hud-hero-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hud-avatar {
+  width: 44px;
+  height: 44px;
+  background: var(--bg-sky);
+  border: 3px solid var(--panel-border);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#hud-avatar-canvas {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.hud-name-lvl {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+#hud-char-name {
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.badge-lvl {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  background: var(--candy-yellow);
+  border: 2px solid var(--panel-border);
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+
+.hud-bar-wrapper {
+  position: relative;
+  width: 140px;
+  height: 12px;
+  background: #334155;
+  border: 2px solid var(--panel-border);
+  border-radius: 4px;
+  margin-bottom: 3px;
+  overflow: hidden;
+}
+
+.hud-fill {
+  height: 100%;
+  width: 100%;
+  transition: width 0.2s ease;
+}
+
+.hp-wrapper .hud-fill { background: var(--hp-red); }
+.mp-wrapper .hud-fill { background: var(--mp-blue); }
+
+.hud-bar-wrapper span {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 8px;
+  font-weight: 700;
+  color: white;
+  text-shadow: 1px 1px 1px #000;
+}
+
+.hud-objective-box {
+  background: #fef08a;
+  border: 2px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 6px 12px;
+  max-width: 260px;
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+.obj-tag {
+  display: block;
+  font-weight: 700;
+  font-size: 9px;
+  color: #854d0e;
+}
+
+.hud-counters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.counter-item {
+  font-weight: 700;
+  font-size: 13px;
+  background: #f1f5f9;
+  border: 2px solid var(--panel-border);
+  border-radius: 6px;
+  padding: 4px 8px;
+}
+
+.icon-hud-btn {
+  background: #f8fafc;
+  border: 2px solid var(--panel-border);
+  border-radius: 6px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* CANVAS DO JOGO */
+#canvas-wrapper {
+  position: relative;
+  width: 100%;
+  height: 520px;
+  background: #000;
+  overflow: hidden;
+}
+
+#game-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* CAIXA DE DIÁLOGO */
+#dialog-box {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  background: #fff8e7;
+  border: 4px solid var(--panel-border);
+  border-radius: 12px;
+  padding: 12px 16px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  box-shadow: 0 8px 0 rgba(0, 0, 0, 0.4);
+  animation: slideUp 0.25s ease-out;
+  z-index: 10;
+}
+
+@keyframes slideUp {
+  from { transform: translate(-50%, 40px); opacity: 0; }
+  to { transform: translate(-50%, 0); opacity: 1; }
+}
+
+.dialog-avatar {
+  font-size: 38px;
+  background: #ffd028;
+  border: 3px solid var(--panel-border);
+  border-radius: 10px;
+  width: 54px;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dialog-content h4 {
+  font-size: 14px;
+  color: #c2410c;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.dialog-content p {
+  font-size: 13px;
+  color: #1e293b;
+  line-height: 1.3;
+}
+
+.dialog-hint {
+  display: block;
+  font-size: 10px;
+  color: #64748b;
+  margin-top: 4px;
+  font-style: italic;
+}
+
+/* BANNER DE LEVEL UP */
+#banner-notice {
+  position: absolute;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--candy-yellow);
+  border: 4px solid var(--panel-border);
+  border-radius: 12px;
+  padding: 12px 28px;
+  text-align: center;
+  box-shadow: 0 8px 0 rgba(0, 0, 0, 0.4);
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  z-index: 20;
+}
+
+#banner-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 18px;
+  color: #d97706;
+  text-shadow: 1px 1px 0 #fff;
+}
+
+#banner-sub {
+  font-size: 14px;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+@keyframes popIn {
+  from { transform: translate(-50%, -20px) scale(0.7); opacity: 0; }
+  to { transform: translate(-50%, 0) scale(1); opacity: 1; }
+}
+
+/* TELA DE GAME OVER */
+#game-over-screen {
+  position: absolute;
+  inset: 0;
+  background: rgba(18, 12, 30, 0.88);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  color: white;
+  z-index: 30;
+}
+
+#game-over-screen h2 {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 24px;
+  color: #ef4444;
+  text-shadow: 2px 2px 0 #000;
+}
+
+#game-over-screen p {
+  font-size: 15px;
+}
+
+/* RODAPÉ E BARRA DE SKILLS */
+#game-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;
+  border-top: 4px solid var(--panel-border);
+  padding: 8px 16px;
+}
+
+.skills-dock {
+  display: flex;
+  gap: 12px;
+}
+
+.skill-slot {
+  position: relative;
+  background: #f1f5f9;
+  border: 3px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 4px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  min-width: 80px;
+  transition: transform 0.1s;
+  overflow: hidden;
+}
+
+.skill-slot:active {
+  transform: scale(0.96);
+}
+
+.key-bind {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  background: #334155;
+  color: white;
+  padding: 1px 4px;
+  border-radius: 3px;
+  margin-bottom: 2px;
+}
+
+.skill-slot span {
+  font-size: 18px;
+}
+
+.skill-slot small {
+  font-size: 10px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.cd-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  height: 0%;
+  top: auto;
+  bottom: 0;
+  transition: height 0.1s linear;
+  pointer-events: none;
+}
+
+.controls-legend {
+  display: flex;
+  gap: 12px;
+  font-size: 11px;
+  color: #475569;
+}
+
+.controls-legend span b {
+  color: var(--adventure-blue);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ================= CHAT MULTIPLAYER ================= */
+#chat-container {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  width: 320px;
+  max-width: calc(100% - 24px);
+  background: rgba(255, 255, 255, 0.88);
+  border: 3px solid var(--panel-border);
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  z-index: 15;
+  backdrop-filter: blur(4px);
+}
+
+#chat-messages {
+  max-height: 110px;
+  overflow-y: auto;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+}
+
+.chat-msg {
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.chat-msg.system {
+  color: #0369a1;
+  font-weight: 600;
+  font-style: italic;
+}
+
+.chat-msg .chat-author {
+  font-weight: 700;
+  color: #b91c1c;
+  margin-right: 4px;
+}
+
+.chat-msg .chat-text {
+  color: #1e293b;
+}
+
+.chat-input-bar {
+  display: flex;
+  border-top: 2px solid var(--panel-border);
+  background: #ffffff;
+  border-radius: 0 0 7px 7px;
+  overflow: hidden;
+}
+
+#chat-input {
+  flex: 1;
+  padding: 6px 10px;
+  border: none;
+  font-family: inherit;
+  font-size: 12px;
+  outline: none;
+  background: transparent;
+}
+
+#chat-input:focus {
+  background: #fef9c3;
+}
+
+#chat-send-btn {
+  background: var(--candy-yellow);
+  border: none;
+  border-left: 2px solid var(--panel-border);
+  padding: 0 12px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.1s;
+}
+
+#chat-send-btn:hover {
+  background: #facc15;
+}
+
+.online-counter {
+  color: #15803d;
+  font-weight: 700;
+}

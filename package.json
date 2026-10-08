@@ -1,0 +1,17 @@
+{
+  "name": "rpg-mini",
+  "version": "1.0.0",
+  "description": "Um RPG em estilo pixel art vibrante inspirado no universo de Hora de Aventura (Adventure Time) na Terra de Ooo!",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "ws": "^8.22.0"
+  }
+}

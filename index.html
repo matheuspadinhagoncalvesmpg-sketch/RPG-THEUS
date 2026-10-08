@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hora da Aventura: Crônicas de Ooo - RPG Pixel</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="game-container">
+    <!-- TELA 1: CRIAÇÃO DE PERSONAGEM -->
+    <div id="character-creation-screen" class="screen active">
+      <div class="adventure-title-badge">
+        <span class="sparkle">✨</span> HORA DA AVENTURA <span class="sparkle">✨</span>
+        <h2>CRÔNICAS DE OOO</h2>
+      </div>
+
+      <div class="creator-layout">
+        <!-- PREVIEW DO PERSONAGEM -->
+        <div class="preview-panel">
+          <div class="pixel-frame">
+            <canvas id="preview-canvas" width="160" height="160"></canvas>
+          </div>
+          <div class="preview-caption">
+            <span id="preview-class-name">Guerreiro</span>
+            <small id="preview-quote">"Matemático! Pronto para a aventura!"</small>
+          </div>
+          <div class="stats-preview">
+            <div class="stat-row">
+              <span>VIDA (HP)</span>
+              <div class="stat-bar"><div id="stat-hp" class="bar-fill hp" style="width: 85%;"></div></div>
+            </div>
+            <div class="stat-row">
+              <span>MANA (MP)</span>
+              <div class="stat-bar"><div id="stat-mp" class="bar-fill mp" style="width: 40%;"></div></div>
+            </div>
+            <div class="stat-row">
+              <span>FORÇA/DANO</span>
+              <div class="stat-bar"><div id="stat-atk" class="bar-fill atk" style="width: 80%;"></div></div>
+            </div>
+            <div class="stat-row">
+              <span>VELOCIDADE</span>
+              <div class="stat-bar"><div id="stat-spd" class="bar-fill spd" style="width: 60%;"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FORMULÁRIO DE CUSTOMIZAÇÃO -->
+        <div class="controls-panel">
+          <h3>CRIE SEU HERÓI</h3>
+
+          <div class="form-group">
+            <label for="char-name">NOME DO AVENTUREIRO:</label>
+            <input type="text" id="char-name" maxlength="14" value="Finnelson" placeholder="Nome do herói">
+          </div>
+
+          <div class="form-group">
+            <label>CLASSE:</label>
+            <div class="class-picker">
+              <button type="button" class="class-btn selected" data-class="warrior">
+                <span class="class-icon">⚔️</span>
+                <strong>Guerreiro</strong>
+                <small>Combate corpo a corpo, espadas afiadas e grande resistência!</small>
+              </button>
+              <button type="button" class="class-btn" data-class="mage">
+                <span class="class-icon">🔮</span>
+                <strong>Mago</strong>
+                <small>Lança feitiços arcanos luminosos e explosões de mana!</small>
+              </button>
+              <button type="button" class="class-btn" data-class="archer">
+                <span class="class-icon">🏹</span>
+                <strong>Arqueiro</strong>
+                <small>Disparos velozes à distância e chuva de flechas ágeis!</small>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group colors-section">
+            <label>ESTILO & CORES:</label>
+            
+            <div class="palette-row">
+              <span>Roupa:</span>
+              <div class="palette-options" id="outfit-colors">
+                <button type="button" class="color-dot active" data-color="#3aa3e3" style="background:#3aa3e3;" title="Azul Clássico"></button>
+                <button type="button" class="color-dot" data-color="#d63342" style="background:#d63342;" title="Vermelho Rubro"></button>
+                <button type="button" class="color-dot" data-color="#3fb950" style="background:#3fb950;" title="Verde Floresta"></button>
+                <button type="button" class="color-dot" data-color="#8a42db" style="background:#8a42db;" title="Roxo Místico"></button>
+                <button type="button" class="color-dot" data-color="#ff9f1c" style="background:#ff9f1c;" title="Laranja Solar"></button>
+              </div>
+            </div>
+
+            <div class="palette-row">
+              <span>Chapéu / Cabelo:</span>
+              <div class="palette-options" id="hat-colors">
+                <button type="button" class="color-dot active" data-color="#ffffff" style="background:#ffffff;" title="Capuz Branco de Urso"></button>
+                <button type="button" class="color-dot" data-color="#ffd166" style="background:#ffd166;" title="Loiro Dourado"></button>
+                <button type="button" class="color-dot" data-color="#3a2510" style="background:#3a2510;" title="Castanho Escuro"></button>
+                <button type="button" class="color-dot" data-color="#4cc9f0" style="background:#4cc9f0;" title="Azul Gélido"></button>
+                <button type="button" class="color-dot" data-color="#f72585" style="background:#f72585;" title="Rosa Chiclete"></button>
+              </div>
+            </div>
+
+            <div class="palette-row">
+              <span>Pele:</span>
+              <div class="palette-options" id="skin-colors">
+                <button type="button" class="color-dot active" data-color="#ffe0bd" style="background:#ffe0bd;" title="Pele Clara"></button>
+                <button type="button" class="color-dot" data-color="#e2b98f" style="background:#e2b98f;" title="Pele Média"></button>
+                <button type="button" class="color-dot" data-color="#8d5524" style="background:#8d5524;" title="Pele Escura"></button>
+                <button type="button" class="color-dot" data-color="#a8dadc" style="background:#a8dadc;" title="Pele Fantasmagórica"></button>
+              </div>
+            </div>
+
+            <div class="palette-row">
+              <span>Acessório:</span>
+              <div class="accessory-options" id="accessory-types">
+                <button type="button" class="tag-btn active" data-acc="backpack">🎒 Mochila Verde</button>
+                <button type="button" class="tag-btn" data-acc="cape">🧣 Capa de Aventureiro</button>
+                <button type="button" class="tag-btn" data-acc="none">Nenhum</button>
+              </div>
+            </div>
+          </div>
+
+          <button id="start-game-btn" class="adventure-action-btn">
+            COMEÇAR AVENTURA! 🌟
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TELA 2: O JOGO EM EXECUÇÃO -->
+    <div id="game-screen" class="screen">
+      <!-- HUD SUPERIOR -->
+      <header id="game-hud">
+        <div class="hud-hero-info">
+          <div class="hud-avatar">
+            <canvas id="hud-avatar-canvas" width="40" height="40"></canvas>
+          </div>
+          <div class="hud-bars">
+            <div class="hud-name-lvl">
+              <span id="hud-char-name">Finnelson</span>
+              <span class="badge-lvl">NÍVEL <b id="hud-lvl">1</b></span>
+            </div>
+            <div class="hud-bar-wrapper hp-wrapper">
+              <div id="hud-hp-fill" class="hud-fill"></div>
+              <span id="hud-hp-text">100 / 100</span>
+            </div>
+            <div class="hud-bar-wrapper mp-wrapper">
+              <div id="hud-mp-fill" class="hud-fill"></div>
+              <span id="hud-mp-text">50 / 50</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hud-objective-box">
+          <span class="obj-tag">MISSÃO ATUAL:</span>
+          <span id="hud-objective-text">Explore as Colinas e derrote o Monstro Gelatina!</span>
+        </div>
+
+        <div class="hud-counters">
+          <div class="counter-item online-counter" title="Jogadores conectados na Terra de Ooo">
+            🟢 <span id="hud-online-count">1</span> Online
+          </div>
+          <div class="counter-item gold-counter">
+            🪙 <span id="hud-gold">0</span>
+          </div>
+          <div class="counter-item exp-counter">
+            ⭐ <span id="hud-exp">0</span>/<span id="hud-exp-next">50</span> XP
+          </div>
+          <button id="sound-toggle-btn" class="icon-hud-btn" title="Ligar/Desligar Som">🔊</button>
+        </div>
+      </header>
+
+      <!-- ÁREA PRINCIPAL DO CANVAS DO JOGO -->
+      <div id="canvas-wrapper">
+        <canvas id="game-canvas" width="800" height="520"></canvas>
+
+        <!-- CHAT MULTIPLAYER IN-GAME -->
+        <div id="chat-container">
+          <div id="chat-messages">
+            <div class="chat-msg system">🌟 Conectado à Terra de Ooo! Pressione [ENTER] para falar no chat.</div>
+          </div>
+          <form id="chat-form" class="chat-input-bar">
+            <input type="text" id="chat-input" maxlength="60" placeholder="Pressione [ENTER] para falar..." autocomplete="off">
+            <button type="submit" id="chat-send-btn">Enviar</button>
+          </form>
+        </div>
+
+        <!-- CAIXA DE DIÁLOGO / MENSAGENS ESTILO ADVENTURE TIME -->
+        <div id="dialog-box" class="hidden">
+          <div class="dialog-avatar" id="dialog-avatar">🐶</div>
+          <div class="dialog-content">
+            <h4 id="dialog-speaker">Jake o Cão Falante</h4>
+            <p id="dialog-text">E aí, cara! É hora de chutar uns monstros pelas colinas de Ooo! Matemático!</p>
+            <span class="dialog-hint">Pressione [ESPAÇO] ou clique para continuar...</span>
+          </div>
+        </div>
+
+        <!-- MENSAGEM DE LEVEL UP OU VITÓRIA -->
+        <div id="banner-notice" class="hidden">
+          <h2 id="banner-title">MATEMÁTICO!</h2>
+          <p id="banner-sub">Você subiu para o Nível 2!</p>
+        </div>
+
+        <!-- OVERLAY DE MORTE / RESTART -->
+        <div id="game-over-screen" class="hidden">
+          <h2>AH NÃO, CARA!</h2>
+          <p>Você foi nocauteado pelos monstros da Terra de Ooo!</p>
+          <button id="respawn-btn" class="adventure-action-btn">RENASCER NA CASA DA ÁRVORE 🏠</button>
+        </div>
+      </div>
+
+      <!-- BARRA DE HABILIDADES & CONTROLES INFERIOR -->
+      <footer id="game-footer">
+        <div class="skills-dock">
+          <div class="skill-slot active">
+            <span class="key-bind">ESPAÇO / CLIQUE</span>
+            <span id="skill-1-icon">⚔️</span>
+            <small id="skill-1-name">Ataque Básico</small>
+          </div>
+          <div class="skill-slot" id="skill-2-slot">
+            <span class="key-bind">TECLA [E]</span>
+            <span id="skill-2-icon">🌀</span>
+            <small id="skill-2-name">Habilidade Especial</small>
+            <div id="skill-cd-overlay" class="cd-overlay"></div>
+          </div>
+          <div class="skill-slot" id="potion-slot">
+            <span class="key-bind">TECLA [Q]</span>
+            <span>🧪</span>
+            <small>Poção Doce (<span id="potion-count">2</span>)</small>
+          </div>
+        </div>
+
+        <div class="controls-legend">
+          <span><b>[WASD]</b> ou <b>[Setas]</b>: Mover</span>
+          <span><b>[Espaço]</b>: Atacar</span>
+          <span><b>[E]</b>: Especial</span>
+          <span><b>[Q]</b>: Curar</span>
+          <span><b>[M]</b>: Som</span>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
