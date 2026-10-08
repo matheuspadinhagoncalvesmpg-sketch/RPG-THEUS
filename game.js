@@ -495,10 +495,151 @@ class GameEngine {
     this.potions = 3;
     this.equippedItem = null;
 
+    // Joystick Virtual Touch para Celular
+    this.joystick = { active: false, dx: 0, dy: 0, touchId: null };
+
     this.initWorldDecorations();
     this.initNPCs();
     this.initChests();
     this.initWebSocket();
+    this.initMobileControls();
+    this.resizeCanvas();
+
+    window.addEventListener('resize', () => this.resizeCanvas());
+    window.addEventListener('orientationchange', () => {
+      setTimeout(() => this.resizeCanvas(), 100);
+    });
+  }
+
+  resizeCanvas() {
+    const wrapper = document.getElementById('canvas-wrapper');
+    if (!wrapper || !this.canvas) return;
+
+    const w = wrapper.clientWidth;
+    const h = wrapper.clientHeight;
+    if (w > 0 && h > 0) {
+      // Ajusta resolução do canvas para coincidir proporcionalmente sem distorcer
+      if (window.innerWidth <= 860) {
+        // Modo Mobile: resolução proporcional à tela
+        const aspect = w / h;
+        this.canvas.height = 480;
+        this.canvas.width = Math.round(480 * aspect);
+      } else {
+        this.canvas.width = 800;
+        this.canvas.height = 520;
+      }
+    }
+  }
+
+  initMobileControls() {
+    const zone = document.getElementById('virtual-joystick-zone');
+    const stick = document.getElementById('virtual-joystick-stick');
+    const base = document.getElementById('virtual-joystick-base');
+
+    if (zone && stick && base) {
+      const maxRadius = 35;
+      let startX = 0;
+      let startY = 0;
+
+      const updateStick = (clientX, clientY) => {
+        const deltaX = clientX - startX;
+        const deltaY = clientY - startY;
+        const dist = Math.hypot(deltaX, deltaY);
+        const angle = Math.atan2(deltaY, deltaX);
+
+        const clampedDist = Math.min(dist, maxRadius);
+        const stickX = Math.cos(angle) * clampedDist;
+        const stickY = Math.sin(angle) * clampedDist;
+
+        stick.style.transform = `translate(${stickX}px, ${stickY}px)`;
+
+        // Normalização
+        this.joystick.dx = (deltaX / (dist || 1)) * (clampedDist / maxRadius);
+        this.joystick.dy = (deltaY / (dist || 1)) * (clampedDist / maxRadius);
+      };
+
+      const handleTouchStart = (e) => {
+        e.preventDefault();
+        const touch = e.changedTouches[0];
+        this.joystick.active = true;
+        this.joystick.touchId = touch.identifier;
+        const rect = base.getBoundingClientRect();
+        startX = rect.left + rect.width / 2;
+        startY = rect.top + rect.height / 2;
+        updateStick(touch.clientX, touch.clientY);
+      };
+
+      const handleTouchMove = (e) => {
+        if (!this.joystick.active) return;
+        e.preventDefault();
+        for (let i = 0; i < e.changedTouches.length; i++) {
+          const touch = e.changedTouches[i];
+          if (touch.identifier === this.joystick.touchId) {
+            updateStick(touch.clientX, touch.clientY);
+            break;
+          }
+        }
+      };
+
+      const handleTouchEnd = (e) => {
+        for (let i = 0; i < e.changedTouches.length; i++) {
+          if (e.changedTouches[i].identifier === this.joystick.touchId) {
+            this.joystick.active = false;
+            this.joystick.dx = 0;
+            this.joystick.dy = 0;
+            this.joystick.touchId = null;
+            stick.style.transform = 'translate(0px, 0px)';
+            break;
+          }
+        }
+      };
+
+      zone.addEventListener('touchstart', handleTouchStart, { passive: false });
+      zone.addEventListener('touchmove', handleTouchMove, { passive: false });
+      zone.addEventListener('touchend', handleTouchEnd, { passive: false });
+      zone.addEventListener('touchcancel', handleTouchEnd, { passive: false });
+    }
+
+    // Botões de Ação Touch
+    const btnAttack = document.getElementById('btn-touch-attack');
+    const btnSkill = document.getElementById('btn-touch-skill');
+    const btnPotion = document.getElementById('btn-touch-potion');
+    const btnChat = document.getElementById('btn-touch-chat');
+
+    if (btnAttack) {
+      btnAttack.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        this.performBasicAttack();
+      }, { passive: false });
+    }
+
+    if (btnSkill) {
+      btnSkill.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        this.performSpecialSkill();
+      }, { passive: false });
+    }
+
+    if (btnPotion) {
+      btnPotion.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        this.usePotion();
+      }, { passive: false });
+    }
+
+    if (btnChat) {
+      btnChat.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        const chatContainer = document.getElementById('chat-container');
+        const chatInput = document.getElementById('chat-input');
+        if (chatContainer) {
+          chatContainer.classList.toggle('mobile-collapsed');
+          if (!chatContainer.classList.contains('mobile-collapsed') && chatInput) {
+            chatInput.focus();
+          }
+        }
+      }, { passive: false });
+    }
   }
 
   initWebSocket() {
@@ -868,13 +1009,20 @@ class GameEngine {
       if (this.keys['KeyS'] || this.keys['ArrowDown']) dy += 1;
       if (this.keys['KeyA'] || this.keys['ArrowLeft']) dx -= 1;
       if (this.keys['KeyD'] || this.keys['ArrowRight']) dx += 1;
+
+      // Suporte ao Joystick Touch Mobile
+      if (this.joystick && this.joystick.active) {
+        dx = this.joystick.dx;
+        dy = this.joystick.dy;
+      }
     }
 
-    if (dx !== 0 || dy !== 0) {
-      const len = Math.sqrt(dx * dx + dy * dy);
+    const len = Math.sqrt(dx * dx + dy * dy);
+    if (len > 0.08) {
       const moveSpeed = this.hero.spd * 60 * dt;
-      this.hero.x += (dx / len) * moveSpeed;
-      this.hero.y += (dy / len) * moveSpeed;
+      const factor = (this.joystick && this.joystick.active) ? Math.min(1, len) : 1;
+      this.hero.x += (dx / len) * moveSpeed * factor;
+      this.hero.y += (dy / len) * moveSpeed * factor;
 
       if (Math.abs(dx) > Math.abs(dy)) this.hero.facing = dx > 0 ? 'right' : 'left';
       else this.hero.facing = dy > 0 ? 'down' : 'up';

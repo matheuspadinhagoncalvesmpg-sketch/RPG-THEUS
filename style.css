@@ -847,3 +847,349 @@ body {
 .chat-msg.npc-ai .chat-author {
   color: #c2410c;
 }
+
+/* =========================================================
+   CONTROLES TOUCH PARA DISPOSITIVOS MÓVEIS (CELULAR/TABLET)
+   ========================================================= */
+.mobile-controls-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none; /* Deixa cliques passarem pelo meio da tela */
+  z-index: 25;
+  display: none; /* Ativado via media query ou detecção de touch */
+}
+
+/* JOYSTICK VIRTUAL */
+.joystick-zone {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  width: 120px;
+  height: 120px;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.joystick-base {
+  width: 110px;
+  height: 110px;
+  background: rgba(30, 41, 59, 0.45);
+  border: 3px solid rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  position: relative;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.joystick-stick {
+  width: 48px;
+  height: 48px;
+  background: #ffd028;
+  border: 3px solid #2c221e;
+  border-radius: 50%;
+  position: absolute;
+  box-shadow: 0 4px 0 #2c221e;
+  pointer-events: none;
+  transition: transform 0.05s ease-out;
+}
+
+/* BOTÕES DE AÇÃO TOUCH */
+.mobile-action-buttons {
+  position: absolute;
+  bottom: 18px;
+  right: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.touch-row-top {
+  display: flex;
+  gap: 12px;
+}
+
+.touch-row-main {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.touch-btn {
+  border: 3px solid #2c221e;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  font-size: 22px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  transition: transform 0.08s, filter 0.08s;
+  box-shadow: 0 4px 0 #2c221e;
+}
+
+.touch-btn:active {
+  transform: translateY(3px) scale(0.95);
+  box-shadow: 0 1px 0 #2c221e;
+  filter: brightness(1.2);
+}
+
+.touch-attack-btn {
+  width: 66px;
+  height: 66px;
+  background: #ef4444;
+  font-size: 28px;
+}
+
+.touch-skill-btn {
+  width: 54px;
+  height: 54px;
+  background: #a855f7;
+  font-size: 24px;
+}
+
+.touch-potion-btn {
+  width: 46px;
+  height: 46px;
+  background: #10b981;
+  font-size: 20px;
+}
+
+.touch-chat-btn {
+  width: 44px;
+  height: 44px;
+  background: #f59e0b;
+  font-size: 18px;
+}
+
+/* =========================================================
+   RESPONSIVIDADE COMPLETA PARA TELAS MOBILE
+   ========================================================= */
+@media (max-width: 860px), (hover: none) and (pointer: coarse) {
+  body {
+    padding: 0;
+    margin: 0;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  #game-container {
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    max-width: 100vw;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .screen {
+    width: 100%;
+    height: 100%;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* TELA DE CRIAÇÃO MOBILE */
+  #character-creation-screen {
+    padding: 12px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .adventure-title-badge {
+    margin-bottom: 10px;
+    padding: 6px 10px;
+    font-size: 9px;
+  }
+
+  .adventure-title-badge h2 {
+    font-size: 20px;
+  }
+
+  .creator-layout {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .preview-panel {
+    padding: 10px;
+  }
+
+  .pixel-frame {
+    width: 130px;
+    height: 130px;
+  }
+
+  #preview-canvas {
+    width: 120px;
+    height: 120px;
+  }
+
+  .class-picker {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .class-btn {
+    padding: 6px 2px;
+  }
+
+  .class-icon {
+    font-size: 20px;
+  }
+
+  .class-btn strong {
+    font-size: 12px;
+  }
+
+  .class-btn small {
+    display: none; /* Oculta texto longo em celular */
+  }
+
+  .palette-row {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .palette-row span {
+    width: 100%;
+    font-size: 12px;
+  }
+
+  /* HUD DO JOGO MOBILE */
+  #game-hud {
+    padding: 6px 10px;
+    flex-wrap: nowrap;
+    gap: 6px;
+  }
+
+  .hud-hero-info {
+    gap: 6px;
+  }
+
+  .hud-avatar {
+    width: 36px;
+    height: 36px;
+  }
+
+  #hud-char-name {
+    font-size: 12px;
+    max-width: 70px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .badge-lvl {
+    font-size: 7px;
+    padding: 1px 3px;
+  }
+
+  .hud-bar-wrapper {
+    width: 90px;
+    height: 10px;
+  }
+
+  .hud-objective-box {
+    max-width: 140px;
+    padding: 4px 6px;
+    font-size: 9px;
+    line-height: 1.1;
+  }
+
+  .location-header {
+    gap: 3px;
+  }
+
+  .location-badge {
+    font-size: 8px;
+    padding: 0 4px;
+  }
+
+  .hud-counters {
+    gap: 6px;
+  }
+
+  .counter-item {
+    font-size: 10px;
+    padding: 2px 4px;
+  }
+
+  /* CANVAS DO JOGO OCUPA O RESTANTE DA TELA */
+  #canvas-wrapper {
+    flex: 1;
+    height: auto;
+    position: relative;
+  }
+
+  /* MOSTRAR CONTROLES TOUCH */
+  .mobile-controls-layer {
+    display: block;
+  }
+
+  /* CHAT MOBILE RECOLHIDO/COMPACTO */
+  #chat-container {
+    width: 260px;
+    max-height: 140px;
+    bottom: 85px;
+    left: 10px;
+    z-index: 20;
+    transition: transform 0.2s, opacity 0.2s;
+  }
+
+  #chat-container.mobile-collapsed {
+    transform: translateY(200px);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  #chat-messages {
+    max-height: 80px;
+    font-size: 10px;
+  }
+
+  /* RODAPÉ DO JOGO MOBILE */
+  #game-footer {
+    padding: 4px 10px;
+  }
+
+  .controls-legend {
+    display: none; /* Oculta instruções de teclado no celular */
+  }
+
+  .skills-dock {
+    width: 100%;
+    justify-content: space-around;
+    gap: 6px;
+  }
+
+  .skill-slot {
+    min-width: 60px;
+    padding: 2px 6px;
+  }
+
+  .skill-slot span {
+    font-size: 15px;
+  }
+
+  .skill-slot small {
+    font-size: 9px;
+  }
+
+  .key-bind {
+    display: none; /* Oculta tags de teclas físicas */
+  }
+}

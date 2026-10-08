@@ -2,7 +2,9 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Hora da Aventura: Crônicas de Ooo - RPG Pixel</title>
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -212,6 +214,28 @@
           <h2>AH NÃO, CARA!</h2>
           <p>Você foi nocauteado pelos monstros da Terra de Ooo!</p>
           <button id="respawn-btn" class="adventure-action-btn">RENASCER NA CASA DA ÁRVORE 🏠</button>
+        </div>
+
+        <!-- CONTROLES TOUCH PARA CELULAR E TABLET -->
+        <div id="mobile-controls" class="mobile-controls-layer">
+          <!-- JOYSTICK VIRTUAL ANALÓGICO -->
+          <div id="virtual-joystick-zone" class="joystick-zone">
+            <div id="virtual-joystick-base" class="joystick-base">
+              <div id="virtual-joystick-stick" class="joystick-stick"></div>
+            </div>
+          </div>
+
+          <!-- BOTÕES DE AÇÃO TOUCH -->
+          <div class="mobile-action-buttons">
+            <div class="touch-row-top">
+              <button type="button" id="btn-touch-chat" class="touch-btn touch-chat-btn" title="Chat">💬</button>
+              <button type="button" id="btn-touch-potion" class="touch-btn touch-potion-btn" title="Poção">🧪</button>
+            </div>
+            <div class="touch-row-main">
+              <button type="button" id="btn-touch-skill" class="touch-btn touch-skill-btn" title="Habilidade">🌀</button>
+              <button type="button" id="btn-touch-attack" class="touch-btn touch-attack-btn" title="Ataque">⚔️</button>
+            </div>
+          </div>
         </div>
       </div>
 
