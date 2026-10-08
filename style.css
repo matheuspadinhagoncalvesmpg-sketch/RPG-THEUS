@@ -1380,3 +1380,6 @@ body {
   .stats-preview { display: none; }
   .class-picker { grid-template-columns: repeat(4, 1fr) !important; }
 }
+
+.touch-dash-btn { width: 48px !important; height: 48px !important; background: #38bdf8; font-size: 22px !important; }
+.touch-btn.cooling { filter: grayscale(1) brightness(0.8); }
