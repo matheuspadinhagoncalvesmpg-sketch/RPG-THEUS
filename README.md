@@ -1,6 +1,6 @@
 # THEUS: Ecos de Vésper
 
-Um metroidvania 2D inspirado em **Hollow Knight**, feito em JavaScript puro com canvas e pensado primeiro para **jogar no celular** (e também no PC, com teclado ou controle).
+Um metroidvania 2D com exploração no estilo **Hollow Knight** e coleta e construção no estilo **Terraria**, feito em JavaScript puro com canvas e pensado primeiro para **jogar no celular** (e também no PC, com teclado ou controle).
 
 > Em Vésper o sol parou no crepúsculo. O Rei Sem Coroa roubou a Coroa da Aurora, e só um Errante, com um olho da cor do ocaso e outro da aurora, pode devolver o dia ao reino.
 
@@ -21,35 +21,44 @@ Também funciona em qualquer hospedagem estática (veja [HOSTINGER_DEPLOY.md](HO
 | :--- | :--- | :--- | :--- |
 | Mover / olhar | Joystick (lado esquerdo, aparece onde você tocar) | ← → ↑ ↓ ou WASD | Analógico / D-pad |
 | Pular (segure para pular mais alto) | ▲ | Espaço, Z ou K | A |
-| Atacar (↑ ou ↓ + ataque mira para cima/baixo) | ⚔ | X ou J | X |
+| Atacar (↑ ou ↓ + ataque mira para cima/baixo) | ⚔ | **clique esquerdo** (mira no cursor), X ou J | X |
 | Dash | » | C, Shift ou L | RB / RT |
-| ALMA: segure para **curar**, toque para **magia** | ✦ | V ou F | B |
+| ALMA: segure para **curar**, toque para **magia** | ✦ | **clique direito**, V ou F | B |
+| Modo construção | botão de martelo | B | LB |
+| Colocar / remover peça | toque no cenário / picareta | clique esquerdo / direito, teclas 1-8 e 0 | — |
 | Falar / descansar / ler | ↑ ou botão que aparece | ↑ ou E | Y |
 | Mapa | botão no topo | M ou Tab | Select |
 | Pausa | botão no topo | Esc ou P | Start |
 
-No celular dá para **deslizar o dedo** de um botão para outro (por exemplo, do pulo para o ataque). Tamanho e transparência dos botões, vibração e som ficam em **Pausa → opções**.
+O jogo tem um **Manual dos controles** completo na pausa e na tela inicial. No celular dá para **deslizar o dedo** de um botão para outro (por exemplo, do pulo para o ataque). Tamanho e transparência dos botões, vibração e som ficam em **Pausa → opções**.
 
 ---
 
 ## 🗺️ O mundo
 
-15 salas conectadas, em 4 regiões, com mapa automático:
+16 salas conectadas, em 4 regiões, com mapa automático:
 
+- **Planície do Lar**: terra livre a oeste do início, a principal zona para construir sua base.
 - **Campos do Crepúsculo**: colinas sob um pôr do sol eterno. Abrigo com banco, Oren o andarilho e Mira a mercadora.
 - **Bosque das Lanternas**: floresta escura e cheia de vaga-lumes. Esconde um segredo atrás de uma parede.
 - **Ruínas Suspensas**: ilhas flutuando entre as nuvens, uma torre para escalar e o trono do Rei.
 - **Cavernas de Cristal**: chega-se por um chão rachado no Abrigo (golpeie para baixo...).
 
-### Mecânicas no estilo Hollow Knight
+### Coleta e construção (estilo Terraria)
+- Golpeie **árvores, rochas, veios de minério e cristais** para coletar **madeira, pedra, minério e cristal**.
+- Em **zonas de construção** (Planície do Lar, Santuário do Vento e Coração de Cristal) aperte **B** ou o martelo e construa: blocos de madeira, pedra e cristal, plataformas, tochas, estandartes, baús e **fogueiras**, que viram seu ponto de descanso e renascimento.
+- A picareta (ou o clique direito) remove a peça e devolve os materiais. Tudo fica salvo.
+
+### Combate e exploração
 - Pulo com altura variável, *coyote time* e *buffer* de pulo.
 - Golpe para os lados, para cima e para baixo, com **quique (pogo)** em inimigos e espinhos.
 - **ALMA**: cada golpe acerta e enche o vaso; segure para curar uma máscara.
-- **Bancos** salvam o jogo e restauram a vida.
-- Ao morrer, você deixa sua **sombra** com todo o geo. Volte até ela para recuperar.
+- **Fogueiras** salvam o jogo e restauram a vida.
+- Ao morrer, você deixa uma **lápide** com todas as moedas. Volte até ela para recuperar.
 - Habilidades que abrem caminhos novos: **Manto do Vento** (dash), **Garras de Pedra** (escalar paredes), **Asas de Cinza** (pulo duplo) e **Chama da Alma** (magia).
 - Chefes: **Cavaleiro de Musgo** e **O Rei Sem Coroa**, cada um com segunda fase.
-- Loja, vasos de vida escondidos, paredes e chãos quebráveis, rochas de geo.
+- Loja, cristais de vida escondidos, paredes e chãos quebráveis, veios de ouro.
+- Inimigos: gosmas, cogumelos saltitantes, morcegos de brasa, flores carnívoras e golens de pedra.
 
 ---
 
@@ -76,7 +85,8 @@ src/
   player.js       física e ações do herói
   enemies.js      inimigos comuns e projéteis
   bosses.js       chefes
-  entities.js     bancos, personagens, itens, geo, sombra
+  build.js        modo construção (estilo Terraria)
+  entities.js     fogueiras, personagens, recursos, moedas, lápide, construções
   rooms.js        mapa do mundo (editável)
   world.js        grade de blocos e conexão entre salas
   physics.js      colisão

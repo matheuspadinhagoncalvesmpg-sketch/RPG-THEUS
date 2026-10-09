@@ -77,26 +77,30 @@ export class Crawler extends Enemy {
     if (this.onGround && (!groundAhead(this, game.room, game.world, this.dir) || wallAhead(this, game.room, game.world, this.dir, true))) this.dir *= -1;
     this.fallStep(game);
   }
+  // Gosma: geleia translúcida que se arrasta.
   draw(ctx, pal) {
-    const { cx } = this, by = this.y + this.h;
+    const wob = Math.sin(this.t * 0.25);
+    const w = 14 + wob * 1.5, h = 11 - wob * 1.2;
     ctx.save();
-    ctx.translate(cx, by);
+    ctx.translate(this.cx, this.y + this.h);
     ctx.scale(this.dir, 1);
-    const step = Math.sin(this.t * 0.3);
-    ctx.strokeStyle = this.col('#15111a');
-    ctx.lineWidth = 2;
-    for (let i = 0; i < 3; i++) {
-      const lx = -9 + i * 8;
-      ctx.beginPath(); ctx.moveTo(lx, -6); ctx.lineTo(lx - 3 + step * (i % 2 ? 2 : -2), 0); ctx.stroke();
-    }
-    ctx.fillStyle = this.col(shade(pal.top, -0.45));
-    ctx.beginPath(); ctx.ellipse(0, -9, 15, 10, 0, Math.PI, 0); ctx.fill();
-    ctx.fillStyle = this.col(shade(pal.top, -0.2));
-    ctx.beginPath(); ctx.ellipse(-2, -13, 9, 4, -0.2, Math.PI, 0); ctx.fill();
-    ctx.fillStyle = this.col('#1c1622');
-    ctx.beginPath(); ctx.ellipse(12, -7, 6, 5, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = this.col(pal.accent);
-    ctx.beginPath(); ctx.arc(14, -8, 1.8, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha *= 0.88;
+    ctx.fillStyle = this.flash > 0 ? '#ffffff' : shade(pal.topHi, -0.15);
+    ctx.beginPath();
+    ctx.moveTo(-w, 0);
+    ctx.quadraticCurveTo(-w - 1, -h * 1.5, 0, -h * 1.6);
+    ctx.quadraticCurveTo(w + 1, -h * 1.5, w, 0);
+    ctx.closePath();
+    ctx.fill();
+    ctx.globalAlpha /= 0.88;
+    ctx.fillStyle = this.col(shade(pal.top, -0.3));
+    ctx.beginPath(); ctx.ellipse(-3, -6, 4, 3, 0.3, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.65)';
+    ctx.beginPath(); ctx.ellipse(-6, -h * 1.2, 3.2, 1.8, -0.4, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fbf8f2';
+    ctx.beginPath(); ctx.ellipse(3, -10, 2.4, 3, 0, 0, Math.PI * 2); ctx.ellipse(8.5, -10, 2.4, 3, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#16121c';
+    ctx.beginPath(); ctx.arc(4, -9.5, 1.3, 0, Math.PI * 2); ctx.arc(9.5, -9.5, 1.3, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
   }
 }
@@ -123,6 +127,7 @@ export class Hopper extends Enemy {
     const hit = this.fallStep(game);
     if (hit.left || hit.right) this.dir *= -1;
   }
+  // Cogumelo saltitante.
   draw(ctx, pal) {
     const air = !this.onGround;
     const squash = air ? 0.85 : this.wait < 12 ? 1.2 : 1 + Math.sin(this.t * 0.1) * 0.03;
@@ -130,16 +135,24 @@ export class Hopper extends Enemy {
     ctx.translate(this.cx, this.y + this.h);
     ctx.scale(this.dir, 1);
     ctx.scale(1 / squash, squash);
-    ctx.fillStyle = this.col('#3a2440');
-    ctx.beginPath(); ctx.ellipse(0, -11, 13, 11, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = this.col('#5b3863');
-    ctx.beginPath(); ctx.ellipse(-3, -15, 7, 4, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = this.col('#f4efe6');
-    ctx.beginPath(); ctx.ellipse(6, -13, 4.5, 5, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#16111a';
-    ctx.beginPath(); ctx.arc(7.5, -12.5, 2.2, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = this.col('#2a1830'); ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(-6, -20); ctx.quadraticCurveTo(-10, -30, -4, -32); ctx.stroke();
+    ctx.fillStyle = this.col('#3a2a2a');
+    ctx.beginPath(); ctx.ellipse(-5, -1.5, 3.5, 2, 0, 0, Math.PI * 2); ctx.ellipse(5, -1.5, 3.5, 2, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = this.col('#efe1c6');
+    ctx.fillRect(-6.5, -13, 13, 11.5);
+    ctx.fillStyle = this.col('#c9b691');
+    ctx.fillRect(-6.5, -13, 3, 11.5);
+    ctx.fillStyle = '#1a1220';
+    ctx.beginPath(); ctx.ellipse(0.5, -8, 1.3, 1.9, 0, 0, Math.PI * 2); ctx.ellipse(4.5, -8, 1.3, 1.9, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#1a1220'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(-1, -11); ctx.lineTo(2, -10); ctx.moveTo(6, -11); ctx.lineTo(3, -10); ctx.stroke();
+    ctx.fillStyle = this.col('#b8433f');
+    ctx.beginPath(); ctx.ellipse(0, -13, 14, 11, 0, Math.PI, 0); ctx.fill();
+    ctx.fillStyle = this.col('#8f2f2c');
+    ctx.fillRect(-14, -14, 28, 2);
+    ctx.fillStyle = this.col('#f7ecd6');
+    for (const [sx, sy, r] of [[-7, -18, 2.6], [2, -21, 2.2], [8, -16, 1.8], [-1, -15, 1.4]]) {
+      ctx.beginPath(); ctx.arc(sx, sy, r, 0, Math.PI * 2); ctx.fill();
+    }
     ctx.restore();
   }
 }
@@ -179,22 +192,34 @@ export class Flyer extends Enemy {
     if (Math.abs(this.vx) > 0.2) this.dir = sign(this.vx);
     this.physics(game, { ignoreOneWay: true });
   }
+  // Morcego de brasa.
   draw(ctx, pal) {
     ctx.save();
     ctx.translate(this.cx, this.cy);
     ctx.scale(this.dir, 1);
-    const g = ctx.createRadialGradient(-8, 4, 1, -8, 4, 16);
-    g.addColorStop(0, rgba(pal.accent, 0.6)); g.addColorStop(1, rgba(pal.accent, 0));
-    ctx.fillStyle = g; ctx.fillRect(-26, -12, 36, 32);
-    const wing = Math.sin(this.t * 0.6) * 6;
-    ctx.fillStyle = this.col('rgba(220,230,255,0.45)');
-    ctx.beginPath(); ctx.ellipse(-2, -8 - wing * 0.3, 9, 4 + wing * 0.4, -0.5, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = this.col('#1d1828');
-    ctx.beginPath(); ctx.ellipse(0, 0, 10, 8, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = this.col(pal.accent);
-    ctx.beginPath(); ctx.ellipse(-8, 3, 5, 4, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = this.col('#ff5266');
-    ctx.beginPath(); ctx.arc(5, -1, 2, 0, Math.PI * 2); ctx.fill();
+    const flap = Math.sin(this.t * 0.55);
+    const body = this.col('#2b2133'), wing = this.col('#3f2f4c');
+    for (const s of [-1, 1]) {
+      ctx.fillStyle = wing;
+      ctx.beginPath();
+      ctx.moveTo(s * 4, -2);
+      ctx.lineTo(s * 14, -9 - flap * 7);
+      ctx.lineTo(s * 20, -3 - flap * 5);
+      ctx.quadraticCurveTo(s * 16, 0, s * 15, 3 - flap * 2);
+      ctx.quadraticCurveTo(s * 11, 1, s * 9, 4 - flap);
+      ctx.quadraticCurveTo(s * 6, 2, s * 4, 3);
+      ctx.fill();
+      ctx.strokeStyle = this.col('#5a4668'); ctx.lineWidth = 0.8;
+      ctx.beginPath(); ctx.moveTo(s * 4, -1); ctx.lineTo(s * 14, -9 - flap * 7); ctx.moveTo(s * 9, 0); ctx.lineTo(s * 15, 3 - flap * 2); ctx.stroke();
+    }
+    ctx.fillStyle = body;
+    ctx.beginPath(); ctx.ellipse(0, 0, 6.5, 7, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(-5, -4); ctx.lineTo(-4, -11); ctx.lineTo(-1, -6); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(5, -4); ctx.lineTo(4, -11); ctx.lineTo(1, -6); ctx.fill();
+    ctx.fillStyle = this.col('#ff6a3d');
+    ctx.beginPath(); ctx.arc(-2.2, -1.5, 1.4, 0, Math.PI * 2); ctx.arc(2.6, -1.5, 1.4, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = this.col('#f4efe6');
+    ctx.beginPath(); ctx.moveTo(-1.5, 3); ctx.lineTo(-0.8, 5); ctx.lineTo(0, 3); ctx.moveTo(1, 3); ctx.lineTo(1.7, 5); ctx.lineTo(2.4, 3); ctx.fill();
     ctx.restore();
   }
 }
@@ -219,20 +244,35 @@ export class Spitter extends Enemy {
       }
     } else if (--this.cool <= 0 && this.dist(game) < (game.ai.tactics.tactic === 'ambush' ? 220 : 360) && !p.dead) this.wind = 28;
   }
+  // Flor carnívora que cospe sementes ácidas.
   draw(ctx, pal) {
-    const swell = this.wind > 0 ? 1 + (1 - this.wind / 28) * 0.25 : 1 + Math.sin(this.t * 0.06) * 0.03;
+    const open = this.wind > 0 ? 1 - this.wind / 28 : 0.15 + Math.sin(this.t * 0.06) * 0.05;
     ctx.save();
     ctx.translate(this.cx, this.y + this.h);
     ctx.scale(this.dir, 1);
-    ctx.strokeStyle = this.col(shade(pal.top, -0.3)); ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.moveTo(-8, 0); ctx.quadraticCurveTo(-12, -8, -6, -8); ctx.moveTo(8, 0); ctx.quadraticCurveTo(12, -8, 6, -8); ctx.stroke();
-    ctx.scale(swell, swell);
-    ctx.fillStyle = this.col(shade(pal.top, -0.15));
-    ctx.beginPath(); ctx.ellipse(0, -14, 11, 12, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = this.col('#1a1420');
-    ctx.beginPath(); ctx.ellipse(6, -16, 5, this.wind > 0 ? 5 : 3, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = this.col(this.wind > 0 ? '#ffe36b' : '#c6ff9a');
-    ctx.beginPath(); ctx.arc(-3, -18, 2, 0, Math.PI * 2); ctx.fill();
+    const leaf = this.col(shade(pal.top, -0.15));
+    ctx.fillStyle = leaf;
+    ctx.beginPath(); ctx.ellipse(-8, -3, 8, 3, -0.4, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(8, -3, 8, 3, 0.4, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = this.col(shade(pal.top, -0.35)); ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(-4, -10, 1, -16); ctx.stroke();
+    ctx.translate(2, -18);
+    for (let i = 0; i < 6; i++) {
+      const a = (i / 6) * Math.PI * 2 + this.t * 0.01;
+      ctx.fillStyle = this.col(i % 2 ? '#c2456b' : '#e0607f');
+      ctx.beginPath(); ctx.ellipse(Math.cos(a) * 8, Math.sin(a) * 8, 6, 3.5, a, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.fillStyle = this.col('#7a1f3a');
+    ctx.beginPath(); ctx.arc(0, 0, 7, 0, Math.PI * 2); ctx.fill();
+    const m = 1.5 + open * 5;
+    ctx.fillStyle = '#1a0a12';
+    ctx.beginPath(); ctx.ellipse(2, 0, 5, m, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = this.col('#f4efe6');
+    for (let i = -1; i <= 1; i++) {
+      ctx.beginPath(); ctx.moveTo(i * 3 + 0.5, -m); ctx.lineTo(i * 3 + 2, -m + 2.2); ctx.lineTo(i * 3 + 3.5, -m); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(i * 3 + 0.5, m); ctx.lineTo(i * 3 + 2, m - 2.2); ctx.lineTo(i * 3 + 3.5, m); ctx.fill();
+    }
+    if (this.wind > 0) { ctx.fillStyle = '#b6ff7a'; ctx.beginPath(); ctx.arc(2, 0, 2 * open, 0, Math.PI * 2); ctx.fill(); }
     ctx.restore();
   }
 }
@@ -273,33 +313,45 @@ export class Guard extends Enemy {
     }
     this.fallStep(game);
   }
+  // Golem de pedra com lança e runa brilhante.
   draw(ctx, pal) {
     ctx.save();
     ctx.translate(this.cx, this.y + this.h);
     ctx.scale(this.dir, 1);
     const wind = this.state === 'wind';
     const lunge = this.state === 'lunge';
-    ctx.fillStyle = this.col('#15121c');
-    ctx.fillRect(-7, -10, 5, 10); ctx.fillRect(2, -10, 5, 10);
-    ctx.fillStyle = this.col(shade(pal.top, -0.35));
-    ctx.beginPath(); ctx.moveTo(-11, -8); ctx.lineTo(-9, -32); ctx.lineTo(9, -32); ctx.lineTo(11, -8); ctx.fill();
-    ctx.fillStyle = this.col(shade(pal.topHi, -0.25));
-    ctx.beginPath(); ctx.ellipse(1, -36, 9, 9, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = this.col(shade(pal.topHi, -0.1));
-    ctx.beginPath(); ctx.moveTo(-4, -44); ctx.lineTo(2, -54); ctx.lineTo(6, -43); ctx.fill();
-    ctx.fillStyle = '#0d0b12';
-    ctx.fillRect(0, -38, 9, 3);
+    const stone = this.col('#6a6676'), stoneDark = this.col('#4a4654'), moss = this.col(shade(pal.top, -0.1));
+    const step = this.state === 'patrol' ? Math.sin(this.t * 0.2) * 2 : 0;
+    ctx.fillStyle = stoneDark;
+    ctx.fillRect(-9 + step, -11, 7, 11); ctx.fillRect(2 - step, -11, 7, 11);
+    ctx.fillStyle = stone;
+    ctx.beginPath(); ctx.moveTo(-12, -10); ctx.lineTo(-13, -30); ctx.lineTo(12, -32); ctx.lineTo(13, -10); ctx.fill();
+    ctx.fillStyle = stoneDark;
+    ctx.fillRect(-12, -22, 25, 2);
+    ctx.fillStyle = moss;
+    ctx.beginPath(); ctx.ellipse(-6, -31, 7, 3, 0, 0, Math.PI * 2); ctx.fill();
+    // cabeça
+    ctx.fillStyle = stone;
+    ctx.fillRect(-7, -43, 15, 12);
+    ctx.fillStyle = stoneDark;
+    ctx.fillRect(-7, -35, 15, 2);
     ctx.fillStyle = wind ? '#ff5a4a' : pal.accent;
-    ctx.fillRect(4, -38, 3, 2);
+    ctx.fillRect(2, -40, 5, 3);
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.fillStyle = wind ? 'rgba(255,90,74,0.4)' : 'rgba(255,255,255,0.15)';
+    ctx.beginPath(); ctx.arc(4.5, -38.5, 6, 0, Math.PI * 2); ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
+    // runa no peito
+    ctx.strokeStyle = wind ? '#ff8a6a' : pal.accent; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.moveTo(-2, -28); ctx.lineTo(2, -24); ctx.lineTo(-2, -16); ctx.moveTo(2, -24); ctx.lineTo(5, -26); ctx.stroke();
     // lança
-    const sx = lunge ? 14 : wind ? -6 : 6;
-    ctx.strokeStyle = this.col('#8a8fa6'); ctx.lineWidth = 2.5;
-    ctx.beginPath(); ctx.moveTo(sx - 16, -22); ctx.lineTo(sx + 22, -24); ctx.stroke();
-    ctx.fillStyle = this.col('#e3e8f5');
-    ctx.beginPath(); ctx.moveTo(sx + 22, -28); ctx.lineTo(sx + 32, -24); ctx.lineTo(sx + 22, -20); ctx.fill();
-    // escudo
-    ctx.fillStyle = this.col(shade(pal.top, -0.1));
-    ctx.beginPath(); ctx.ellipse(8, -20, 4, 10, 0, 0, Math.PI * 2); ctx.fill();
+    const sx = lunge ? 16 : wind ? -6 : 6;
+    ctx.strokeStyle = this.col('#5a3a22'); ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(sx - 18, -22); ctx.lineTo(sx + 22, -24); ctx.stroke();
+    ctx.fillStyle = this.col('#c7ccd8');
+    ctx.beginPath(); ctx.moveTo(sx + 21, -29); ctx.lineTo(sx + 34, -24); ctx.lineTo(sx + 21, -19); ctx.fill();
+    ctx.fillStyle = stone;
+    ctx.beginPath(); ctx.arc(sx + 2, -23, 4, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
   }
 }

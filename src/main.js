@@ -101,7 +101,7 @@ const profile = { ...DEFAULT_PROFILE };
 const PALETTES = {
   cloak: ['#3a4f8f', '#8f2f3a', '#2f6f4f', '#5b3a8f', '#b8742f', '#c75b8f', '#24232c', '#d9d4c7'],
   hair: ['#f2f2f2', '#f472b6', '#ffd166', '#1a1a24', '#6a4126', '#ef4444', '#38bdf8', '#a855f7'],
-  skin: ['#efe6da', '#ffe0bd', '#e2b98f', '#c68642', '#8d5524', '#5c3818', '#a8dadc'],
+  skin: ['#f2cfae', '#ffe0bd', '#efe6da', '#e2b98f', '#c68642', '#8d5524', '#5c3818', '#a8dadc'],
 };
 const EYE_LABELS = { hetero: 'Ocaso & Aurora', black: 'Preto', blue: 'Azul', red: 'Vermelho', green: 'Verde', gold: 'Dourado' };
 
@@ -168,7 +168,59 @@ $('#btn-start').addEventListener('click', () => {
   play(save);
 });
 
+// ───────── Mouse ─────────
+// Esquerdo: ataca mirando no cursor (ou coloca peça no modo construção).
+// Direito: ALMA — segure para curar, clique para magia (ou remove peça).
+const canvas = $('#game');
+canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+canvas.addEventListener('pointermove', (e) => {
+  if (e.pointerType === 'mouse') game.build.hoverScreen(e.clientX, e.clientY);
+});
+canvas.addEventListener('pointerdown', (e) => {
+  if (e.pointerType !== 'mouse') return;
+  if (game.state === 'dialog') { game.advanceDialog(); return; }
+  if (game.state === 'banner' && game.bannerTimer <= 0) { game.closeBanner(); return; }
+  if (game.state !== 'play') return;
+  input.setTouchMode(false);
+  e.preventDefault();
+  if (game.build.active) { game.build.clickScreen(e.clientX, e.clientY, e.button === 2); return; }
+  if (e.button === 0) input.mouseAttack(e.clientX, e.clientY);
+  if (e.button === 2) input.setMouse('spell', true);
+});
+window.addEventListener('pointerup', (e) => {
+  if (e.pointerType === 'mouse' && e.button === 2) input.setMouse('spell', false);
+});
+canvas.addEventListener('wheel', (e) => {
+  if (!game.build.active) return;
+  e.preventDefault();
+  const n = 9;
+  game.build.select((game.build.sel + (e.deltaY > 0 ? 1 : n - 1)) % n);
+}, { passive: false });
+
+// Toque no cenário durante o modo construção coloca/remove a peça.
+touch.onWorldTap = (x, y) => {
+  if (!game.build.active || game.state !== 'play') return false;
+  game.build.clickScreen(x, y);
+  return true;
+};
+game.touchLayout = () => touch.layout();
+
+// ───────── Manual dos controles ─────────
+function openManual() {
+  const tab = input.touchMode ? 'touch' : 'pc';
+  for (const b of $$('.manual-tab')) b.classList.toggle('active', b.dataset.tab === tab);
+  for (const t of $$('.manual-table')) t.classList.toggle('hidden', t.dataset.tab !== tab);
+  ui.show($('#manual-screen'));
+}
+for (const b of $$('.btn-manual')) b.addEventListener('click', openManual);
+for (const b of $$('.manual-tab')) b.addEventListener('click', () => {
+  for (const x of $$('.manual-tab')) x.classList.toggle('active', x === b);
+  for (const t of $$('.manual-table')) t.classList.toggle('hidden', t.dataset.tab !== b.dataset.tab);
+});
+$('#btn-manual-close').addEventListener('click', () => ui.show($('#manual-screen'), false));
+
 // ───────── Menus do jogo ─────────
+$('#btn-build').addEventListener('click', () => { if (game.state === 'play') game.build.toggle(); });
 $('#btn-map').addEventListener('click', () => { if (game.state === 'play') game.openMenu('map'); });
 $('#btn-pause').addEventListener('click', () => { if (game.state === 'play') game.openMenu('pause'); });
 $('#btn-resume').addEventListener('click', () => game.closeMenu());

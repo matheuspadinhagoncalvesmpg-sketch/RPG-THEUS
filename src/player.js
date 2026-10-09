@@ -177,8 +177,18 @@ export class Player {
     }
 
     // ── Ataque
-    if (inp.pressed.attack && this.attackCd <= 0 && !this.focusing && !stunned && this.dashTimer <= 0) {
+    if (inp.pressed.attack && game.build.active) inp.aim = null;
+    if (inp.pressed.attack && !game.build.active && this.attackCd <= 0 && !this.focusing && !stunned && this.dashTimer <= 0) {
       this.attackDir = inp.held.up ? 'up' : inp.held.down && !this.onGround ? 'down' : 'side';
+      if (inp.aim) {
+        // Ataque com o mouse: mira para onde o cursor está.
+        const w = game.screenToWorld(inp.aim.x, inp.aim.y);
+        const dx = w.x - this.cx, dy = w.y - this.cy;
+        if (dy < -24 && -dy > Math.abs(dx) * 0.9) this.attackDir = 'up';
+        else if (dy > 24 && dy > Math.abs(dx) * 0.9 && !this.onGround) this.attackDir = 'down';
+        else { this.attackDir = 'side'; if (Math.abs(dx) > 4) this.facing = Math.sign(dx); }
+      }
+      inp.aim = null;
       this.attackTimer = ATTACK_FRAMES;
       this.attackCd = ATTACK_COOLDOWN;
       this.hitSet = new Set();
@@ -241,18 +251,15 @@ export class Player {
 
     let alpha = 1;
     if (this.invuln > 0 && this.hurtTimer <= 0 && (this.t >> 2) % 2) alpha = 0.35;
-    const attacking = this.attackTimer > ATTACK_FRAMES - 9 ? this.attackDir : null;
+    // Golpe: a lâmina gira em ~9 quadros a partir do ombro, deixando um rastro.
+    const swingK = this.attackTimer > 0 ? Math.min(1, (ATTACK_FRAMES - this.attackTimer) / 9) : 0;
+    const level = game.save.nail;
+    if (this.attackTimer > 0)
+      drawSlash(ctx, this.cx + this.facing * 2, this.y + this.h - 18, this.attackDir, this.facing, swingK, level);
     drawHero(ctx, this.cx, this.y + this.h, {
       profile: game.save.profile, facing: this.facing, state: this.sitting ? 'sit' : this.state,
-      t: this.t, alpha, flash: this.flash, attack: attacking,
+      t: this.t, alpha, flash: this.flash, swordLevel: level,
+      attack: this.attackTimer > 0 ? { dir: this.attackDir, k: swingK } : null,
     });
-
-    if (this.attackTimer > 0) {
-      const k = 1 - this.attackTimer / ATTACK_FRAMES;
-      const d = this.attackDir;
-      const sx = d === 'side' ? this.cx + this.facing * 24 : this.cx;
-      const sy = d === 'up' ? this.y - 12 : d === 'down' ? this.y + this.h + 14 : this.cy - 2;
-      drawSlash(ctx, sx, sy, d, this.facing, k);
-    }
   }
 }

@@ -1,10 +1,11 @@
 // Núcleo do jogo: salas, transições, combate, câmera e estados.
-import { TILE, T, AREAS, ABILITIES, PHYS, SOUL_MAX, SOUL_PER_HIT, SOUL_COST } from './config.js';
+import { TILE, T, AREAS, ABILITIES, PHYS, SOUL_MAX, SOUL_PER_HIT, SOUL_COST, RESOURCES } from './config.js';
 import { World } from './world.js';
 import { Player } from './player.js';
 import { ENEMY_TYPES, Projectile } from './enemies.js';
 import { BOSS_TYPES } from './bosses.js';
-import { spawnRoomEntities, GeoCoin, ShadeEcho, GeoRock } from './entities.js';
+import { spawnRoomEntities, GeoCoin, Tombstone, ItemDrop } from './entities.js';
+import { BuildMode } from './build.js';
 import { Particles } from './fx.js';
 import { Renderer } from './render.js';
 import { AIDirector } from './ai.js';
@@ -23,6 +24,8 @@ export class Game {
     this.particles = new Particles();
     this.player = new Player();
     this.bubbles = [];
+    this.floaters = [];
+    this.build = new BuildMode(this);
     this.cam = { x: 0, y: 0 };
     this.shakeMag = 0;
     this.state = 'off';
@@ -75,7 +78,7 @@ export class Game {
         this.player.y -= 4 * TILE;
         setTimeout(() => this.ui.toast(this.input.touchMode
           ? 'Joystick: mover  ·  ▲ pular  ·  ⚔ atacar  ·  segure ✦ para curar'
-          : '← → mover · Espaço pular · X atacar · segure V para curar', 6000), 1800);
+          : 'A D mover · Espaço pular · clique para atacar · segure o botão direito para curar · Esc → manual', 6500), 1800);
       }
     }
   }
@@ -101,7 +104,9 @@ export class Game {
       this.bossPending = { type: room.boss, x: k.tx * TILE + TILE / 2, y: (k.ty + 1) * TILE };
     }
     const sh = this.save.shade;
-    if (sh && sh.room === id) this.entities.push(new ShadeEcho(sh.x, sh.y, sh.geo));
+    if (sh && sh.room === id) this.entities.push(new Tombstone(sh.x, sh.y, sh.geo));
+    this.floaters = [];
+    this.build.onRoomEnter(room);
     this.projectiles = [];
     this.coins = [];
     this.hostileBoxes = [];
@@ -183,6 +188,7 @@ export class Game {
       case 'play':
         if (inp.pressed.pause) return this.openMenu('pause');
         if (inp.pressed.map) return this.openMenu('map');
+        if (inp.pressed.build) this.build.toggle();
         this.updatePlay();
         break;
       case 'dialog':
@@ -306,8 +312,8 @@ export class Game {
       this.input.vibrate(25);
     }
     for (const r of this.entities) {
-      if (!(r instanceof GeoRock) || hitSet.has(r) || !overlap(box, r.box())) continue;
-      hitSet.add(r); r.hit(this); solidHit = true;
+      if (typeof r.hit !== 'function' || hitSet.has(r) || !overlap(box, r.box())) continue;
+      hitSet.add(r); r.hit(this); if (!r.kind) solidHit = true; // coletar não empurra o herói
       if (dir === 'down') pogo = true;
     }
     // Paredes e chãos quebráveis
@@ -461,7 +467,7 @@ export class Game {
     this.respawn();
     this.ui.resetHud();
     this.ui.updateHud(this);
-    if (this.save.shade) setTimeout(() => this.ui.toast('Sua sombra guarda o geo perdido. Encontre-a.'), 900);
+    if (this.save.shade) setTimeout(() => this.ui.toast('Sua lápide guarda as moedas perdidas. Volte até ela.'), 900);
   }
 
   dropGeo(x, y, amount) {
@@ -474,6 +480,46 @@ export class Game {
     }
   }
 
+  dropResource(x, y, kind, n) {
+    for (let i = 0; i < n; i++) this.coins.push(new ItemDrop(x + rand(-6, 6), y + rand(-6, 6), kind, 1));
+  }
+
+  collectResource(kind, n, x, y) {
+    this.save.inv[kind] = (this.save.inv[kind] || 0) + n;
+    this.audio.play('pickup_small');
+    this.floatText(x, y - 10, `+${n} ${RESOURCES[kind].name}`, RESOURCES[kind].color);
+    this.build.refresh();
+  }
+
+  floatText(x, y, text, color = '#f4efe6') {
+    // Junta coletas seguidas do mesmo item num texto só.
+    const f = this.floaters.find((o) => o.key === text.replace(/^\+\d+ /, '') && o.t > 40);
+    if (f) {
+      f.n += 1;
+      f.text = `+${f.n} ${f.key}`;
+      f.t = 70; f.x = x; f.y = y;
+      return;
+    }
+    const m = text.match(/^\+(\d+) (.*)$/);
+    this.floaters.push({ x, y, text, color, t: 70, key: m ? m[2] : text, n: m ? Number(m[1]) : 1 });
+  }
+
+  drawFloaters(ctx) {
+    ctx.save();
+    ctx.font = '700 10px "Cinzel", serif';
+    ctx.textAlign = 'center';
+    for (const f of this.floaters) {
+      f.t--; f.y -= 0.35;
+      ctx.globalAlpha = Math.min(1, f.t / 20);
+      ctx.fillStyle = 'rgba(8,6,12,0.75)';
+      ctx.fillText(f.text, f.x + 1, f.y + 1);
+      ctx.fillStyle = f.color;
+      ctx.fillText(f.text, f.x, f.y);
+    }
+    this.floaters = this.floaters.filter((f) => f.t > 0);
+    ctx.restore();
+  }
+
   collectGeo(v) {
     this.save.geo += v;
     this.audio.play('geo');
@@ -484,7 +530,7 @@ export class Game {
     this.save.shade = null;
     this.audio.play('heal');
     this.particles.burst(sh.x, sh.y - 20, 24, { color: ['#ffffff', '#9b8fb5'], speed: 5, life: 34, glow: true });
-    this.ui.toast(`Você recuperou ${sh.geo} geo`);
+    this.ui.toast(`Você recuperou ${sh.geo} moedas`);
     this.persist();
   }
 
@@ -506,7 +552,8 @@ export class Game {
   restAtBench(bench) {
     const p = this.player;
     p.sitting = true;
-    p.x = bench.x - p.w / 2;
+    p.x = bench.x - p.w / 2 - 20;
+    p.facing = 1;
     p.y = bench.y - p.h;
     p.vx = p.vy = 0;
     this.masks = this.save.masksMax;
@@ -558,7 +605,7 @@ export class Game {
     this.persist();
     this.audio.play('pickup');
     this.ui.resetHud();
-    this.openBanner('◈', 'Vaso de Vida', 'Sua vida máxima aumentou em uma máscara.', '');
+    this.openBanner('♥', 'Cristal de Vida', 'Sua vida máxima aumentou em um coração.', '');
   }
 
   openBanner(icon, title, desc, keys) {
@@ -728,6 +775,10 @@ export class Game {
     this.drawBubbles(ctx);
     if (this.interactTarget && !this.input.touchMode && this.state === 'play') this.drawPrompt(ctx, this.interactTarget);
     r.drawLighting(this, camX, camY);
+    ctx.setTransform(s, 0, 0, s, -camX * s, -camY * s);
+    this.drawLights(ctx);
+    this.drawFloaters(ctx);
+    if (this.build.active) this.build.draw(ctx);
 
     // Escurecimento (transição, espinhos, morte)
     let fade = 0;
@@ -739,6 +790,32 @@ export class Game {
       ctx.fillStyle = `rgba(0,0,0,${clamp(fade, 0, 1)})`;
       ctx.fillRect(0, 0, r.canvas.width, r.canvas.height);
     }
+  }
+
+  // Brilho quente de tochas e fogueiras, que atravessa a escuridão das cavernas.
+  drawLights(ctx) {
+    const dark = AREAS[this.room.area].dark;
+    if (!dark) return;
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    for (const e of this.entities) {
+      if (!e.light) continue;
+      const g = ctx.createRadialGradient(e.x, e.y - 18, 4, e.x, e.y - 18, 110 * e.light);
+      g.addColorStop(0, `rgba(255,170,80,${0.22 * dark})`);
+      g.addColorStop(1, 'rgba(255,150,70,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(e.x - 120, e.y - 140, 240, 240);
+    }
+    ctx.restore();
+  }
+
+  // Converte um ponto da tela (CSS px) em coordenadas do mundo da sala.
+  screenToWorld(sx, sy) {
+    const r = this.renderer, c = r.canvas.getBoundingClientRect();
+    return {
+      x: this.cam.x + ((sx - c.left) * (r.canvas.width / c.width)) / r.scale,
+      y: this.cam.y + ((sy - c.top) * (r.canvas.height / c.height)) / r.scale,
+    };
   }
 
   drawPrompt(ctx, e) {

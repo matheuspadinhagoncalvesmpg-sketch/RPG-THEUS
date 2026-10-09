@@ -11,7 +11,7 @@ export const NPCS = {
           'Seus olhos... um da cor do ocaso, outro da aurora. Dizem que só alguém assim pode devolver o dia a Vésper.',
           'Desde que o Rei Sem Coroa roubou a Coroa da Aurora, o sol nunca terminou de se pôr.',
           'Ele espera no alto das Ruínas Suspensas. Mas o caminho até lá exige mais do que uma lâmina.',
-          'Siga para o leste, pelo Bosque das Lanternas. E descanse nos bancos: eles guardam sua jornada.',
+          'Siga para o leste, pelo Bosque das Lanternas. E descanse nas fogueiras: elas guardam sua jornada. Ah, e a oeste fica a Planície do Lar: terra livre para quem quiser construir.',
         ];
       }
       const a = s.abilities;
@@ -26,7 +26,7 @@ export const NPCS = {
     name: 'Mira, a Mercadora',
     shop: true,
     lines(game) {
-      if (!game.save.talked.mira) return ['Hehe! Um cliente! Faz séculos.', 'Junto geo de todo canto de Vésper. Se tiver o bastante, tenho coisas que podem salvar sua pele.'];
+      if (!game.save.talked.mira) return ['Hehe! Um cliente! Faz séculos.', 'Junto moedas de todo canto de Vésper, e também madeira, pedra e minério... quem constrói sempre precisa. Se tiver o bastante, tenho coisas que podem salvar sua pele.'];
       return ['Vai levar alguma coisa?'];
     },
   },
@@ -44,7 +44,7 @@ export const NPCS = {
 };
 
 export const SHOP_ITEMS = [
-  { id: 'mask', name: 'Fragmento de Vida', desc: '+1 máscara de vida máxima.', price: 120, apply: (s) => { s.masksMax += 1; } },
+  { id: 'mask', name: 'Fragmento de Vida', desc: '+1 coração de vida máxima.', price: 120, apply: (s) => { s.masksMax += 1; } },
   { id: 'nail', name: 'Afiar a Lâmina', desc: 'Seus golpes causam o dobro de dano.', price: 220, apply: (s) => { s.nail = 2; } },
-  { id: 'mask2', name: 'Vaso Antigo', desc: '+1 máscara de vida máxima.', price: 300, apply: (s) => { s.masksMax += 1; } },
+  { id: 'mask2', name: 'Vaso Antigo', desc: '+1 coração de vida máxima.', price: 300, apply: (s) => { s.masksMax += 1; } },
 ];

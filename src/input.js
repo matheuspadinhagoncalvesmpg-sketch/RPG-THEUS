@@ -1,6 +1,6 @@
 // Entrada unificada: teclado, controle (gamepad) e toque com multitoque.
 
-export const ACTIONS = ['left', 'right', 'up', 'down', 'jump', 'attack', 'dash', 'spell', 'interact', 'map', 'pause'];
+export const ACTIONS = ['left', 'right', 'up', 'down', 'jump', 'attack', 'dash', 'spell', 'interact', 'map', 'pause', 'build'];
 
 const KEYMAP = {
   ArrowLeft: 'left', KeyA: 'left',
@@ -14,9 +14,10 @@ const KEYMAP = {
   KeyE: 'interact', Enter: 'interact',
   KeyM: 'map', Tab: 'map',
   Escape: 'pause', KeyP: 'pause',
+  KeyB: 'build',
 };
 
-const PAD_BUTTONS = { 0: 'jump', 2: 'attack', 1: 'spell', 5: 'dash', 7: 'dash', 3: 'interact', 9: 'pause', 8: 'map', 12: 'up', 13: 'down', 14: 'left', 15: 'right' };
+const PAD_BUTTONS = { 0: 'jump', 2: 'attack', 1: 'spell', 5: 'dash', 7: 'dash', 3: 'interact', 4: 'build', 9: 'pause', 8: 'map', 12: 'up', 13: 'down', 14: 'left', 15: 'right' };
 
 export class Input {
   constructor() {
@@ -29,6 +30,8 @@ export class Input {
     this.keys = {};
     this.touch = {};
     this.pad = {};
+    this.mouse = {};
+    this.aim = null; // ponto da tela clicado com o mouse (mira do ataque)
     this.vibration = true;
     this.touchMode = false;
     this.onTouchModeChange = null;
@@ -58,6 +61,7 @@ export class Input {
   clearAll() {
     this.keys = {};
     this.touch = {};
+    this.mouse = {};
     for (const a of ACTIONS) if (this.prev[a]) this.queuedRelease[a] = true;
   }
 
@@ -66,6 +70,19 @@ export class Input {
     this.touchMode = on;
     document.body.classList.toggle('touch-mode', on);
     if (this.onTouchModeChange) this.onTouchModeChange(on);
+  }
+
+  // Mouse: clique esquerdo ataca mirando no cursor; direito segura a ALMA.
+  mouseAttack(x, y) {
+    this.aim = { x, y };
+    this.queuedPress.attack = true;
+  }
+
+  setMouse(action, on) {
+    if (!!this.mouse[action] === on) return;
+    this.mouse[action] = on;
+    if (on) this.queuedPress[action] = true;
+    else this.queuedRelease[action] = true;
   }
 
   setTouch(action, on) {
@@ -94,7 +111,7 @@ export class Input {
   poll() {
     this.pollGamepad();
     for (const a of ACTIONS) {
-      const raw = !!(this.keys[a] || this.touch[a] || this.pad[a]);
+      const raw = !!(this.keys[a] || this.touch[a] || this.pad[a] || this.mouse[a]);
       this.pressed[a] = (raw && !this.prev[a]) || !!this.queuedPress[a];
       this.released[a] = (!raw && this.prev[a]) || !!this.queuedRelease[a];
       this.held[a] = raw;
@@ -129,6 +146,7 @@ export class TouchControls {
     this.joyOrigin = { x: 0, y: 0 };
     this.radius = 56;
     this.enabled = false;
+    this.onWorldTap = null; // retorna true se o toque foi usado (ex.: construir)
 
     root.addEventListener('pointerdown', (e) => this.down(e), { passive: false });
     root.addEventListener('pointermove', (e) => this.move(e), { passive: false });
@@ -173,9 +191,13 @@ export class TouchControls {
     try { this.root.setPointerCapture(e.pointerId); } catch (err) { /* ok */ }
     const w = window.innerWidth;
     const btn = this.buttonAt(e.clientX, e.clientY);
+    const h = window.innerHeight;
+    const joyZone = e.clientX < w * 0.42 && e.clientY > h * 0.38;
     if (btn) {
       this.pointers.set(e.pointerId, { kind: 'btn', act: btn.act, el: btn.el });
       this.press(btn);
+    } else if (this.onWorldTap && !joyZone && this.onWorldTap(e.clientX, e.clientY)) {
+      // toque usado pelo modo construção
     } else if (e.clientX < w * 0.5 && this.joyId === null) {
       this.joyId = e.pointerId;
       this.joyOrigin = { x: e.clientX, y: e.clientY };

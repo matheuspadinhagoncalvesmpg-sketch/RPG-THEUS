@@ -349,23 +349,29 @@ export class HollowKing extends Boss {
     ctx.fill();
     ctx.fillStyle = c('#3d2a55');
     ctx.beginPath(); ctx.moveTo(-6, -48); ctx.lineTo(-10, -6); ctx.lineTo(6, -6); ctx.lineTo(8, -48); ctx.fill();
-    // máscara
-    ctx.fillStyle = c('#e9e3d6');
+    // capuz com rosto na sombra e olhos acesos
+    ctx.fillStyle = c('#1d1528');
     ctx.beginPath();
-    ctx.moveTo(-9, -58);
-    ctx.quadraticCurveTo(-10, -70, 1, -71);
-    ctx.quadraticCurveTo(12, -70, 11, -58);
-    ctx.quadraticCurveTo(10, -48, 1, -45);
-    ctx.quadraticCurveTo(-8, -48, -9, -58);
+    ctx.moveTo(-12, -46);
+    ctx.quadraticCurveTo(-14, -70, 1, -74);
+    ctx.quadraticCurveTo(15, -70, 13, -46);
+    ctx.quadraticCurveTo(1, -40, -12, -46);
     ctx.fill();
-    ctx.fillStyle = '#0a0810';
-    ctx.beginPath(); ctx.ellipse(-2, -60, 2.6, 4.2, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(6, -60, 2.6, 4.2, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = winding || this.phase2 ? '#ff6a4a' : '#ffd36e';
-    ctx.beginPath(); ctx.arc(-2, -59, 1.2, 0, Math.PI * 2); ctx.arc(6, -59, 1.2, 0, Math.PI * 2); ctx.fill();
-    // rachadura
-    ctx.strokeStyle = '#0a0810'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(4, -71); ctx.lineTo(2, -65); ctx.lineTo(5, -62); ctx.stroke();
+    ctx.fillStyle = c('#3d2a55');
+    ctx.beginPath(); ctx.moveTo(-12, -46); ctx.quadraticCurveTo(-14, -70, 1, -74); ctx.lineTo(-2, -70); ctx.quadraticCurveTo(-10, -64, -8, -47); ctx.fill();
+    ctx.fillStyle = '#05040a';
+    ctx.beginPath(); ctx.ellipse(2, -57, 8, 9, 0, 0, Math.PI * 2); ctx.fill();
+    const eye = winding || this.phase2 ? '#ff6a4a' : '#ffd36e';
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.fillStyle = eye;
+    ctx.beginPath(); ctx.ellipse(-1, -58, 2.2, 1.2, 0.2, 0, Math.PI * 2); ctx.ellipse(6, -58, 2.2, 1.2, -0.2, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = winding || this.phase2 ? 'rgba(255,106,74,0.3)' : 'rgba(255,211,110,0.25)';
+    ctx.beginPath(); ctx.arc(2.5, -58, 9, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    // barba cinzenta
+    ctx.fillStyle = c('#8a8496');
+    ctx.beginPath(); ctx.moveTo(-3, -51); ctx.lineTo(2, -38); ctx.lineTo(8, -51); ctx.fill();
     // fragmentos da coroa flutuando
     for (let i = 0; i < 3; i++) {
       const a = this.t * 0.03 + (i * Math.PI * 2) / 3;

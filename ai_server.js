@@ -16,14 +16,14 @@ export function loadEnv(root) {
 
 const WORLD = `Mundo: Vésper, um reino onde o sol parou no crepúsculo. O Rei Sem Coroa roubou a Coroa da Aurora e espera no Trono, no alto das Ruínas Suspensas.
 O herói é o Errante, com um olho da cor do ocaso (vermelho) e outro da aurora (azul).
-Regiões: Campos do Crepúsculo (início, Abrigo com banco), Bosque das Lanternas (Cavaleiro de Musgo guarda o Santuário do Vento com o Manto do Vento/dash),
+Regiões: Planície do Lar (terra livre a oeste do início, onde o herói pode construir sua base com madeira, pedra, minério e cristal), Campos do Crepúsculo (início, Abrigo com fogueira), Bosque das Lanternas (Cavaleiro de Musgo guarda o Santuário do Vento com o Manto do Vento/dash),
 Ruínas Suspensas (Ponte Partida exige dash; Torre dos Ventos exige escalar paredes com as Garras de Pedra, achadas na Galeria dos Escaladores),
 Cavernas de Cristal (sob um chão rachado no Abrigo; guardam as Asas de Cinza/pulo duplo). A Chama da Alma (magia) está atrás de uma parede oca nas Raízes Profundas.
-Geo é o dinheiro. ALMA enche ao acertar golpes; segurar o botão de alma cura.`;
+O dinheiro são moedas. ALMA enche ao acertar golpes; segurar o botão de alma cura. Fogueiras salvam o jogo. Ao morrer, o herói deixa uma lápide com as moedas.`;
 
 const PERSONAS = {
   oren: 'Você é Oren, o Andarilho: um velho cartógrafo gentil e melancólico, fala devagar, usa metáforas sobre caminhos e o pôr do sol.',
-  mira: 'Você é Mira, a Mercadora: animada, gananciosa de um jeito simpático, ri com "hehe", adora geo e fofoca sobre o reino. Vende Fragmento de Vida (120 geo), Afiar a Lâmina (220) e Vaso Antigo (300).',
+  mira: 'Você é Mira, a Mercadora: animada, gananciosa de um jeito simpático, ri com "hehe", adora moedas e fofoca sobre o reino. Vende Fragmento de Vida (120 moedas), Afiar a Lâmina (220) e Vaso Antigo (300).',
   eco: 'Você é o Eco da Lanterna: um espírito sussurrante e enigmático que fala em frases curtas e poéticas, guarda memórias de Vésper.',
 };
 
@@ -78,7 +78,7 @@ function progressText(p = {}) {
   const ab = p.abilities || {};
   const have = Object.entries({ dash: 'Manto do Vento', wallJump: 'Garras de Pedra', doubleJump: 'Asas de Cinza', spell: 'Chama da Alma' })
     .filter(([k]) => ab[k]).map(([, v]) => v);
-  return `Progresso do herói: habilidades = ${have.join(', ') || 'nenhuma'}; Cavaleiro de Musgo ${p.bosses?.moss ? 'derrotado' : 'vivo'}; Rei Sem Coroa ${p.bosses?.king ? 'derrotado' : 'vivo'}; geo = ${clamp(p.geo, 0, 99999, 0)}; sala atual = ${str(p.room, 40)}.`;
+  return `Progresso do herói: habilidades = ${have.join(', ') || 'nenhuma'}; Cavaleiro de Musgo ${p.bosses?.moss ? 'derrotado' : 'vivo'}; Rei Sem Coroa ${p.bosses?.king ? 'derrotado' : 'vivo'}; moedas = ${clamp(p.geo, 0, 99999, 0)}; sala atual = ${str(p.room, 40)}.`;
 }
 
 async function npcReply(body) {
@@ -105,7 +105,7 @@ async function director(body) {
   const prompt = `Você é o diretor tático dos inimigos de um jogo de plataforma 2D estilo Hollow Knight. Decida a estratégia dos próximos segundos.
 ${WORLD}
 Situação: sala "${str(s.room, 40)}", inimigos vivos: ${str(JSON.stringify(s.enemies || {}), 200)}.
-Herói: máscaras ${clamp(s.masks, 0, 20, 5)}/${clamp(s.masksMax, 1, 20, 5)}, alma ${clamp(s.soul, 0, 99, 0)}, morreu ${clamp(s.deaths, 0, 999, 0)} vezes nesta sala.
+Herói: corações ${clamp(s.masks, 0, 20, 5)}/${clamp(s.masksMax, 1, 20, 5)}, alma ${clamp(s.soul, 0, 99, 0)}, morreu ${clamp(s.deaths, 0, 999, 0)} vezes nesta sala.
 Estilo de jogo recente: golpes de lado ${clamp(s.style?.side, 0, 999, 0)}, para cima ${clamp(s.style?.up, 0, 999, 0)}, para baixo (pogo) ${clamp(s.style?.down, 0, 999, 0)}, dashes ${clamp(s.style?.dash, 0, 999, 0)}, curas ${clamp(s.style?.heal, 0, 999, 0)}, dano sofrido ${clamp(s.style?.hurt, 0, 999, 0)}, distância média dos inimigos ${clamp(s.style?.dist, 0, 999, 100)}px.
 ${boss ? `Chefe em luta: ${boss}, vida ${clamp(s.bossHp, 0, 1, 1) * 100}%.` : ''}
 Objetivo: luta desafiadora e justa. Se o herói está quase morrendo ou morreu muito aqui, alivie um pouco; se está dominando, pressione e explore os pontos fracos do estilo dele.

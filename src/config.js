@@ -114,3 +114,28 @@ export const ABILITIES = {
     keys: 'Toque rápido em ✦ (V)  ·  Segure para curar',
   },
 };
+
+// ── Coleta e construção (estilo Terraria) ──
+export const RESOURCES = {
+  wood: { name: 'Madeira', color: '#c08a52' },
+  stone: { name: 'Pedra', color: '#a7a3b3' },
+  ore: { name: 'Minério', color: '#e39a3a' },
+  crystal: { name: 'Cristal', color: '#7ef0ff' },
+};
+
+// Nós de recurso no mapa (letra → recurso)
+export const NODE_CHARS = { w: 'wood', r: 'stone', o: 'ore', k: 'crystal' };
+
+export const BUILD_ITEMS = [
+  { id: 'remove', name: 'Remover', tool: true },
+  { id: 'wood_block', name: 'Bloco de Madeira', cost: { wood: 2 }, tile: T.SOLID },
+  { id: 'wood_plat', name: 'Plataforma', cost: { wood: 1 }, tile: T.ONEWAY },
+  { id: 'stone_block', name: 'Bloco de Pedra', cost: { stone: 2 }, tile: T.SOLID },
+  { id: 'crystal_block', name: 'Tijolo de Cristal', cost: { crystal: 1, stone: 1 }, tile: T.SOLID },
+  { id: 'torch', name: 'Tocha', cost: { wood: 1, ore: 1 }, deco: true, support: 'any' },
+  { id: 'banner', name: 'Estandarte', cost: { wood: 2, crystal: 1 }, deco: true, support: 'below' },
+  { id: 'chest', name: 'Baú', cost: { wood: 4, ore: 1 }, deco: true, support: 'below' },
+  { id: 'campfire', name: 'Fogueira', cost: { wood: 5, stone: 3 }, deco: true, support: 'below', desc: 'vira ponto de descanso' },
+];
+export const BUILD_BY_ID = Object.fromEntries(BUILD_ITEMS.map((b) => [b.id, b]));
+export const BUILD_REACH = 7 * TILE;

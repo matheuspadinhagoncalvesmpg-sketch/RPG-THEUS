@@ -1,5 +1,5 @@
 // Interface em HTML sobre o canvas: HUD, diálogos, mapa, loja, avisos.
-import { AREAS, TILE, T, SOUL_MAX } from './config.js';
+import { AREAS, TILE, T, SOUL_MAX, RESOURCES } from './config.js';
 import { SHOP_ITEMS } from './dialog.js';
 import { rgba } from './util.js';
 import { TACTIC_NAMES } from './ai.js';
@@ -59,6 +59,13 @@ export class UI {
       $('#soul').classList.toggle('ready', game.soul >= 33);
     }
     if (this.last.geo !== s.geo) { this.last.geo = s.geo; this.geoEl.textContent = s.geo; }
+    const invKey = JSON.stringify(s.inv);
+    if (this.last.inv !== invKey) {
+      this.last.inv = invKey;
+      $('#inv').innerHTML = Object.entries(RESOURCES)
+        .filter(([k]) => (s.inv[k] || 0) > 0)
+        .map(([k, r]) => `<span title="${r.name}"><i style="background:${r.color}"></i>${s.inv[k]}</span>`).join('');
+    }
     const boss = game.boss && !game.boss.dead ? game.boss : null;
     this.show(this.bossBar, !!boss && boss.state !== 'intro');
     const t = game.ai.tactics;
@@ -203,9 +210,18 @@ export class UI {
       ctx.fillStyle = color;
       ctx.beginPath(); ctx.arc(ox + gx * k, oy + gy * k, size, 0, Math.PI * 2); ctx.fill();
     };
-    for (const r of rooms)
+    for (const r of rooms) {
+      if (r.zone) {
+        ctx.strokeStyle = 'rgba(255,207,122,0.8)';
+        ctx.setLineDash([3, 2]);
+        ctx.strokeRect(ox + (r.x + r.zone[0]) * k, oy + (r.y + r.zone[1]) * k, r.zone[2] * k, r.zone[3] * k);
+        ctx.setLineDash([]);
+      }
       for (const e of r.entities)
         if (e.ch === 'B') mark(r.x + e.tx + 0.5, r.y + e.ty + 0.5, '#ffcf7a', 4);
+      for (const [idx, id] of r.placed)
+        if (id === 'campfire') mark(r.x + (idx % r.w) + 0.5, r.y + Math.floor(idx / r.w) + 0.5, '#ffcf7a', 4);
+    }
     const sh = game.save.shade;
     if (sh && game.world.byId[sh.room]) {
       const r = game.world.byId[sh.room];

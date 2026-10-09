@@ -8,7 +8,7 @@ export const DEFAULT_PROFILE = {
   cloak: '#3a4f8f',
   hair: '#f2f2f2',
   eyes: 'hetero',
-  skin: '#efe6da',
+  skin: '#f2cfae',
 };
 
 export function newSave(profile) {
@@ -27,6 +27,8 @@ export function newSave(profile) {
     talked: {},
     bought: {},
     shade: null,
+    inv: { wood: 0, stone: 0, ore: 0, crystal: 0 },
+    builds: {},
     playTime: 0,
     finished: false,
   };
@@ -38,7 +40,8 @@ export function loadSave() {
     if (!raw) return null;
     const s = JSON.parse(raw);
     if (!s || s.v !== 2) return null;
-    return { ...newSave(s.profile), ...s };
+    const base = newSave(s.profile);
+    return { ...base, ...s, inv: { ...base.inv, ...(s.inv || {}) }, builds: s.builds || {} };
   } catch (e) {
     return null;
   }

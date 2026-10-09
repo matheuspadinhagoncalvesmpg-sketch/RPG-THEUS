@@ -149,6 +149,10 @@ export class AudioSystem {
       case 'orb': this.tone(520, { type: 'triangle', dur: 0.15, vol: 0.08, slide: 1.4 }); break;
       case 'spit': this.noise({ dur: 0.15, vol: 0.25, freq: 700, sweep: 0.6, q: 3 }); break;
       case 'ui': this.tone(660, { type: 'triangle', dur: 0.08, vol: 0.1 }); break;
+      case 'chop': this.noise({ dur: 0.1, vol: 0.4, freq: 600, sweep: 0.6, q: 2 }); this.tone(140, { type: 'triangle', dur: 0.1, vol: 0.2, slide: 0.7 }); break;
+      case 'pickup_small': this.tone(1200 + Math.random() * 200, { type: 'sine', dur: 0.08, vol: 0.07, slide: 1.3 }); break;
+      case 'place': this.noise({ dur: 0.08, vol: 0.35, freq: 900, sweep: 0.5, type: 'lowpass' }); this.tone(220, { type: 'triangle', dur: 0.08, vol: 0.12 }); break;
+      case 'deny': this.tone(180, { type: 'square', dur: 0.1, vol: 0.06, slide: 0.8 }); break;
       case 'talk': this.tone(300 + Math.random() * 120, { type: 'triangle', dur: 0.05, vol: 0.05 }); break;
       case 'death':
         this.tone(160, { type: 'sawtooth', dur: 1.5, vol: 0.2, slide: 0.3 });

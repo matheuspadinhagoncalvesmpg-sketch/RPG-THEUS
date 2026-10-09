@@ -27,10 +27,14 @@
       <div class="hud-col">
         <div id="masks"></div>
         <div id="geo"><span class="geo-ico"></span><span id="geo-n">0</span></div>
+        <div id="inv"></div>
         <div id="ai-badge" class="hidden"></div>
       </div>
     </div>
     <div class="hud-right">
+      <button id="btn-build" class="hud-btn hidden" aria-label="Construir">
+        <svg viewBox="0 0 24 24"><path d="M14 4l6 6-3 3-6-6z M11 7L3.5 14.5a2 2 0 0 0 0 3l3 3a2 2 0 0 0 3 0L17 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+      </button>
       <button id="btn-map" class="hud-btn" aria-label="Mapa">
         <svg viewBox="0 0 24 24"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z M9 4v14 M15 6v14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
       </button>
@@ -38,6 +42,12 @@
         <svg viewBox="0 0 24 24"><path d="M8 5v14 M16 5v14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
       </button>
     </div>
+  </div>
+
+  <div id="hotbar" class="hidden">
+    <div id="hb-res"></div>
+    <div class="hb-row"><div id="hb-slots"></div><button id="hb-close" class="hud-btn" aria-label="Sair do modo construção">✕</button></div>
+    <div id="hb-info"></div>
   </div>
 
   <div id="boss-bar" class="hidden"><div id="boss-name"></div><div class="bar"><div id="boss-fill"></div></div></div>
@@ -79,7 +89,7 @@
     <div class="panel map-panel">
       <h3 id="map-room"></h3>
       <canvas id="map-canvas"></canvas>
-      <p class="legend"><i class="lg-you"></i> você <i class="lg-bench"></i> banco <i class="lg-shade"></i> sombra</p>
+      <p class="legend"><i class="lg-you"></i> você <i class="lg-bench"></i> fogueira <i class="lg-shade"></i> lápide <i class="lg-zone"></i> zona de construção</p>
       <p class="hint">toque para fechar</p>
     </div>
   </div>
@@ -89,6 +99,7 @@
       <h2>Pausado</h2>
       <button id="btn-resume" class="menu-btn">Continuar</button>
       <button id="btn-pause-map" class="menu-btn">Mapa</button>
+      <button class="menu-btn btn-manual">Manual dos controles</button>
       <div class="options">
         <div class="opt"><span>Som</span><button class="opt-btn" data-setting="muted"></button></div>
         <div class="opt"><span>Vibração</span><button class="opt-btn" data-setting="vibration"></button></div>
@@ -126,6 +137,50 @@
     </div>
   </div>
 
+  <div id="manual-screen" class="overlay hidden">
+    <div class="panel manual-panel">
+      <h2>Manual dos controles</h2>
+      <div class="manual-tabs">
+        <button class="manual-tab active" data-tab="pc">Teclado e mouse</button>
+        <button class="manual-tab" data-tab="touch">Celular</button>
+        <button class="manual-tab" data-tab="pad">Controle</button>
+      </div>
+      <table class="manual-table" data-tab="pc">
+        <tr><td>Mover</td><td><kbd>A</kbd><kbd>D</kbd> ou <kbd>←</kbd><kbd>→</kbd></td></tr>
+        <tr><td>Pular (segure para ir mais alto)</td><td><kbd>Espaço</kbd> <kbd>Z</kbd> <kbd>K</kbd></td></tr>
+        <tr><td>Atacar</td><td><kbd>Clique esquerdo</kbd> (mira no cursor) ou <kbd>X</kbd> <kbd>J</kbd></td></tr>
+        <tr><td>Atacar para cima / para baixo</td><td>clique acima/abaixo do herói, ou <kbd>W</kbd>/<kbd>S</kbd> + ataque</td></tr>
+        <tr><td>Quicar em inimigos e espinhos</td><td>ataque para baixo no ar</td></tr>
+        <tr><td>Dash</td><td><kbd>Shift</kbd> <kbd>C</kbd> <kbd>L</kbd></td></tr>
+        <tr><td>ALMA: segure = curar, toque = magia</td><td><kbd>Clique direito</kbd> ou <kbd>V</kbd> <kbd>F</kbd></td></tr>
+        <tr><td>Falar, ler, descansar</td><td><kbd>W</kbd> <kbd>↑</kbd> <kbd>E</kbd></td></tr>
+        <tr><td>Modo construção</td><td><kbd>B</kbd></td></tr>
+        <tr><td>Colocar / remover peça</td><td><kbd>Clique esquerdo</kbd> / <kbd>Clique direito</kbd></td></tr>
+        <tr><td>Escolher peça</td><td><kbd>1</kbd>…<kbd>8</kbd>, <kbd>0</kbd> = remover</td></tr>
+        <tr><td>Mapa · Pausa</td><td><kbd>M</kbd> <kbd>Tab</kbd> · <kbd>Esc</kbd> <kbd>P</kbd></td></tr>
+      </table>
+      <table class="manual-table hidden" data-tab="touch">
+        <tr><td>Mover / mirar</td><td>arraste no lado esquerdo (o joystick aparece onde você tocar)</td></tr>
+        <tr><td>Pular</td><td><kbd>▲</kbd> segure para pular mais alto</td></tr>
+        <tr><td>Atacar</td><td><kbd>⚔</kbd> com joystick para cima/baixo para mirar</td></tr>
+        <tr><td>Dash</td><td><kbd>»</kbd></td></tr>
+        <tr><td>ALMA</td><td><kbd>✦</kbd> segure para curar, toque para magia</td></tr>
+        <tr><td>Falar, ler, descansar</td><td>botão dourado que aparece perto</td></tr>
+        <tr><td>Construir</td><td>botão de martelo no topo · toque no cenário para colocar · escolha a picareta para remover</td></tr>
+        <tr><td>Dica</td><td>deslize o dedo de um botão para outro sem soltar</td></tr>
+      </table>
+      <table class="manual-table hidden" data-tab="pad">
+        <tr><td>Mover</td><td>analógico ou direcional</td></tr>
+        <tr><td>Pular · Atacar</td><td><kbd>A</kbd> · <kbd>X</kbd></td></tr>
+        <tr><td>Dash</td><td><kbd>RB</kbd> <kbd>RT</kbd></td></tr>
+        <tr><td>ALMA</td><td><kbd>B</kbd></td></tr>
+        <tr><td>Interagir · Construir</td><td><kbd>Y</kbd> · <kbd>LB</kbd></td></tr>
+        <tr><td>Mapa · Pausa</td><td><kbd>Select</kbd> · <kbd>Start</kbd></td></tr>
+      </table>
+      <button id="btn-manual-close" class="menu-btn">Fechar</button>
+    </div>
+  </div>
+
   <div id="ending-screen" class="overlay hidden">
     <div class="panel ending">
       <p class="eyebrow">A Coroa da Aurora retorna</p>
@@ -152,6 +207,7 @@
           <button id="btn-new-yes" class="menu-btn danger">Apagar e começar</button>
           <button id="btn-new-no" class="menu-btn subtle">Cancelar</button>
         </div>
+        <button class="menu-btn subtle btn-manual">Manual dos controles</button>
         <button id="btn-options" class="menu-btn subtle">Opções</button>
         <div id="title-options" class="options hidden">
           <div class="opt"><span>Som</span><button class="opt-btn" data-setting="muted"></button></div>

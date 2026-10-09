@@ -29,17 +29,30 @@ class RoomBuilder {
 const DEFS = [
   // ───────────── CAMPOS DO CREPÚSCULO ─────────────
   {
+    id: 'planicie_lar', name: 'Planície do Lar', area: 'campos',
+    x: -44, y: 18, w: 44, h: 16, sky: true, zone: [4, 2, 30, 11],
+    build: (b) => {
+      b.rect(0, 13, 44, 3);
+      b.rect(0, 0, 2, 13);
+      b.rect(36, 12, 3, 1);
+      b.set(3, 12, 'r').set(35, 12, 'w').set(40, 12, 'w').set(42, 12, 'r');
+      b.set(37, 11, 'L');
+    },
+    lore: [
+      'Uma placa de madeira cravada no chão:\n"Terras livres. Corte árvores, quebre pedras e construa aqui o seu lar."\n(Aperte B ou o botão de martelo para construir.)',
+    ],
+  },
+  {
     id: 'campos_inicio', name: 'Colina do Despertar', area: 'campos',
     x: 0, y: 18, w: 36, h: 16, sky: true,
     build: (b) => {
       b.rect(0, 13, 36, 3);
-      b.rect(0, 0, 2, 13);
-      b.rect(2, 7, 2, 6);
-      b.rect(4, 10, 2, 3);
+      b.rect(0, 0, 3, 8).rect(3, 0, 2, 4);
       b.rect(11, 12, 7, 1).rect(13, 11, 3, 1);
       b.plat(20, 9, 4).set(22, 8, '$');
       b.rect(30, 12, 3, 1);
       b.set(7, 12, 'L').set(9, 12, 'S').set(26, 12, 'c');
+      b.set(28, 12, 'w').set(34, 12, 'r');
     },
     lore: [
       'Uma pedra antiga, gasta pelo vento:\n"VÉSPER — Quando a Coroa da Aurora voltar ao trono, o dia retornará."',
@@ -53,7 +66,7 @@ const DEFS = [
       b.rect(22, 13, 3, 3, 'X');
       b.set(4, 12, 'N').set(9, 12, 'B').set(15, 12, 'N');
       b.plat(28, 9, 5).set(30, 8, '$');
-      b.set(33, 12, 'h').set(37, 12, 'c');
+      b.set(33, 12, 'h').set(37, 12, 'c').set(19, 12, 'w');
     },
     npcs: ['oren', 'mira'],
   },
@@ -67,6 +80,7 @@ const DEFS = [
       b.plat(4, 20, 4).plat(9, 17, 4).plat(15, 14, 4).plat(9, 11, 4);
       b.plat(15, 8, 4).plat(9, 5, 4).plat(13, 2, 3);
       b.set(6, 22, '$').set(20, 22, 'c').set(20, 12, 'f');
+      b.set(10, 22, 'r').set(24, 22, 'w');
     },
   },
 
@@ -83,6 +97,7 @@ const DEFS = [
       b.plat(27, 8, 4).plat(32, 5, 4);
       b.set(34, 4, 'M');
       b.set(21, 9, 'p').set(8, 12, 'c').set(30, 12, 'c').set(17, 6, 'f');
+      b.set(5, 12, 'w').set(25, 12, 'w');
     },
   },
   {
@@ -120,7 +135,7 @@ const DEFS = [
   },
   {
     id: 'santuario_vento', name: 'Santuário do Vento', area: 'bosque',
-    x: 206, y: 30, w: 22, h: 16,
+    x: 206, y: 30, w: 22, h: 16, zone: [10, 3, 11, 10],
     build: (b) => {
       b.rect(0, 0, 22, 2);
       b.rect(0, 2, 1, 7);
@@ -147,6 +162,7 @@ const DEFS = [
       b.rect(30, 12, 2, 2);
       b.plat(34, 9, 5);
       b.set(3, 13, '$').set(28, 8, 'f').set(39, 13, 'g');
+      b.set(26, 13, 'r').set(42, 13, 'o');
     },
   },
   {
@@ -172,7 +188,7 @@ const DEFS = [
       b.rect(0, 12, 30, 2);
       b.rect(24, 10, 3, 2).set(25, 9, 'A');
       b.plat(12, 8, 4).set(13, 7, '$');
-      b.set(5, 11, 'B').set(10, 11, 'L').set(17, 11, 'g');
+      b.set(5, 11, 'B').set(10, 11, 'L').set(17, 11, 'g').set(21, 11, 'o');
     },
     ability: 'wallJump',
     lore: ['Arranhões profundos na pedra:\n"Os antigos escaladores subiam a Torre sem degraus. As paredes eram seu caminho."'],
@@ -186,7 +202,7 @@ const DEFS = [
       b.rect(0, 0, 2, 14);
       b.plat(4, 11, 4).plat(8, 8, 3).set(9, 7, 'M');
       b.rect(22, 13, 4, 1, '^');
-      b.set(20, 8, 'f').set(28, 6, 'f').set(29, 13, 'g');
+      b.set(20, 8, 'f').set(28, 6, 'f').set(29, 13, 'g').set(32, 13, 'o');
     },
   },
   {
@@ -216,7 +232,7 @@ const DEFS = [
       b.rect(0, 24, 20, 2);
       b.plat(4, 21, 4).plat(10, 18, 4).plat(4, 15, 4);
       b.plat(10, 12, 4).plat(4, 9, 4).plat(9, 6, 4).plat(8, 3, 3);
-      b.set(6, 23, 'B').set(13, 23, 'c').set(14, 10, 'f');
+      b.set(6, 23, 'B').set(13, 23, 'c').set(14, 10, 'f').set(15, 23, 'k');
     },
   },
   {
@@ -230,11 +246,12 @@ const DEFS = [
       b.rect(14, 12, 6, 1, '^');
       b.plat(26, 6, 4);
       b.set(6, 9, 'c').set(10, 9, '$').set(24, 9, 'h').set(31, 9, 'p').set(35, 9, 'c');
+      b.set(3, 9, 'k').set(28, 9, 'k').set(37, 9, 'o');
     },
   },
   {
     id: 'cristal_coracao', name: 'Coração de Cristal', area: 'cristal',
-    x: 110, y: 48, w: 24, h: 16,
+    x: 110, y: 48, w: 24, h: 16, zone: [2, 2, 11, 8],
     build: (b) => {
       b.rect(0, 0, 24, 2);
       b.rect(0, 2, 1, 4);
@@ -242,7 +259,7 @@ const DEFS = [
       b.rect(0, 10, 24, 6);
       b.rect(14, 8, 4, 2).set(15, 7, 'A');
       b.plat(19, 5, 3).set(20, 4, 'M');
-      b.set(6, 9, 'L');
+      b.set(6, 9, 'L').set(12, 9, 'k').set(21, 9, 'k');
     },
     ability: 'doubleJump',
     lore: ['Uma inscrição brilha no cristal:\n"Das cinzas do último pôr do sol nasceram asas. Quem as veste toca o céu duas vezes."'],

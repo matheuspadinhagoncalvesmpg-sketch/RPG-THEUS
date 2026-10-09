@@ -1,6 +1,7 @@
 // Renderização: céu, paralaxe, blocos (pré-renderizados em pedaços) e iluminação.
 import { TILE, VIEW_H, MAX_RENDER_SCALE, AREAS, T } from './config.js';
 import { mulberry32, hashStr, shade, rgba, rand } from './util.js';
+import { drawPlacedBlock } from './build.js';
 
 const CHUNK = 16;           // blocos por pedaço
 const MARGIN = 48;          // margem para grama/cipós que vazam do bloco
@@ -86,6 +87,8 @@ export class Renderer {
     const area = room.area;
     const solid = (dx, dy) => game.world.isSolid(room, tx + dx, ty + dy);
 
+    const placed = room.placed.get(ty * room.w + tx);
+    if (placed) return drawPlacedBlock(ctx, placed, x, y);
     if (t === T.SPIKE) return this.drawSpikes(ctx, x, y, pal, area, rng);
     if (t === T.ONEWAY) return this.drawPlank(ctx, x, y, pal, area, rng, tx);
 
