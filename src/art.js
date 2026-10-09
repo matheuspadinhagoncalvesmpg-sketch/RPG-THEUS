@@ -180,36 +180,56 @@ export function drawHero(ctx, x, y, o) {
   ctx.fillStyle = col('#e0ad45');
   ctx.fillRect(0.5, -12.4 + by * 0.6, 3, 3.2);
 
-  // Cabeça
+  // Cabeça com máscara de marfim: olhos acesos e marcas do ocaso (esq.) e da aurora (dir.)
   const hy = -27 + by;
-  ctx.fillStyle = col(shade(p.skin, -0.55));
-  ellipse(ctx, 1, hy, 6.9, 6.8);
-  ctx.fillStyle = skin;
-  ellipse(ctx, 1, hy, 6.2, 6.1);
-  // bochecha
-  ctx.fillStyle = flash ? '#fff' : 'rgba(255,120,110,0.25)';
-  ellipse(ctx, 4.5, hy + 3, 1.6, 1);
-  // orelha
-  ctx.fillStyle = col(shade(p.skin, -0.12));
-  ellipse(ctx, -4.6, hy + 1.2, 1.1, 1.6);
-
-  // Olhos (com branco: rosto humano, não máscara)
+  const [eFar, eNear] = EYE_COLORS[p.eyes] || EYE_COLORS.hetero;
+  ctx.fillStyle = col('#1a1320');
+  ellipse(ctx, 0.6, hy, 7.4, 7.3);
+  const ivory = col('#f3eee4'), ivoryDark = col('#cfc6b6');
+  ctx.fillStyle = ivory;
+  ctx.beginPath();
+  ctx.moveTo(-5.6, hy - 3.5);
+  ctx.quadraticCurveTo(0.5, hy - 8.6, 7.6, hy - 3);
+  ctx.lineTo(7.9, hy + 2);
+  ctx.quadraticCurveTo(6.8, hy + 7.6, 2.4, hy + 8.8);
+  ctx.quadraticCurveTo(-3.8, hy + 7.4, -5.8, hy + 1.2);
+  ctx.closePath();
+  ctx.fill();
+  // sombra suave na parte de baixo da máscara
+  ctx.fillStyle = ivoryDark;
+  ctx.beginPath();
+  ctx.moveTo(-5.4, hy + 3);
+  ctx.quadraticCurveTo(0, hy + 6, 7.4, hy + 3.5);
+  ctx.quadraticCurveTo(6.6, hy + 7.6, 2.4, hy + 8.8);
+  ctx.quadraticCurveTo(-3.8, hy + 7.4, -5.4, hy + 3);
+  ctx.fill();
   if (o.state !== 'dead') {
-    const [eFar, eNear] = EYE_COLORS[p.eyes] || EYE_COLORS.hetero;
     const blink = t % 220 < 6 && o.state === 'idle';
-    for (const [ex, ec] of [[1.6, eFar], [5.3, eNear]]) {
-      if (blink) { ctx.fillStyle = '#1a1320'; ctx.fillRect(ex - 1.2, hy + 0.6, 2.4, 0.8); continue; }
-      ctx.fillStyle = flash ? '#fff' : '#fbf8f2';
-      ellipse(ctx, ex, hy + 0.7, 1.5, 1.9);
+    for (const [ex, ec] of [[1.4, eFar], [5.4, eNear]]) {
+      // marca pintada sob o olho
       ctx.fillStyle = col(ec);
-      ellipse(ctx, ex + 0.4, hy + 0.9, 1, 1.4);
-      ctx.fillStyle = '#16121c';
-      ellipse(ctx, ex + 0.5, hy + 1, 0.45, 0.7);
+      ctx.beginPath();
+      ctx.moveTo(ex - 0.5, hy + 2.4); ctx.lineTo(ex + 0.5, hy + 2.4); ctx.lineTo(ex + 0.1, hy + 5.6);
+      ctx.fill();
+      // fenda do olho
+      ctx.fillStyle = '#120d18';
+      ctx.beginPath();
+      ctx.ellipse(ex, hy + 0.2, 1.9, blink ? 0.35 : 1.5, -0.12, 0, Math.PI * 2);
+      ctx.fill();
+      if (!blink && !flash) {
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.fillStyle = rgba(ec, 0.22);
+        ellipse(ctx, ex + 0.3, hy + 0.3, 2.1, 1.8);
+        ctx.fillStyle = ec;
+        ellipse(ctx, ex + 0.4, hy + 0.3, 0.95, 0.95);
+        ctx.restore();
+      }
     }
-    // boca
-    ctx.strokeStyle = col(shade(p.skin, -0.45));
-    ctx.lineWidth = 0.6;
-    ctx.beginPath(); ctx.arc(4.4, hy + 3.2, 1.1, 0.3, Math.PI - 0.3); ctx.stroke();
+    // pequena rachadura
+    ctx.strokeStyle = col('#a89f90');
+    ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.moveTo(4.2, hy + 8.5); ctx.lineTo(4.8, hy + 6.9); ctx.lineTo(4.2, hy + 5.9); ctx.stroke();
   }
 
   // Cabelo: franja, topo e mecha de trás
