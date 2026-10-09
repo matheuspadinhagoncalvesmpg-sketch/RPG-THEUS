@@ -26,6 +26,9 @@ export class Game {
     this.bubbles = [];
     this.floaters = [];
     this.build = new BuildMode(this);
+    this.speed = 1;
+    this.slowmoT = 0;
+    this.zoom = 0;
     this.cam = { x: 0, y: 0 };
     this.shakeMag = 0;
     this.state = 'off';
@@ -167,7 +170,7 @@ export class Game {
     let dt = now - this.last;
     this.last = now;
     if (dt > 250) dt = 250;
-    this.acc += dt;
+    this.acc += dt * this.speed * (this.slowmoT > 0 ? 0.35 : 1);
     let steps = 0;
     try {
       while (this.acc >= STEP && steps < 5) { this.step(); this.acc -= STEP; steps++; }
@@ -184,6 +187,7 @@ export class Game {
     const inp = this.input;
     inp.poll();
     this.frame++;
+    if (this.slowmoT > 0) this.slowmoT--;
     switch (this.state) {
       case 'play':
         if (inp.pressed.pause) return this.openMenu('pause');
@@ -491,6 +495,29 @@ export class Game {
     this.build.refresh();
   }
 
+  damageText(x, y, n, big = false) {
+    this.floaters.push({ x: x + rand(-6, 6), y: y - 4, vy: -1.6, text: String(n), color: big ? '#ffd36e' : '#ffffff', t: 45, key: null, dmg: true, big });
+  }
+
+  slowmo(frames) { this.slowmoT = Math.max(this.slowmoT, frames); }
+  zoomPunch(z) { this.zoom = Math.max(this.zoom, z); }
+
+  // Zoom rápido da tela (feito no CSS do canvas: não custa nada para desenhar).
+  applyZoom() {
+    const c = this.renderer.canvas;
+    if (this.zoom < 0.002) {
+      if (this.zoomOn) { c.style.transform = ''; this.zoomOn = false; }
+      this.zoom = 0;
+      return;
+    }
+    const r = this.renderer, p = this.player;
+    const ox = ((p.cx - this.cam.x) / r.viewW) * 100, oy = ((p.cy - this.cam.y) / r.viewH) * 100;
+    c.style.transformOrigin = `${ox}% ${oy}%`;
+    c.style.transform = `scale(${1 + this.zoom})`;
+    this.zoomOn = true;
+    this.zoom *= 0.88;
+  }
+
   floatText(x, y, text, color = '#f4efe6') {
     // Junta coletas seguidas do mesmo item num texto só.
     const f = this.floaters.find((o) => o.key === text.replace(/^\+\d+ /, '') && o.t > 40);
@@ -509,7 +536,9 @@ export class Game {
     ctx.font = '700 10px "Cinzel", serif';
     ctx.textAlign = 'center';
     for (const f of this.floaters) {
-      f.t--; f.y -= 0.35;
+      f.t--;
+      if (f.dmg) { f.y += f.vy; f.vy += 0.08; ctx.font = f.big ? '900 15px "Cinzel", serif' : '900 11px "Cinzel", serif'; }
+      else { f.y -= 0.35; ctx.font = '700 10px "Cinzel", serif'; }
       ctx.globalAlpha = Math.min(1, f.t / 20);
       ctx.fillStyle = 'rgba(8,6,12,0.75)';
       ctx.fillText(f.text, f.x + 1, f.y + 1);
@@ -779,6 +808,7 @@ export class Game {
     this.drawLights(ctx);
     this.drawFloaters(ctx);
     if (this.build.active) this.build.draw(ctx);
+    this.applyZoom();
 
     // Escurecimento (transição, espinhos, morte)
     let fade = 0;

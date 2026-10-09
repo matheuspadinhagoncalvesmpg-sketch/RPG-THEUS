@@ -55,7 +55,7 @@ export function clearSave() {
   try { localStorage.removeItem(KEY); } catch (e) { /* ok */ }
 }
 
-export const DEFAULT_SETTINGS = { muted: false, vibration: true, btnSize: 1, btnOpacity: 0.55, showFps: false };
+export const DEFAULT_SETTINGS = { speed: 1, muted: false, vibration: true, btnSize: 1, btnOpacity: 0.55, showFps: false };
 
 export function loadSettings() {
   try {

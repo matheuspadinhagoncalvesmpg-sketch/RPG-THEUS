@@ -17,6 +17,8 @@ class Boss extends Enemy {
     if (this.state === 'intro' || this.dead) return;
     const before = this.phase2;
     this.hp -= dmg;
+    game.damageText(this.cx, this.y, dmg, true);
+    game.zoomPunch(0.025);
     this.flash = 5;
     if (!before && this.phase2) {
       game.shake(10);
@@ -31,6 +33,8 @@ class Boss extends Enemy {
     game.audio.play('roar');
     game.shake(18);
     game.hitstop(30);
+    game.slowmo(100);
+    game.zoomPunch(0.12);
     for (let i = 0; i < 4; i++)
       game.particles.burst(this.cx, this.cy, 20, { color: ['#ffffff', '#ffd36e', this.bloodColor], speed: 9, life: 60, grav: 0.1, drag: 0.95, glow: i % 2 === 0 });
     game.particles.ring(this.cx, this.cy, '#ffffff', 10, 6, 30);

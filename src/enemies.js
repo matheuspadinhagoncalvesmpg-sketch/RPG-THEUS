@@ -20,6 +20,7 @@ export class Enemy {
 
   hurt(game, dmg, kx, ky) {
     this.hp -= dmg;
+    game.damageText(this.cx, this.y, dmg);
     this.flash = 7;
     const k = 1 - this.kbResist;
     if (k > 0) {

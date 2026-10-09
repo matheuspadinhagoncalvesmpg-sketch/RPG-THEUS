@@ -109,6 +109,7 @@ export function drawHero(ctx, x, y, o) {
     default: bob = Math.sin(t * 0.06) * 0.7; wind = Math.sin(t * 0.05) * 1.5;
   }
   ctx.rotate(lean);
+  if (o.squash) ctx.scale(1 + o.squash * 0.16, 1 - o.squash * 0.16);
   const by = bob + crouch;
   const tunic = col(p.cloak);
   const tunicDark = col(shade(p.cloak, -0.38));
@@ -182,6 +183,9 @@ export function drawHero(ctx, x, y, o) {
 
   // Cabeça com máscara de marfim: olhos acesos e marcas do ocaso (esq.) e da aurora (dir.)
   const hy = -27 + by;
+  // ao virar, a cabeça gira (achata no eixo x por alguns quadros)
+  ctx.save();
+  if (o.turn) { ctx.translate(1, hy); ctx.scale(1 - o.turn * 0.55, 1); ctx.translate(-1, -hy); }
   const [eFar, eNear] = EYE_COLORS[p.eyes] || EYE_COLORS.hetero;
   ctx.fillStyle = col('#1a1320');
   ellipse(ctx, 0.6, hy, 7.4, 7.3);
@@ -249,6 +253,8 @@ export function drawHero(ctx, x, y, o) {
   ctx.fill();
   ctx.fillStyle = col(shade(p.hair, 0.35));
   ctx.fillRect(-2, hy - 7.4, 5, 1.1);
+
+  ctx.restore();
 
   // Braço da frente + espada
   ctx.strokeStyle = tunic;

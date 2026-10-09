@@ -27,6 +27,8 @@ function applySettings() {
   for (const el of $$('[data-setting="muted"]')) el.textContent = settings.muted ? 'Desligado' : 'Ligado';
   for (const el of $$('[data-setting="vibration"]')) el.textContent = settings.vibration ? 'Ligada' : 'Desligada';
   for (const el of $$('[data-size]')) el.classList.toggle('active', Number(el.dataset.size) === settings.btnSize);
+  for (const el of $$('[data-speed]')) el.classList.toggle('active', Number(el.dataset.speed) === settings.speed);
+  game.speed = settings.speed || 1;
   for (const el of $$('.opt-opacity')) el.value = settings.btnOpacity;
   writeSettings(settings);
   requestAnimationFrame(() => touch.layout());
@@ -35,6 +37,7 @@ function applySettings() {
 for (const el of $$('[data-setting="muted"]')) el.addEventListener('click', () => { settings.muted = !settings.muted; audio.unlock(); applySettings(); });
 for (const el of $$('[data-setting="vibration"]')) el.addEventListener('click', () => { settings.vibration = !settings.vibration; applySettings(); input.vibrate(40); });
 for (const el of $$('[data-size]')) el.addEventListener('click', () => { settings.btnSize = Number(el.dataset.size); applySettings(); });
+for (const el of $$('[data-speed]')) el.addEventListener('click', () => { settings.speed = Number(el.dataset.speed); applySettings(); });
 for (const el of $$('.opt-opacity')) el.addEventListener('input', () => { settings.btnOpacity = Number(el.value); applySettings(); });
 for (const el of $$('.opt-fullscreen')) el.addEventListener('click', () => goFullscreen(true));
 

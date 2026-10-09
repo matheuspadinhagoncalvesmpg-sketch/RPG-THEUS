@@ -43,6 +43,8 @@ export class Player {
     for (const k of ['dashCd', 'invuln', 'flash', 'attackCd', 'hurtTimer'])
       if (this[k] > 0) this[k]--;
     for (const a of this.afterimages) a.life--;
+    if (this.turnT > 0) this.turnT--;
+    this.squash = (this.squash || 0) * 0.8;
     this.afterimages = this.afterimages.filter((a) => a.life > 0);
 
     if (this.sitting) {
@@ -108,7 +110,10 @@ export class Player {
       this.vx = mx * P.run + this.recoilX;
     }
     this.recoilX = approach(this.recoilX, 0, 0.45);
-    if (mx && this.dashTimer <= 0 && this.attackTimer <= 0 && !stunned && !this.wallSliding && this.wallLock <= 0) this.facing = mx;
+    if (mx && this.dashTimer <= 0 && this.attackTimer <= 0 && !stunned && !this.wallSliding && this.wallLock <= 0) {
+      if (mx !== this.facing) this.turnT = 8;
+      this.facing = mx;
+    }
 
     // ── Gravidade
     if (this.dashTimer <= 0) {
@@ -126,7 +131,7 @@ export class Player {
       if (this.onGround && inp.held.down && standingOnOneWay(this, room, world)) {
         this.dropThrough = 12; this.y += 2; this.onGround = false; this.jumpBuffer = 0;
       } else if (grounded) {
-        this.vy = P.jump; jumped = true;
+        this.vy = P.jump; jumped = true; this.squash = -0.7;
         game.audio.play('jump');
         game.particles.dust(this.cx, this.y + this.h, 0, 5);
       } else if (ab.wallJump && (this.wallSliding || this.wallCoyote > 0)) {
@@ -158,6 +163,7 @@ export class Player {
     if (hit.up) this.jumpHeld = false;
     if (this.onGround) {
       if (!wasGround && fallSpeed > 3) {
+        this.squash = Math.min(1, fallSpeed / 10);
         game.audio.play('land');
         game.particles.dust(this.cx, this.y + this.h, 0, fallSpeed > 9 ? 8 : 4);
       }
@@ -259,6 +265,7 @@ export class Player {
     drawHero(ctx, this.cx, this.y + this.h, {
       profile: game.save.profile, facing: this.facing, state: this.sitting ? 'sit' : this.state,
       t: this.t, alpha, flash: this.flash, swordLevel: level,
+      turn: (this.turnT || 0) / 8, squash: this.squash || 0,
       attack: this.attackTimer > 0 ? { dir: this.attackDir, k: swingK } : null,
     });
   }
