@@ -4,6 +4,7 @@ import { AudioSystem } from './audio.js';
 import { UI } from './ui.js';
 import { Game } from './game.js';
 import { drawHero, EYE_COLORS } from './art.js';
+import { BUILD_ITEMS } from './config.js';
 import { loadSave, newSave, writeSave, clearSave, loadSettings, writeSettings, DEFAULT_PROFILE } from './save.js';
 
 const $ = (s) => document.querySelector(s);
@@ -196,7 +197,7 @@ window.addEventListener('pointerup', (e) => {
 canvas.addEventListener('wheel', (e) => {
   if (!game.build.active) return;
   e.preventDefault();
-  const n = 9;
+  const n = BUILD_ITEMS.length;
   game.build.select((game.build.sel + (e.deltaY > 0 ? 1 : n - 1)) % n);
 }, { passive: false });
 

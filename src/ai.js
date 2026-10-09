@@ -148,6 +148,24 @@ export class AIDirector {
     return list[list.length - 1][0];
   }
 
+  // Narração curta de eventos (ataques à base, chegada do ferreiro...). Sem IA, usa o texto local.
+  async narrate(event, fallback, context = {}) {
+    if (!this.enabled) return fallback;
+    try {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 4000);
+      const r = await fetch('api/ai/narrate', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: ctrl.signal,
+        body: JSON.stringify({ event, context: { ...context, room: this.game.room.name, name: this.game.save.profile.name } }),
+      });
+      clearTimeout(timer);
+      if (!r.ok) throw new Error(r.status);
+      return (await r.json()).line || fallback;
+    } catch (e) {
+      return fallback;
+    }
+  }
+
   // ───── Conversa livre com personagens ─────
   async npcReply(npcId, message) {
     const g = this.game;

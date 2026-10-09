@@ -48,6 +48,10 @@ O jogo tem um **Manual dos controles** completo na pausa e na tela inicial. No c
 - Golpeie **árvores, rochas, veios de minério e cristais** para coletar **madeira, pedra, minério e cristal**.
 - Em **zonas de construção** (Planície do Lar, Santuário do Vento e Coração de Cristal) aperte **B** ou o martelo e construa: blocos de madeira, pedra e cristal, plataformas, tochas, estandartes, baús e **fogueiras**, que viram seu ponto de descanso e renascimento.
 - A picareta (ou o clique direito) remove a peça e devolve os materiais. Tudo fica salvo.
+- **Bancada** e **Forja** fabricam Lanterna, espadas (Minério x1,5 e Cristal x2,2) e armaduras de madeira, pedra e cristal (+1 a +3 corações), que aparecem no herói.
+- **Baús** guardam materiais.
+- Monte uma casa (fogueira, tocha, baú, bancada e 10 blocos) e o ferreiro **Tibério** se muda para a base e passa a vender materiais.
+- Com a base habitada, a planície sofre **ataques noturnos** em ondas; defender rende moedas e materiais. O Gemini narra os eventos.
 
 ### Combate e exploração
 - Pulo com altura variável, *coyote time* e *buffer* de pulo.
@@ -86,6 +90,8 @@ src/
   enemies.js      inimigos comuns e projéteis
   bosses.js       chefes
   build.js        modo construção (estilo Terraria)
+  crafting.js     bancada, forja, baú e loja do ferreiro
+  raids.js        ferreiro que se muda e ataques noturnos à base
   entities.js     fogueiras, personagens, recursos, moedas, lápide, construções
   rooms.js        mapa do mundo (editável)
   world.js        grade de blocos e conexão entre salas

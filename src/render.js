@@ -485,12 +485,21 @@ export class Renderer {
     const pal = AREAS[game.room.area];
     const W = this.canvas.width, H = this.canvas.height, s = this.scale;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    if (pal.dark > 0) {
+    const night = game.raids ? game.raids.night : 0;
+    if (night > 0.01) {
+      // Noite de ataque: escurece tudo com um tom azulado.
+      ctx.fillStyle = `rgba(8,6,30,${night * 0.75})`;
+      ctx.fillRect(0, 0, W, H);
+    }
+    let dark = Math.max(pal.dark, night);
+    const lantern = game.save && game.save.items && game.save.items.lantern;
+    if (lantern) dark *= 0.6;
+    if (dark > 0.01) {
       const p = game.player;
       const px = (p.cx - camX) * s, py = (p.cy - camY) * s;
-      const g = ctx.createRadialGradient(px, py, 70 * s, px, py, 420 * s);
+      const g = ctx.createRadialGradient(px, py, (lantern ? 130 : 70) * s, px, py, (lantern ? 520 : 420) * s);
       g.addColorStop(0, 'rgba(0,0,0,0)');
-      g.addColorStop(1, `rgba(0,0,0,${pal.dark})`);
+      g.addColorStop(1, `rgba(0,0,0,${dark})`);
       ctx.fillStyle = g;
       ctx.fillRect(0, 0, W, H);
     }

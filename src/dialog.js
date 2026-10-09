@@ -30,6 +30,18 @@ export const NPCS = {
       return ['Vai levar alguma coisa?'];
     },
   },
+  smith: {
+    name: 'Tibério, o Ferreiro',
+    trade: true,
+    lines(game) {
+      if (!game.save.talked.smith) return [
+        'Vi a fumaça da sua fogueira lá da estrada. Lugar bom pra uma forja, esse.',
+        'Vou ficar por aqui. Se faltar madeira, pedra ou minério, é só falar comigo... por um punhado de moedas, claro.',
+        'Ah, e fique de olho à noite. Base com fogo aceso atrai bicho.',
+      ];
+      return ['Precisa de material?'];
+    },
+  },
   eco: {
     name: 'Eco da Lanterna',
     lines(game) {

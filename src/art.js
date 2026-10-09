@@ -17,9 +17,19 @@ function ellipse(ctx, x, y, rx, ry) {
 }
 
 // Espada desenhada ao longo do eixo +x (cabo na origem). level 2 = lâmina afiada.
-export function drawSword(ctx, len, level = 1, flash = false) {
-  const steel = flash ? '#ffffff' : level > 1 ? '#e9fbff' : '#eef1f6';
-  const steelDark = flash ? '#ffffff' : level > 1 ? '#8fd8ea' : '#8e98ab';
+const BLADES = {
+  steel: ['#eef1f6', '#8e98ab', '#ff4a5a'],
+  ore: ['#ffd9a0', '#b8742f', '#ffcf4a'],
+  crystal: ['#e9fbff', '#5fc9e0', '#7ef0ff'],
+};
+
+// style: 'steel' | 'ore' | 'crystal'; glow = lâmina afiada (brilho no gume).
+export function drawSword(ctx, len, style = 'steel', flash = false, glow = false) {
+  if (typeof style === 'number') { glow = style > 1; style = 'steel'; }
+  const [bl, bd, gem] = BLADES[style] || BLADES.steel;
+  const level = glow || style === 'crystal' ? 2 : 1;
+  const steel = flash ? '#ffffff' : bl;
+  const steelDark = flash ? '#ffffff' : bd;
   // empunhadura de couro
   ctx.fillStyle = '#3b2617';
   ctx.fillRect(-7, -1.7, 7, 3.4);
@@ -28,7 +38,7 @@ export function drawSword(ctx, len, level = 1, flash = false) {
   // pomo com gema
   ctx.fillStyle = '#c9932f';
   ellipse(ctx, -8.2, 0, 2.6, 2.6);
-  ctx.fillStyle = level > 1 ? '#7ef0ff' : '#ff4a5a';
+  ctx.fillStyle = gem;
   ellipse(ctx, -8.2, 0, 1.3, 1.3);
   // guarda
   ctx.fillStyle = '#e0ad45';
@@ -61,7 +71,7 @@ export function drawSword(ctx, len, level = 1, flash = false) {
   if (level > 1 && !flash) {
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
-    ctx.strokeStyle = 'rgba(126,240,255,0.45)';
+    ctx.strokeStyle = style === 'ore' ? 'rgba(255,200,110,0.5)' : 'rgba(126,240,255,0.45)';
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(3, -2.6); ctx.lineTo(len - 6, -2.6); ctx.lineTo(len, 0);
@@ -84,7 +94,7 @@ export function drawHero(ctx, x, y, o) {
   const t = o.t || 0;
   const flash = o.flash > 0;
   const col = (c) => (flash ? '#ffffff' : c);
-  const level = o.swordLevel || 1;
+  const sw0 = o.sword || { len: 27, style: 'steel', glow: (o.swordLevel || 1) > 1 };
   ctx.save();
   ctx.translate(x, y);
   ctx.scale(o.facing || 1, 1);
@@ -133,7 +143,7 @@ export function drawHero(ctx, x, y, o) {
     ctx.translate(-3, -24 + by);
     ctx.rotate(Math.PI * 0.62);
     ctx.scale(0.85, 0.85);
-    drawSword(ctx, 24, level, flash);
+    drawSword(ctx, sw0.len - 3, sw0.style, flash, sw0.glow);
     ctx.restore();
   }
 
@@ -180,6 +190,18 @@ export function drawHero(ctx, x, y, o) {
   ctx.fillRect(-6, -12 + by * 0.6, 12.5, 2.4);
   ctx.fillStyle = col('#e0ad45');
   ctx.fillRect(0.5, -12.4 + by * 0.6, 3, 3.2);
+
+  // Armadura (peitoral e ombreira)
+  if (o.armor && o.armor.color) {
+    ctx.fillStyle = col(o.armor.color);
+    ctx.beginPath();
+    ctx.moveTo(-5, -19.5 + by); ctx.lineTo(5, -19.5 + by); ctx.lineTo(5.6, -12.6 + by * 0.6); ctx.lineTo(-5.6, -12.6 + by * 0.6);
+    ctx.fill();
+    ctx.fillStyle = col(o.armor.trim);
+    ctx.fillRect(-5, -19.5 + by, 10, 1.4);
+    ctx.fillRect(-0.6, -18 + by, 1.2, 5);
+    ellipse(ctx, 2.4, -18.6 + by, 3.4, 2.2);
+  }
 
   // Cabeça com máscara de marfim: olhos acesos e marcas do ocaso (esq.) e da aurora (dir.)
   const hy = -27 + by;
@@ -269,7 +291,7 @@ export function drawHero(ctx, x, y, o) {
     ctx.save();
     ctx.translate(hx, hyy);
     ctx.rotate(a);
-    drawSword(ctx, level > 1 ? 30 : 27, level, flash);
+    drawSword(ctx, sw0.len, sw0.style, flash, sw0.glow);
     ctx.restore();
   } else {
     const hx = sx + 2 + Math.sin(-armSwing) * 3, hyy = sy + 7;
@@ -281,7 +303,7 @@ export function drawHero(ctx, x, y, o) {
 }
 
 // Rastro do golpe: arco de luz que acompanha a lâmina.
-export function drawSlash(ctx, x, y, dir, facing, k, level = 1) {
+export function drawSlash(ctx, x, y, dir, facing, k, level = 1, style = 'steel') {
   const e = 1 - Math.pow(1 - k, 3);
   const a1 = swingAngle(dir, Math.max(0, e - 0.35)), a2 = swingAngle(dir, e);
   const lo = Math.min(a1, a2), hi = Math.max(a1, a2);
@@ -291,7 +313,7 @@ export function drawSlash(ctx, x, y, dir, facing, k, level = 1) {
   ctx.scale(facing, 1);
   ctx.globalCompositeOperation = 'lighter';
   const alpha = (1 - k) * 0.85;
-  const c = level > 1 ? '126,240,255' : '235,240,255';
+  const c = style === 'ore' ? '255,205,130' : style === 'crystal' || level > 1 ? '126,240,255' : '235,240,255';
   ctx.fillStyle = `rgba(${c},${alpha * 0.55})`;
   ctx.beginPath();
   ctx.arc(0, 0, level > 1 ? 40 : 37, lo, hi);
@@ -348,6 +370,21 @@ export function drawNPC(ctx, kind, x, y, t, facing = 1) {
     ctx.beginPath(); ctx.moveTo(-9, -26 + b); ctx.quadraticCurveTo(0, -44 + b, 9, -26 + b); ctx.lineTo(6, -29 + b); ctx.quadraticCurveTo(0, -36 + b, -6, -29 + b); ctx.fill();
     ctx.fillStyle = '#ffd36e';
     ellipse(ctx, -2, -27 + b, 1.4, 2); ellipse(ctx, 3, -27 + b, 1.4, 2);
+  } else if (kind === 'smith') {
+    // Tibério, o ferreiro: avental de couro, barba e martelo
+    ctx.fillStyle = '#5a3a24';
+    ctx.fillRect(-8, -24 + b, 16, 18);
+    ctx.fillStyle = '#7a4f2a';
+    ctx.fillRect(-6, -20 + b, 12, 16);
+    ctx.fillStyle = '#2a2230'; ctx.fillRect(-7, -6, 5, 6); ctx.fillRect(2, -6, 5, 6);
+    ctx.fillStyle = '#d9a37a';
+    ellipse(ctx, 0, -30 + b, 7, 6.5);
+    ctx.fillStyle = '#8a4a2a';
+    ctx.beginPath(); ctx.moveTo(-6, -29 + b); ctx.quadraticCurveTo(0, -14 + b, 6, -29 + b); ctx.fill();
+    ctx.fillStyle = '#14121c'; ctx.fillRect(1, -32 + b, 2, 2); ctx.fillRect(-4, -32 + b, 2, 2);
+    ctx.strokeStyle = '#5a3a22'; ctx.lineWidth = 2.4;
+    ctx.beginPath(); ctx.moveTo(10, -6); ctx.lineTo(13, -24 + b); ctx.stroke();
+    ctx.fillStyle = '#7c8291'; ctx.fillRect(9, -28 + b, 9, 6);
   } else if (kind === 'eco') {
     // Espírito translúcido
     const fl = Math.sin(t * 0.04) * 4;
@@ -608,6 +645,27 @@ export function drawBuildDeco(ctx, kind, x, y, t, accent) {
     ctx.beginPath(); ctx.moveTo(1.5, -30); ctx.lineTo(14 + w, -29); ctx.lineTo(13 + w, -13); ctx.lineTo(8 + w, -16); ctx.lineTo(2, -13); ctx.fill();
     ctx.fillStyle = 'rgba(255,230,160,0.85)';
     ctx.beginPath(); ctx.arc(8 + w * 0.6, -23, 3, 0, Math.PI * 2); ctx.fill();
+  } else if (kind === 'workbench') {
+    ctx.fillStyle = '#5c3a20'; ctx.fillRect(-14, -12, 3, 12); ctx.fillRect(11, -12, 3, 12);
+    ctx.fillStyle = '#8a5a32'; ctx.fillRect(-16, -15, 32, 4);
+    ctx.fillStyle = '#c08a52'; ctx.fillRect(-16, -15, 32, 1.2);
+    ctx.fillStyle = '#9aa0ad'; ctx.fillRect(-10, -19, 8, 3);
+    ctx.fillStyle = '#5c3a20'; ctx.fillRect(-4, -18, 6, 1.6);
+    ctx.fillStyle = '#c08a52'; ctx.fillRect(5, -18, 6, 3);
+  } else if (kind === 'forge') {
+    const g = ctx.createRadialGradient(0, -10, 2, 0, -10, 46);
+    g.addColorStop(0, 'rgba(255,120,50,0.35)'); g.addColorStop(1, 'rgba(255,120,50,0)');
+    ctx.fillStyle = g; ctx.fillRect(-46, -56, 92, 60);
+    ctx.fillStyle = '#4a4654'; ctx.fillRect(-14, -20, 28, 20);
+    ctx.fillStyle = '#6a6676'; ctx.fillRect(-14, -20, 28, 3);
+    ctx.fillRect(-5, -32, 10, 12);
+    ctx.fillStyle = '#1a0a08'; ctx.fillRect(-8, -13, 16, 9);
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.fillStyle = `rgba(255,${140 + Math.sin(t * 0.3) * 40},60,0.9)`;
+    ctx.fillRect(-7, -10, 14, 6);
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = '#2a2830';
+    ctx.fillRect(16, -9, 10, 4); ctx.fillRect(19, -5, 4, 5);
   } else if (kind === 'chest') {
     ctx.fillStyle = '#5c3a20'; ctx.fillRect(-12, -16, 24, 16);
     ctx.fillStyle = '#7a4f2a'; ctx.fillRect(-12, -16, 24, 6);

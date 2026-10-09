@@ -136,6 +136,48 @@ export const BUILD_ITEMS = [
   { id: 'banner', name: 'Estandarte', cost: { wood: 2, crystal: 1 }, deco: true, support: 'below' },
   { id: 'chest', name: 'Baú', cost: { wood: 4, ore: 1 }, deco: true, support: 'below' },
   { id: 'campfire', name: 'Fogueira', cost: { wood: 5, stone: 3 }, deco: true, support: 'below', desc: 'vira ponto de descanso' },
+  { id: 'workbench', name: 'Bancada', cost: { wood: 6 }, deco: true, support: 'below', desc: 'fabrica lanterna e armadura' },
+  { id: 'forge', name: 'Forja', cost: { stone: 8, ore: 3 }, deco: true, support: 'below', desc: 'forja espadas e armaduras' },
 ];
 export const BUILD_BY_ID = Object.fromEntries(BUILD_ITEMS.map((b) => [b.id, b]));
 export const BUILD_REACH = 7 * TILE;
+
+// Espadas: multiplicador de dano e visual da lâmina.
+export const WEAPONS = {
+  errante: { name: 'Lâmina do Errante', dmg: 1, len: 27, style: 'steel' },
+  minerio: { name: 'Espada de Minério', dmg: 1.5, len: 29, style: 'ore' },
+  cristal: { name: 'Espada de Cristal', dmg: 2.2, len: 32, style: 'crystal' },
+};
+
+// Armaduras: corações extras.
+export const ARMORS = {
+  none: { name: 'Sem armadura', hearts: 0 },
+  madeira: { name: 'Armadura de Madeira', hearts: 1, color: '#8a5a32', trim: '#c08a52' },
+  pedra: { name: 'Armadura de Pedra', hearts: 2, color: '#6a6676', trim: '#c7ccd8' },
+  cristal: { name: 'Armadura de Cristal', hearts: 3, color: '#3aa9c4', trim: '#bff7ff' },
+};
+
+// Receitas por estação de trabalho.
+export const RECIPES = [
+  { id: 'lantern', station: 'workbench', name: 'Lanterna', desc: 'Ilumina bosques e cavernas escuras.', cost: { wood: 3, ore: 2, crystal: 1 }, give: (s) => { s.items.lantern = true; }, owned: (s) => !!s.items.lantern },
+  { id: 'armor_madeira', station: 'workbench', name: 'Armadura de Madeira', desc: '+1 coração.', cost: { wood: 12 }, give: (s) => equipArmor(s, 'madeira'), owned: (s) => ARMORS[s.armor || 'none'].hearts >= 1 },
+  { id: 'sword_minerio', station: 'forge', name: 'Espada de Minério', desc: 'Dano x1,5. Lâmina de bronze.', cost: { ore: 6, wood: 2 }, give: (s) => { s.weapon = 'minerio'; }, owned: (s) => WEAPONS[s.weapon || 'errante'].dmg >= 1.5 },
+  { id: 'sword_cristal', station: 'forge', name: 'Espada de Cristal', desc: 'Dano x2,2. Lâmina longa e brilhante.', cost: { crystal: 6, ore: 4 }, give: (s) => { s.weapon = 'cristal'; }, owned: (s) => (s.weapon || 'errante') === 'cristal' },
+  { id: 'armor_pedra', station: 'forge', name: 'Armadura de Pedra', desc: '+2 corações.', cost: { stone: 10, ore: 2 }, give: (s) => equipArmor(s, 'pedra'), owned: (s) => ARMORS[s.armor || 'none'].hearts >= 2 },
+  { id: 'armor_cristal', station: 'forge', name: 'Armadura de Cristal', desc: '+3 corações.', cost: { crystal: 8, ore: 4 }, give: (s) => equipArmor(s, 'cristal'), owned: (s) => (s.armor || 'none') === 'cristal' },
+];
+
+// Troca a armadura ajustando a vida máxima pela diferença de corações.
+export function equipArmor(s, id) {
+  const before = ARMORS[s.armor || 'none'].hearts;
+  s.armor = id;
+  s.masksMax += ARMORS[id].hearts - before;
+}
+
+// Materiais vendidos pelo ferreiro que se muda para a base.
+export const SMITH_STOCK = [
+  { kind: 'wood', n: 10, price: 25 },
+  { kind: 'stone', n: 10, price: 30 },
+  { kind: 'ore', n: 5, price: 60 },
+  { kind: 'crystal', n: 5, price: 90 },
+];

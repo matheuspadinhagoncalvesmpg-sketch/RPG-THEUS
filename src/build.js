@@ -218,6 +218,7 @@ export class BuildMode {
       if (ent) g.entities.push(ent);
     }
     this.store(room, idx, it.id);
+    g.raids.checkSmith();
     g.audio.play('place');
     g.particles.dust((tx + 0.5) * TILE, (ty + 1) * TILE, 0, 6, 'rgba(230,220,200,0.5)');
     this.refresh();

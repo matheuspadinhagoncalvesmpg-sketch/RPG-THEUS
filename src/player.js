@@ -1,5 +1,5 @@
 // O Errante: movimento, combate, cura e magia.
-import { PHYS, SOUL_COST, TILE } from './config.js';
+import { PHYS, SOUL_COST, TILE, WEAPONS, ARMORS } from './config.js';
 import { moveBody, standingOnOneWay, touchesSpikes, wallAhead } from './physics.js';
 import { approach, rand } from './util.js';
 import { drawHero, drawSlash } from './art.js';
@@ -200,6 +200,7 @@ export class Player {
       this.hitSet = new Set();
       game.audio.play('slash');
     }
+    this.reach = WEAPONS[game.save.weapon || 'errante'].len - 27;
     if (this.attackTimer > 0) {
       if (this.attackTimer > ATTACK_FRAMES - ATTACK_ACTIVE) game.playerAttack(this.attackBox(), this.attackDir, this.hitSet);
       this.attackTimer--;
@@ -218,9 +219,10 @@ export class Player {
 
   attackBox() {
     const { x, y, w, h, facing } = this;
-    if (this.attackDir === 'up') return { x: x + w / 2 - 22, y: y - 44, w: 44, h: 50 };
-    if (this.attackDir === 'down') return { x: x + w / 2 - 21, y: y + h - 8, w: 42, h: 46 };
-    return facing > 0 ? { x: x + w - 4, y: y - 5, w: 48, h: 34 } : { x: x - 44, y: y - 5, w: 48, h: 34 };
+    const r = this.reach || 0; // espadas maiores alcançam mais longe
+    if (this.attackDir === 'up') return { x: x + w / 2 - 22, y: y - 44 - r, w: 44, h: 50 + r };
+    if (this.attackDir === 'down') return { x: x + w / 2 - 21, y: y + h - 8, w: 42, h: 46 + r };
+    return facing > 0 ? { x: x + w - 4, y: y - 5, w: 48 + r, h: 34 } : { x: x - 44 - r, y: y - 5, w: 48 + r, h: 34 };
   }
 
   castSpell(game) {
@@ -260,11 +262,14 @@ export class Player {
     // Golpe: a lâmina gira em ~9 quadros a partir do ombro, deixando um rastro.
     const swingK = this.attackTimer > 0 ? Math.min(1, (ATTACK_FRAMES - this.attackTimer) / 9) : 0;
     const level = game.save.nail;
+    const wp = WEAPONS[game.save.weapon || 'errante'];
+    const sword = { len: wp.len, style: wp.style, glow: level > 1 };
+    const armor = ARMORS[game.save.armor || 'none'];
     if (this.attackTimer > 0)
-      drawSlash(ctx, this.cx + this.facing * 2, this.y + this.h - 18, this.attackDir, this.facing, swingK, level);
+      drawSlash(ctx, this.cx + this.facing * 2, this.y + this.h - 18, this.attackDir, this.facing, swingK, level, wp.style);
     drawHero(ctx, this.cx, this.y + this.h, {
       profile: game.save.profile, facing: this.facing, state: this.sitting ? 'sit' : this.state,
-      t: this.t, alpha, flash: this.flash, swordLevel: level,
+      t: this.t, alpha, flash: this.flash, sword, armor,
       turn: (this.turnT || 0) / 8, squash: this.squash || 0,
       attack: this.attackTimer > 0 ? { dir: this.attackDir, k: swingK } : null,
     });

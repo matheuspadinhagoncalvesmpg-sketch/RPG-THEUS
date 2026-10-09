@@ -500,3 +500,10 @@ kbd {
   font-family: var(--serif); font-size: 12px; text-align: center; background: rgba(244, 239, 230, 0.06);
 }
 #manual-screen { z-index: 45; }
+
+/* Fabricação */
+.craft-sub { font-size: 15px; color: var(--ink-dim); margin: -4px 0 8px; }
+.craft-sub b { color: var(--ink); }
+#craft-list .si-desc span { display: inline-flex; align-items: center; gap: 3px; margin-right: 8px; }
+#craft-list .si-desc i { width: 7px; height: 7px; border-radius: 2px; transform: rotate(45deg); display: inline-block; }
+#craft-list .si-desc span.miss { color: var(--danger); }

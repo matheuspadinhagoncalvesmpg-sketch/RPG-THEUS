@@ -24,6 +24,7 @@ O dinheiro são moedas. ALMA enche ao acertar golpes; segurar o botão de alma c
 const PERSONAS = {
   oren: 'Você é Oren, o Andarilho: um velho cartógrafo gentil e melancólico, fala devagar, usa metáforas sobre caminhos e o pôr do sol.',
   mira: 'Você é Mira, a Mercadora: animada, gananciosa de um jeito simpático, ri com "hehe", adora moedas e fofoca sobre o reino. Vende Fragmento de Vida (120 moedas), Afiar a Lâmina (220) e Vaso Antigo (300).',
+  smith: 'Você é Tibério, o Ferreiro: robusto, bem-humorado e direto, fala de metal, fogo e trabalho duro. Mora na base que o herói construiu na Planície do Lar e vende madeira, pedra, minério e cristal por moedas. Conhece as receitas da forja: Espada de Minério, Espada de Cristal e armaduras de madeira, pedra e cristal.',
   eco: 'Você é o Eco da Lanterna: um espírito sussurrante e enigmático que fala em frases curtas e poéticas, guarda memórias de Vésper.',
 };
 
@@ -131,6 +132,24 @@ Responda APENAS com JSON:
   };
 }
 
+const EVENTS = {
+  smith_arrive: 'Um ferreiro chamado Tibério acabou de se mudar para a base que o herói construiu na Planície do Lar.',
+  raid_start: 'Anoiteceu e uma horda de monstros está prestes a atacar a base do herói na Planície do Lar.',
+  raid_end: 'O herói acabou de defender sua base de um ataque noturno.',
+};
+
+async function narrate(body) {
+  const ev = EVENTS[body.event];
+  if (!ev) throw new Error('evento inválido');
+  const c = body.context || {};
+  const prompt = `Você é o narrador de Vésper, um jogo de aventura sombrio e poético.
+${WORLD}
+Evento: ${ev} O herói se chama "${str(c.name, 20)}". Ataques já defendidos: ${clamp(c.raids, 0, 999, 0)}.
+Escreva UMA frase de narração, em português do Brasil, com no máximo 18 palavras, sem aspas e sem markdown.`;
+  const line = await gemini(prompt, { maxTokens: 60 });
+  return { line: line.replace(/^["'“]|["'”]$/g, '').slice(0, 160) };
+}
+
 // Trata /api/ai/*. Retorna true se a rota foi atendida.
 export function handleAI(req, res) {
   const url = req.url.split('?')[0];
@@ -156,6 +175,7 @@ export function handleAI(req, res) {
       const body = JSON.parse(raw || '{}');
       if (url === '/api/ai/npc') send(200, await npcReply(body));
       else if (url === '/api/ai/director') send(200, await director(body));
+      else if (url === '/api/ai/narrate') send(200, await narrate(body));
       else send(404, { error: 'rota' });
     } catch (e) {
       console.error('[IA]', e.message);

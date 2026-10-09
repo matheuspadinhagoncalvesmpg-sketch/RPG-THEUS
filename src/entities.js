@@ -148,6 +148,18 @@ export class BuildDeco extends Entity {
   draw(ctx, game) { drawBuildDeco(ctx, this.kind, this.x, this.y, this.t, game.save.profile.cloak); }
 }
 
+// Bancada e forja: abrem o painel de fabricação.
+export class Station extends BuildDeco {
+  constructor(x, y, kind, idx) { super(x, y, kind, idx); this.label = 'Fabricar'; this.light = kind === 'forge' ? 0.6 : 0; }
+  interact(game) { game.craft.openStation(this.kind); }
+}
+
+// Baú: guarda materiais.
+export class ChestBox extends BuildDeco {
+  constructor(x, y, kind, idx) { super(x, y, kind, idx); this.label = 'Abrir'; }
+  interact(game) { game.craft.openChest(`${game.room.id}:${this.idx}`); }
+}
+
 // Cria a entidade de uma peça construída no índice de bloco idx.
 export function makeBuilt(room, idx, id) {
   const item = BUILD_BY_ID[id];
@@ -155,6 +167,8 @@ export function makeBuilt(room, idx, id) {
   const tx = idx % room.w, ty = Math.floor(idx / room.w);
   const x = tx * TILE + TILE / 2, y = (ty + 1) * TILE;
   if (id === 'campfire') { const c = new Campfire(x, y, true); c.idx = idx; return c; }
+  if (id === 'workbench' || id === 'forge') return new Station(x, y, id, idx);
+  if (id === 'chest') return new ChestBox(x, y, id, idx);
   return new BuildDeco(x, y, id, idx);
 }
 
@@ -175,6 +189,7 @@ export function spawnRoomEntities(room, save) {
         if (NODE_CHARS[e.ch]) list.push(new ResourceNode(x, y, NODE_CHARS[e.ch]));
     }
   }
+  if (room.id === 'planicie_lar' && save.base && save.base.smith) list.push(new NPC(34 * TILE + TILE / 2, 13 * TILE, 'smith'));
   for (const [idx, id] of room.placed) {
     const ent = makeBuilt(room, idx, id);
     if (ent) list.push(ent);

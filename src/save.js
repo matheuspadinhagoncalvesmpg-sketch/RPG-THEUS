@@ -29,6 +29,11 @@ export function newSave(profile) {
     shade: null,
     inv: { wood: 0, stone: 0, ore: 0, crystal: 0 },
     builds: {},
+    weapon: 'errante',
+    armor: 'none',
+    items: {},
+    chests: {},
+    base: { smith: false, raids: 0 },
     playTime: 0,
     finished: false,
   };
@@ -41,7 +46,7 @@ export function loadSave() {
     const s = JSON.parse(raw);
     if (!s || s.v !== 2) return null;
     const base = newSave(s.profile);
-    return { ...base, ...s, inv: { ...base.inv, ...(s.inv || {}) }, builds: s.builds || {} };
+    return { ...base, ...s, inv: { ...base.inv, ...(s.inv || {}) }, builds: s.builds || {}, base: { ...base.base, ...(s.base || {}) } };
   } catch (e) {
     return null;
   }

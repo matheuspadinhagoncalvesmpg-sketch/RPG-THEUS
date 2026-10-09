@@ -1,11 +1,14 @@
 // Núcleo do jogo: salas, transições, combate, câmera e estados.
-import { TILE, T, AREAS, ABILITIES, PHYS, SOUL_MAX, SOUL_PER_HIT, SOUL_COST, RESOURCES } from './config.js';
+import { TILE, T, AREAS, ABILITIES, PHYS, SOUL_MAX, SOUL_PER_HIT, SOUL_COST, RESOURCES, WEAPONS } from './config.js';
 import { World } from './world.js';
 import { Player } from './player.js';
 import { ENEMY_TYPES, Projectile } from './enemies.js';
 import { BOSS_TYPES } from './bosses.js';
 import { spawnRoomEntities, GeoCoin, Tombstone, ItemDrop } from './entities.js';
 import { BuildMode } from './build.js';
+import { CraftUI } from './crafting.js';
+import { Raids } from './raids.js';
+import { NPC } from './entities.js';
 import { Particles } from './fx.js';
 import { Renderer } from './render.js';
 import { AIDirector } from './ai.js';
@@ -26,6 +29,8 @@ export class Game {
     this.bubbles = [];
     this.floaters = [];
     this.build = new BuildMode(this);
+    this.craft = new CraftUI(this);
+    this.raids = new Raids(this);
     this.speed = 1;
     this.slowmoT = 0;
     this.zoom = 0;
@@ -110,6 +115,7 @@ export class Game {
     if (sh && sh.room === id) this.entities.push(new Tombstone(sh.x, sh.y, sh.geo));
     this.floaters = [];
     this.build.onRoomEnter(room);
+    this.raids.onRoomEnter(room);
     this.projectiles = [];
     this.coins = [];
     this.hostileBoxes = [];
@@ -215,6 +221,9 @@ export class Game {
       case 'chat':
         if (inp.pressed.pause) this.closeChat();
         break;
+      case 'craft':
+        if (inp.pressed.pause) this.craft.close();
+        break;
       case 'dead':
         this.deathTimer--;
         this.particles.update();
@@ -272,6 +281,7 @@ export class Game {
     for (const b of this.hostileBoxes) if (overlap(hb, b)) this.damagePlayer(1, b.x + b.w / 2);
 
     this.ai.update();
+    this.raids.update();
     for (const b of this.bubbles) b.t--;
     this.bubbles = this.bubbles.filter((b) => b.t > 0 && !b.target.dead);
 
@@ -299,7 +309,7 @@ export class Game {
       hitSet.add(e);
       const kx = dir === 'side' ? p.facing : sign(e.cx - p.cx) * 0.4;
       const ky = dir === 'up' ? -1 : dir === 'down' ? 1 : 0;
-      e.hurt(this, this.save.nail, kx, ky);
+      e.hurt(this, this.swordDamage(), kx, ky);
       if (!enemyHit) this.ai.record(dir);
       enemyHit = true;
       if (dir === 'down') pogo = true;
@@ -354,6 +364,17 @@ export class Game {
       hitSet.add('recoil');
       p.recoilX = -p.facing * (p.onGround ? 3.4 : 2.4);
     }
+  }
+
+  spawnSmith() {
+    if (this.room.id !== 'planicie_lar' || this.entities.some((e) => e.id === 'smith')) return;
+    this.entities.push(new NPC(34 * TILE + TILE / 2, 13 * TILE, 'smith'));
+    this.particles.burst(34 * TILE + TILE / 2, 12 * TILE, 20, { color: ['#ffd27a', '#ffffff'], speed: 3, life: 40, glow: true });
+  }
+
+  // Dano do golpe: espada equipada x afiação da Mira.
+  swordDamage() {
+    return Math.round(WEAPONS[this.save.weapon || 'errante'].dmg * this.save.nail * 10) / 10;
   }
 
   hitBreakable(g, tx, ty) {
@@ -568,7 +589,10 @@ export class Game {
     const p = this.player;
     let target = null;
     if (p.onGround && !p.sitting && p.attackTimer <= 0) {
-      for (const e of this.entities) if (e.interact && e.near(p)) { target = e; break; }
+      // O objeto interativo mais próximo vence (bancada, baú e forja podem ficar lado a lado).
+      let best = Infinity;
+      for (const e of this.entities)
+        if (e.interact && e.near(p) && Math.abs(e.x - p.cx) < best) { target = e; best = Math.abs(e.x - p.cx); }
     }
     this.interactTarget = target;
     this.ui.setInteract(target ? target.label : null);
@@ -601,6 +625,7 @@ export class Game {
       this.persist();
       if (this.ai.enabled) this.openChat(npc);
       else if (npc.data.shop) this.openShop();
+      else if (npc.data.trade) this.craft.openSmith();
     });
   }
 
@@ -717,7 +742,7 @@ export class Game {
     document.body.classList.add('menu-open');
     this.ui.openChat(npc, this.ai.histories[npc.id] || [], {
       send: (text) => this.ai.npcReply(npc.id, text),
-      shop: npc.data.shop ? () => { this.closeChat(); this.openShop(); } : null,
+      shop: npc.data.shop ? () => { this.closeChat(); this.openShop(); } : npc.data.trade ? () => { this.closeChat(); this.craft.openSmith(); } : null,
       close: () => this.closeChat(),
       sound: () => this.audio.play('talk'),
     });
@@ -824,14 +849,14 @@ export class Game {
 
   // Brilho quente de tochas e fogueiras, que atravessa a escuridão das cavernas.
   drawLights(ctx) {
-    const dark = AREAS[this.room.area].dark;
-    if (!dark) return;
+    const dark = Math.max(AREAS[this.room.area].dark, this.raids.night);
+    if (dark < 0.05) return;
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
     for (const e of this.entities) {
       if (!e.light) continue;
       const g = ctx.createRadialGradient(e.x, e.y - 18, 4, e.x, e.y - 18, 110 * e.light);
-      g.addColorStop(0, `rgba(255,170,80,${0.22 * dark})`);
+      g.addColorStop(0, `rgba(255,170,80,${0.32 * dark})`);
       g.addColorStop(1, 'rgba(255,150,70,0)');
       ctx.fillStyle = g;
       ctx.fillRect(e.x - 120, e.y - 140, 240, 240);
