@@ -32,6 +32,10 @@
       </div>
     </div>
     <div class="hud-right">
+      <button id="net-badge" class="hud-btn net-badge hidden" aria-label="Multijogador"></button>
+      <button id="btn-chat" class="hud-btn hidden" aria-label="Conversar">
+        <svg viewBox="0 0 24 24"><path d="M4 5h16v10H9l-5 4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+      </button>
       <button id="btn-build" class="hud-btn hidden" aria-label="Construir">
         <svg viewBox="0 0 24 24"><path d="M14 4l6 6-3 3-6-6z M11 7L3.5 14.5a2 2 0 0 0 0 3l3 3a2 2 0 0 0 3 0L17 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
       </button>
@@ -49,6 +53,12 @@
     <div class="hb-row"><div id="hb-slots"></div><button id="hb-close" class="hud-btn" aria-label="Sair do modo construção">✕</button></div>
     <div id="hb-info"></div>
   </div>
+
+  <div id="chat-feed"></div>
+  <form id="chat-bar" class="hidden">
+    <input id="chat-text" type="text" maxlength="120" placeholder="Mensagem para o mundo..." autocomplete="off" enterkeyhint="send">
+    <button type="submit" class="menu-btn">Enviar</button>
+  </form>
 
   <div id="boss-bar" class="hidden"><div id="boss-name"></div><div class="bar"><div id="boss-fill"></div></div></div>
   <div id="area-title" class="hidden"><span class="ornament"></span><h2></h2><p></p><span class="ornament"></span></div>
@@ -100,6 +110,7 @@
       <button id="btn-resume" class="menu-btn">Continuar</button>
       <button id="btn-pause-map" class="menu-btn">Mapa</button>
       <button class="menu-btn btn-manual">Manual dos controles</button>
+      <button class="menu-btn btn-mp">Multijogador e nuvem</button>
       <div class="options">
         <div class="opt"><span>Som</span><button class="opt-btn" data-setting="muted"></button></div>
         <div class="opt"><span>Vibração</span><button class="opt-btn" data-setting="vibration"></button></div>
@@ -146,6 +157,36 @@
       <p id="craft-sub" class="craft-sub"></p>
       <div id="craft-list"></div>
       <button id="btn-craft-close" class="menu-btn subtle">Fechar</button>
+    </div>
+  </div>
+
+  <div id="mp-screen" class="overlay hidden">
+    <div class="panel mp-panel">
+      <h2>Multijogador</h2>
+      <div id="mp-online" class="hidden">
+        <p class="mp-label">Você está no mundo</p>
+        <p class="mp-code"><span id="mp-code"></span> <button id="mp-copy" class="opt-btn">Copiar</button></p>
+        <p class="mp-hint">Passe esse código para seus amigos entrarem.</p>
+        <ul id="mp-players"></ul>
+        <button id="mp-leave" class="menu-btn danger">Sair do mundo</button>
+      </div>
+      <div id="mp-offline">
+        <p class="mp-hint">Jogue junto: a base é compartilhada, os monstros e chefes são os mesmos para todos. Cada um mantém o próprio progresso.</p>
+        <button id="mp-create" class="menu-btn primary">Criar um mundo</button>
+        <form id="mp-join" class="mp-row">
+          <input id="mp-join-code" type="text" maxlength="5" placeholder="CÓDIGO" autocomplete="off" spellcheck="false">
+          <button type="submit" class="menu-btn">Entrar</button>
+        </form>
+      </div>
+      <p id="mp-msg" class="mp-msg"></p>
+      <h2 class="mp-sub">Salvar na nuvem</h2>
+      <p class="mp-hint">Seu progresso é guardado no servidor com este código. Use-o em outro celular ou no PC.</p>
+      <p class="mp-code small"><span id="cloud-code"></span> <button id="cloud-copy" class="opt-btn">Copiar</button></p>
+      <form id="cloud-load" class="mp-row">
+        <input id="cloud-input" type="text" maxlength="14" placeholder="Código da nuvem" autocomplete="off" spellcheck="false">
+        <button type="submit" class="menu-btn">Carregar</button>
+      </form>
+      <button id="mp-close" class="menu-btn subtle">Fechar</button>
     </div>
   </div>
 
@@ -220,6 +261,7 @@
           <button id="btn-new-yes" class="menu-btn danger">Apagar e começar</button>
           <button id="btn-new-no" class="menu-btn subtle">Cancelar</button>
         </div>
+        <button class="menu-btn btn-mp">Multijogador e nuvem</button>
         <button class="menu-btn subtle btn-manual">Manual dos controles</button>
         <button id="btn-options" class="menu-btn subtle">Opções</button>
         <div id="title-options" class="options hidden">

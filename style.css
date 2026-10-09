@@ -507,3 +507,36 @@ kbd {
 #craft-list .si-desc span { display: inline-flex; align-items: center; gap: 3px; margin-right: 8px; }
 #craft-list .si-desc i { width: 7px; height: 7px; border-radius: 2px; transform: rotate(45deg); display: inline-block; }
 #craft-list .si-desc span.miss { color: var(--danger); }
+
+/* Multijogador */
+.net-badge { width: auto; padding: 0 12px; border-radius: 20px; font-family: var(--serif); font-size: 12px; letter-spacing: 0.06em; color: #9fe3ff; border-color: rgba(159, 227, 255, 0.5); }
+.mp-panel { width: min(480px, 100%); }
+.mp-panel h2.mp-sub { font-size: 18px; margin-top: 16px; border-top: 1px solid var(--line); padding-top: 12px; }
+.mp-label { color: var(--ink-dim); font-size: 15px; }
+.mp-code { font-family: var(--serif); font-size: 32px; letter-spacing: 0.25em; color: var(--gold); display: flex; align-items: center; justify-content: center; gap: 12px; margin: 4px 0; }
+.mp-code.small { font-size: 18px; letter-spacing: 0.12em; }
+.mp-hint { font-size: 15px; color: var(--ink-dim); margin: 6px 0; }
+.mp-msg { min-height: 1.2em; color: var(--gold); font-size: 15px; }
+.mp-row { display: flex; gap: 8px; margin: 6px 0; }
+.mp-row .menu-btn { width: auto; margin: 0; }
+.mp-row input {
+  flex: 1; min-width: 0; padding: 9px 12px; font-family: var(--serif); font-size: 18px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--ink); background: rgba(244, 239, 230, 0.06); border: 1px solid var(--line); border-radius: 3px; outline: none;
+  user-select: text; -webkit-user-select: text; touch-action: manipulation;
+}
+.mp-row input:focus { border-color: var(--gold); }
+#mp-players { list-style: none; margin: 8px 0; font-size: 16px; }
+#mp-players li::before { content: '● '; color: #7fe39a; }
+#mp-screen { z-index: 46; }
+
+#chat-feed {
+  position: fixed; left: calc(14px + var(--sl)); bottom: calc(14px + var(--sb)); z-index: 19;
+  max-width: min(420px, 60vw); pointer-events: none; display: flex; flex-direction: column; gap: 3px;
+}
+body.touch-mode #chat-feed { bottom: auto; top: calc(96px + var(--st)); }
+#chat-feed p { background: rgba(8, 6, 12, 0.7); padding: 3px 10px; border-radius: 3px; font-size: 15px; transition: opacity 0.6s; }
+#chat-feed p b { color: #9fe3ff; font-family: var(--serif); font-size: 12px; margin-right: 6px; }
+#chat-feed p.fade-out { opacity: 0; }
+#chat-bar { position: fixed; left: 50%; transform: translateX(-50%); top: calc(64px + var(--st)); z-index: 41; display: flex; gap: 6px; width: min(520px, 90vw); }
+#chat-bar input { flex: 1; min-width: 0; padding: 9px 12px; font-size: 17px; font-family: var(--text); color: var(--ink); background: rgba(10, 8, 16, 0.92); border: 1px solid var(--gold); border-radius: 3px; outline: none; user-select: text; -webkit-user-select: text; }
+#chat-bar .menu-btn { width: auto; margin: 0; background: rgba(10, 8, 16, 0.92); }

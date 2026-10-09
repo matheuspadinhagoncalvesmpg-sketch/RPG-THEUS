@@ -8,7 +8,9 @@ import { spawnRoomEntities, GeoCoin, Tombstone, ItemDrop } from './entities.js';
 import { BuildMode } from './build.js';
 import { CraftUI } from './crafting.js';
 import { Raids } from './raids.js';
-import { NPC } from './entities.js';
+import { NPC, makeBuilt } from './entities.js';
+import { Net } from './net.js';
+import { scheduleUpload } from './cloud.js';
 import { Particles } from './fx.js';
 import { Renderer } from './render.js';
 import { AIDirector } from './ai.js';
@@ -31,6 +33,8 @@ export class Game {
     this.build = new BuildMode(this);
     this.craft = new CraftUI(this);
     this.raids = new Raids(this);
+    this.net = new Net(this);
+    this.raidSeq = 0;
     this.speed = 1;
     this.slowmoT = 0;
     this.zoom = 0;
@@ -91,7 +95,10 @@ export class Game {
     }
   }
 
-  persist() { writeSave(this.save); }
+  persist() {
+    writeSave(this.save);
+    scheduleUpload(this.save);
+  }
 
   // ───────── Salas ─────────
   enterRoom(id, x, y) {
@@ -101,9 +108,13 @@ export class Game {
     room.doorsClosed = false;
     this.entities = spawnRoomEntities(room, this.save);
     this.enemies = [];
+    let eid = 0;
     for (const e of room.entities) {
       const E = ENEMY_TYPES[e.ch];
-      if (E) this.enemies.push(new E(e.tx * TILE + TILE / 2, (e.ty + 1) * TILE));
+      if (!E) continue;
+      const en = new E(e.tx * TILE + TILE / 2, (e.ty + 1) * TILE);
+      en.eid = eid++;
+      this.enemies.push(en);
     }
     this.boss = null;
     this.bossPending = null;
@@ -259,9 +270,11 @@ export class Game {
     }
 
     this.hostileBoxes.length = 0;
+    if (this.net.puppet && this.net.remoteBoxes) this.hostileBoxes.push(...this.net.remoteBoxes);
     p.update(this);
 
-    for (const e of this.enemies) if (!e.dead) e.update(this);
+    const puppet = this.net.puppet;
+    for (const e of this.enemies) if (!e.dead) { if (puppet) e.puppetStep(); else e.update(this); }
     for (const e of this.entities) e.update(this);
     for (const c of this.coins) c.update(this);
     for (const pr of this.projectiles) pr.update(this);
@@ -272,7 +285,8 @@ export class Game {
     this.projectiles = this.projectiles.filter((pr) => !pr.dead);
 
     // Chefe acorda quando o herói entra na arena
-    if (this.bossPending && p.x > 6 * TILE && p.onGround) this.startBoss();
+    if (this.bossPending && p.x > 6 * TILE && p.onGround && this.net.isHost()) this.startBoss();
+    this.net.update();
 
     // Dano por contato e golpes dos inimigos
     const hb = this.hurtbox();
@@ -309,7 +323,7 @@ export class Game {
       hitSet.add(e);
       const kx = dir === 'side' ? p.facing : sign(e.cx - p.cx) * 0.4;
       const ky = dir === 'up' ? -1 : dir === 'down' ? 1 : 0;
-      e.hurt(this, this.swordDamage(), kx, ky);
+      this.hitEnemy(e, this.swordDamage(), kx, ky);
       if (!enemyHit) this.ai.record(dir);
       enemyHit = true;
       if (dir === 'down') pogo = true;
@@ -366,6 +380,48 @@ export class Game {
     }
   }
 
+  // Golpe num inimigo: o anfitrião aplica; o convidado mostra o efeito e avisa o anfitrião.
+  hitEnemy(e, dmg, kx, ky) {
+    if (this.net.puppet) {
+      e.flash = 7;
+      this.damageText(e.cx, e.y, dmg, !!e.isBoss);
+      this.net.sendHit(e, dmg, kx, ky);
+    } else e.hurt(this, dmg, kx, ky);
+  }
+
+  // Base compartilhada: aplica as construções do mundo (ou volta às do save local).
+  applyWorldBuilds(builds) {
+    this.world.applyBuilds(builds);
+    if (!this.room) return;
+    this.renderer.invalidateRoom(this.room);
+    this.entities = this.entities.filter((e) => e.idx == null);
+    for (const [idx, id] of this.room.placed) {
+      const ent = makeBuilt(this.room, idx, id);
+      if (ent) this.entities.push(ent);
+    }
+    this.build.refresh();
+  }
+
+  applyRemoteBuild(roomId, idx, id) {
+    const room = this.world.byId[roomId];
+    if (!room) return;
+    const old = room.placed.get(idx);
+    if (old) {
+      room.placed.delete(idx);
+      if (room.tiles[idx] !== T.EMPTY && !id) room.tiles[idx] = T.EMPTY;
+    }
+    if (id) {
+      room.placed.set(idx, id);
+      const it = makeBuilt(room, idx, id);
+      if (!it) room.tiles[idx] = id === 'wood_plat' ? T.ONEWAY : T.SOLID;
+    }
+    if (room !== this.room) return;
+    this.renderer.invalidateRoom(room);
+    this.entities = this.entities.filter((e) => e.idx !== idx);
+    if (id) { const ent = makeBuilt(room, idx, id); if (ent) this.entities.push(ent); }
+    this.raids.checkSmith();
+  }
+
   spawnSmith() {
     if (this.room.id !== 'planicie_lar' || this.entities.some((e) => e.id === 'smith')) return;
     this.entities.push(new NPC(34 * TILE + TILE / 2, 13 * TILE, 'smith'));
@@ -408,7 +464,7 @@ export class Game {
         for (const e of this.enemies) {
           if (e.dead || pr.hitSet.has(e) || !overlap(pr.box(), e)) continue;
           pr.hitSet.add(e);
-          e.hurt(this, pr.dmg, sign(pr.vx), 0);
+          this.hitEnemy(e, pr.dmg, sign(pr.vx), 0);
           this.audio.play('hit');
           this.particles.burst(e.cx, e.cy, 10, { type: 'spark', color: '#bfe9ff', speed: 6, life: 14, glow: true });
           if (!pr.pierce) pr.dead = true;
@@ -681,6 +737,7 @@ export class Game {
     const b = this.bossPending;
     this.bossPending = null;
     const boss = new BOSS_TYPES[b.type](b.x, b.y);
+    boss.eid = 'boss';
     this.enemies.push(boss);
     this.boss = boss;
     this.room.doorsClosed = true;
@@ -819,6 +876,7 @@ export class Game {
     ctx.setTransform(s, 0, 0, s, -camX * s, -camY * s);
     r.drawDoors(ctx, this.room, this.frame);
     for (const e of this.entities) e.draw(ctx, this);
+    this.net.drawPlayers(ctx);
     const pal = AREAS[this.room.area];
     for (const e of this.enemies) e.draw(ctx, pal);
     for (const c of this.coins) c.draw(ctx);

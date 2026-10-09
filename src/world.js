@@ -102,6 +102,20 @@ export class World {
     return t === T.SOLID || t === T.BREAK || (t === T.DOOR && r && r.doorsClosed);
   }
 
+  // Troca todas as construções (base do mundo online ou do save local).
+  applyBuilds(builds) {
+    for (const r of this.rooms) {
+      for (const [idx, id] of r.placed) if (BUILD_BY_ID[id] && BUILD_BY_ID[id].tile) r.tiles[idx] = T.EMPTY;
+      r.placed.clear();
+      for (const [idx, id] of Object.entries(builds[r.id] || {})) {
+        const item = BUILD_BY_ID[id];
+        if (!item) continue;
+        r.placed.set(Number(idx), id);
+        if (item.tile) r.tiles[Number(idx)] = item.tile;
+      }
+    }
+  }
+
   applySave(save) {
     for (const r of this.rooms) {
       for (const g of r.breakGroups) if (save.broken[g.id]) r.breakGroup(g);

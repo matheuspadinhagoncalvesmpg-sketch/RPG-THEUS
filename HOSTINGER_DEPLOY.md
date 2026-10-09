@@ -14,6 +14,11 @@ O `server.js` (Node.js) serve os arquivos e liga a **IA Gemini**: conversa livre
 
 ---
 
+## 🌐 Multijogador e nuvem (precisa da Opção 2, com Node.js)
+
+O `server.js` também cuida dos mundos multijogador e do salvamento na nuvem. Eles ficam na pasta `data/` da aplicação.
+Se quiser guardar esses dados em outro lugar (para não perder em reinstalações), defina a variável `DATA_DIR` com uma pasta fora do site.
+
 ## 📌 Opção 1: Hospedagem web comum (a mais simples, funciona em qualquer plano)
 
 1. No hPanel, abra o **Gerenciador de Arquivos** do seu domínio (ou subdomínio, ex: `jogo.seudominio.com.br`).

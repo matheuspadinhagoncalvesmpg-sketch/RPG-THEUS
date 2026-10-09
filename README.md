@@ -66,6 +66,17 @@ O jogo tem um **Manual dos controles** completo na pausa e na tela inicial. No c
 
 ---
 
+## 🌐 Multijogador e nuvem
+
+- Em **Multijogador e nuvem** (tela inicial ou pausa), crie um **mundo** e passe o código de 5 letras, ou entre no mundo de alguém (até 6 jogadores).
+- Todos se veem na mesma sala, com animações, espada, armadura e nome. Monstros e chefes são os mesmos para todos: o primeiro jogador da sala simula e os outros acompanham e acertam os mesmos inimigos. Se ele sair, outro assume.
+- A **base é compartilhada**: o que um constrói aparece para todos. Habilidades, materiais e moedas são de cada um.
+- Tem **chat** (botão de balão ou tecla T).
+- **Salvar na nuvem**: cada aparelho tem um código de 10 letras. Digite-o em outro aparelho para continuar de onde parou.
+- Conexão por WebSocket, com reserva automática por HTTP. Mundos e saves ficam na pasta `data/` do servidor (fora do Git).
+
+---
+
 ## 🧠 IA Gemini
 
 Com a variável `GEMINI_API_KEY` no servidor (veja `.env.example`):
@@ -83,6 +94,7 @@ style.css         visual e layout (adaptado a celular, com safe-area)
 sw.js             cache offline (PWA)
 server.js         servidor (arquivos + rotas da IA), sem dependências
 ai_server.js      integração com o Gemini (chave só no servidor)
+mp_server.js      multijogador (WebSocket sem dependências + HTTP) e nuvem
 src/
   main.js         título, criação do herói, opções
   game.js         núcleo: salas, transições, combate, câmera
@@ -99,12 +111,15 @@ src/
   render.js       fundo em paralaxe, blocos, luz
   art.js          desenho vetorial do herói e objetos
   ai.js           diretor tático e conversa com personagens (cliente)
+  net.js          multijogador no cliente
+  cloud.js        salvar na nuvem
   input.js        teclado, controle e toque multitoque
   audio.js        efeitos e música sintetizados
   ui.js           HUD, diálogos, mapa, loja
   dialog.js       falas e itens da loja
   save.js         salvamento local
 tools/check-world.mjs   valida as conexões entre as salas (npm run check)
+tools/mp-bot.mjs        jogador-robô para testar o multijogador
 ```
 
 Para criar ou editar salas, mexa em `src/rooms.js` e rode `npm run check` para conferir se as aberturas entre salas batem.

@@ -258,6 +258,8 @@ export class BuildMode {
   }
 
   store(room, idx, id) {
+    // Online, as construções pertencem ao mundo compartilhado.
+    if (this.game.net.online) { this.game.net.sendBuild(room.id, idx, id); return; }
     const s = this.game.save;
     s.builds = s.builds || {};
     const r = (s.builds[room.id] = s.builds[room.id] || {});

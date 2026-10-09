@@ -54,6 +54,10 @@ export class Raids {
 
   update() {
     const g = this.game;
+    if (g.net.online && !g.net.isHost()) {
+      this.night += ((this.remoteNight || 0) - this.night) * 0.05;
+      return;
+    }
     const target = this.active ? 0.55 : 0;
     this.night += (target - this.night) * 0.02;
     if (g.room.id !== BASE_ROOM || !g.save.base.smith) return;
@@ -94,6 +98,7 @@ export class Raids {
       const y = K === Flyer ? 5 * TILE : 13 * TILE;
       const e = new K(x, y);
       e.raid = true;
+      e.eid = 'r' + g.raidSeq++;
       e.dir = left ? 1 : -1;
       g.enemies.push(e);
       g.particles.burst(x, y - 12, 10, { color: ['#2a1d33', '#7a5cff'], speed: 3, life: 30 });

@@ -46,6 +46,16 @@ export class Enemy {
     return hit;
   }
 
+  // Convidado no multijogador: só segue a posição enviada pelo anfitrião.
+  puppetStep() {
+    this.t++;
+    if (this.flash > 0) this.flash--;
+    if (this.nx != null) {
+      this.x += (this.nx - this.x) * 0.4;
+      this.y += (this.ny - this.y) * 0.4;
+    }
+  }
+
   // Recuo após levar golpe. Retorna true enquanto estiver atordoado.
   knockback(game) {
     if (this.kb <= 0) return false;

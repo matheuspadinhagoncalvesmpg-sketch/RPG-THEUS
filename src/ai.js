@@ -51,6 +51,7 @@ export class AIDirector {
   // Chamado a cada quadro de jogo.
   update() {
     const g = this.game;
+    if (g.net.puppet) return; // só quem simula os inimigos planeja a tática
     const alive = g.enemies.filter((e) => !e.dead);
     if (!alive.length) return;
     if (g.frame % 30 === 0) {

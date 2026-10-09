@@ -5,12 +5,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadEnv, handleAI } from './ai_server.js';
+import { initMultiplayer, handleMultiplayer } from './mp_server.js';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 loadEnv(ROOT);
 const PORT = process.env.PORT || process.argv[2] || 3000;
 // Arquivos que nunca devem ser servidos (a chave da IA fica no .env).
-const PRIVATE = /(^|\/)\.|^\/(server|ai_server)\.js$|^\/(tools|node_modules)\//;
+const PRIVATE = /(^|\/)\.|^\/(server|ai_server|mp_server)\.js$|^\/(tools|node_modules|data)\//;
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -24,7 +25,7 @@ const MIME = {
 };
 
 const server = http.createServer((req, res) => {
-  if (handleAI(req, res)) return;
+  if (handleAI(req, res) || handleMultiplayer(req, res)) return;
   let url;
   try { url = decodeURIComponent(req.url.split('?')[0]); } catch (e) { res.writeHead(400); return res.end(); }
   if (url === '/') url = '/index.html';
@@ -45,6 +46,8 @@ const server = http.createServer((req, res) => {
     res.end(data);
   });
 });
+
+initMultiplayer(server, ROOT);
 
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`THEUS: Ecos de Vésper rodando em http://localhost:${PORT}`);

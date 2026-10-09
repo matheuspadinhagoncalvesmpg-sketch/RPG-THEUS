@@ -5,6 +5,7 @@ import { UI } from './ui.js';
 import { Game } from './game.js';
 import { drawHero, EYE_COLORS } from './art.js';
 import { BUILD_ITEMS } from './config.js';
+import { cloudCode, setCloudCode, prettyCode, normalizeCode, downloadSave } from './cloud.js';
 import { loadSave, newSave, writeSave, clearSave, loadSettings, writeSettings, DEFAULT_PROFILE } from './save.js';
 
 const $ = (s) => document.querySelector(s);
@@ -62,6 +63,8 @@ function showScreen(id) {
 }
 
 function toTitle() {
+  game.net.disconnect();
+  hideChat();
   game.stop();
   for (const el of $$('.overlay')) el.classList.add('hidden');
   ui.show(ui.dialogEl, false);
@@ -208,6 +211,129 @@ touch.onWorldTap = (x, y) => {
   return true;
 };
 game.touchLayout = () => touch.layout();
+
+// ───────── Multijogador e nuvem ─────────
+const mpMsg = (t) => { $('#mp-msg').textContent = t || ''; };
+
+function renderMP() {
+  const net = game.net;
+  ui.show($('#mp-online'), net.online);
+  ui.show($('#mp-offline'), !net.online);
+  if (net.online) {
+    $('#mp-code').textContent = net.code;
+    const names = [game.save.profile.name + ' (você)', ...[...net.players.values()].map((p) => p.name)];
+    $('#mp-players').innerHTML = names.map((n) => `<li>${n.replace(/</g, '')}</li>`).join('');
+  }
+  $('#cloud-code').textContent = prettyCode(cloudCode());
+}
+
+function updateNetBadge() {
+  const net = game.net;
+  ui.show($('#net-badge'), net.online);
+  ui.show($('#btn-chat'), net.online);
+  if (net.online) $('#net-badge').textContent = `🌐 ${net.code} · ${net.count}`;
+  if (!$('#mp-screen').classList.contains('hidden')) renderMP();
+}
+game.net.onChange = updateNetBadge;
+
+function openMP() {
+  mpMsg('');
+  renderMP();
+  ui.show($('#mp-screen'));
+}
+
+// Garante que existe um jogo rodando antes de conectar.
+function ensurePlaying() {
+  if (game.state !== 'off') return true;
+  const s = loadSave();
+  if (!s) { mpMsg('Crie seu herói em "Novo jogo" primeiro.'); return false; }
+  ui.show($('#mp-screen'), false);
+  play(s);
+  return true;
+}
+
+async function connect(opts) {
+  if (!ensurePlaying()) return;
+  mpMsg('Conectando...');
+  try {
+    const code = await game.net.connect(opts);
+    mpMsg(opts.create ? 'Mundo criado! Passe o código para seus amigos.' : 'Você entrou no mundo!');
+    renderMP();
+    if (game.state === 'play' || game.state === 'pause') ui.show($('#mp-screen'));
+    ui.toast(`Mundo ${code}`);
+  } catch (e) {
+    mpMsg(e.message || 'Não foi possível conectar.');
+  }
+}
+
+for (const b of $$('.btn-mp')) b.addEventListener('click', openMP);
+$('#net-badge').addEventListener('click', openMP);
+$('#mp-close').addEventListener('click', () => ui.show($('#mp-screen'), false));
+$('#mp-create').addEventListener('click', () => connect({ create: true }));
+$('#mp-join').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const code = normalizeCode($('#mp-join-code').value).slice(0, 5);
+  if (code.length !== 5) return mpMsg('O código do mundo tem 5 letras.');
+  connect({ code });
+});
+$('#mp-leave').addEventListener('click', () => { game.net.disconnect(); renderMP(); mpMsg('Você saiu do mundo. Sua base local voltou.'); });
+const copy = (text) => { try { navigator.clipboard.writeText(text); mpMsg('Copiado!'); } catch (e) { mpMsg(text); } };
+$('#mp-copy').addEventListener('click', () => copy(game.net.code));
+$('#cloud-copy').addEventListener('click', () => copy(prettyCode(cloudCode())));
+
+let pendingCloud = null;
+$('#cloud-load').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const code = normalizeCode($('#cloud-input').value);
+  if (code.length !== 10) return mpMsg('O código da nuvem tem 10 letras (ex.: ABCD-EFGH-JK).');
+  if (pendingCloud !== code) {
+    pendingCloud = code;
+    return mpMsg('Isso substitui o progresso deste aparelho. Toque em Carregar de novo para confirmar.');
+  }
+  mpMsg('Baixando...');
+  try {
+    const save = await downloadSave(code);
+    writeSave(save);
+    setCloudCode(code);
+    pendingCloud = null;
+    ui.show($('#mp-screen'), false);
+    toTitle();
+    ui.toast('Progresso carregado! Toque em Continuar.', 4000);
+  } catch (err) {
+    mpMsg(err.message);
+  }
+});
+
+// ── Chat ──
+function showChat() {
+  if (!game.net.online) return;
+  ui.show($('#chat-bar'));
+  $('#chat-text').value = '';
+  $('#chat-text').focus();
+}
+function hideChat() { ui.show($('#chat-bar'), false); $('#chat-text').blur(); }
+$('#btn-chat').addEventListener('click', () => ($('#chat-bar').classList.contains('hidden') ? showChat() : hideChat()));
+$('#chat-bar').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const t = $('#chat-text').value.trim();
+  if (t) game.net.sendChat(t);
+  hideChat();
+});
+window.addEventListener('keydown', (e) => {
+  if (e.code === 'KeyT' && game.state === 'play' && game.net.online && document.activeElement.tagName !== 'INPUT') { e.preventDefault(); showChat(); }
+  if (e.code === 'Escape' && document.activeElement === $('#chat-text')) hideChat();
+});
+game.net.onChat = (name, text) => {
+  const p = document.createElement('p');
+  const b = document.createElement('b');
+  b.textContent = name;
+  p.append(b, document.createTextNode(text));
+  $('#chat-feed').appendChild(p);
+  while ($('#chat-feed').children.length > 5) $('#chat-feed').firstChild.remove();
+  game.audio.play('talk');
+  setTimeout(() => p.classList.add('fade-out'), 9000);
+  setTimeout(() => p.remove(), 9800);
+};
 
 // ───────── Manual dos controles ─────────
 function openManual() {
