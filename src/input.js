@@ -146,6 +146,7 @@ export class TouchControls {
     this.joyOrigin = { x: 0, y: 0 };
     this.radius = 56;
     this.enabled = false;
+    this.leftHanded = false;
     this.onWorldTap = null; // retorna true se o toque foi usado (ex.: construir)
 
     root.addEventListener('pointerdown', (e) => this.down(e), { passive: false });
@@ -155,18 +156,19 @@ export class TouchControls {
     root.addEventListener('lostpointercapture', (e) => this.up(e));
     root.addEventListener('contextmenu', (e) => e.preventDefault());
     window.addEventListener('resize', () => this.layout());
+    // Dedos "presos" (troca de app, gesto do sistema) nunca podem travar o joystick.
+    window.addEventListener('blur', () => this.releaseAll());
+    document.addEventListener('visibilitychange', () => { if (document.hidden) this.releaseAll(); });
     window.addEventListener('pointerdown', (e) => { if (e.pointerType === 'touch') input.setTouchMode(true); }, true);
   }
 
   layout() {
-    this.rects = this.buttons.map((b) => {
-      const r = b.getBoundingClientRect();
-      return { el: b, act: b.dataset.act, x: r.left + r.width / 2, y: r.top + r.height / 2, r: r.width / 2 };
-    });
     const br = this.base.getBoundingClientRect();
     this.radius = Math.max(40, br.width * 0.45);
-    this.restJoy();
+    if (this.joyId === null) this.restJoy();
   }
+
+  isJoySide(x) { return this.leftHanded ? x >= window.innerWidth * 0.5 : x < window.innerWidth * 0.5; }
 
   restJoy() {
     this.base.style.transform = '';
@@ -174,13 +176,16 @@ export class TouchControls {
     this.root.classList.remove('joy-active');
   }
 
+  // Posição lida na hora do toque: botões que aparecem depois (dash, interagir)
+  // ou que mudam de tamanho nas opções sempre respondem.
   buttonAt(x, y) {
-    if (!this.rects) this.layout();
     let best = null, bestD = Infinity;
-    for (const b of this.rects) {
-      if (b.el.offsetParent === null || b.el.classList.contains('hidden')) continue;
-      const d = Math.hypot(x - b.x, y - b.y);
-      if (d < b.r * 1.45 && d < bestD) { best = b; bestD = d; }
+    for (const el of this.buttons) {
+      if (el.classList.contains('hidden')) continue;
+      const r = el.getBoundingClientRect();
+      if (r.width === 0) continue;
+      const d = Math.hypot(x - (r.left + r.width / 2), y - (r.top + r.height / 2));
+      if (d < (r.width / 2) * 1.45 && d < bestD) { best = { el, act: el.dataset.act }; bestD = d; }
     }
     return best;
   }
@@ -192,13 +197,18 @@ export class TouchControls {
     const w = window.innerWidth;
     const btn = this.buttonAt(e.clientX, e.clientY);
     const h = window.innerHeight;
-    const joyZone = e.clientX < w * 0.42 && e.clientY > h * 0.38;
+    const joyZone = (this.leftHanded ? e.clientX > w * 0.58 : e.clientX < w * 0.42) && e.clientY > h * 0.38;
     if (btn) {
       this.pointers.set(e.pointerId, { kind: 'btn', act: btn.act, el: btn.el });
       this.press(btn);
     } else if (this.onWorldTap && !joyZone && this.onWorldTap(e.clientX, e.clientY)) {
       // toque usado pelo modo construção
-    } else if (e.clientX < w * 0.5 && this.joyId === null) {
+    } else if (this.isJoySide(e.clientX)) {
+      if (this.joyId !== null) {
+        // O dedo anterior ficou preso: o toque novo assume o joystick.
+        this.pointers.delete(this.joyId);
+        for (const a of ['left', 'right', 'up', 'down']) this.input.setTouch(a, false);
+      }
       this.joyId = e.pointerId;
       this.joyOrigin = { x: e.clientX, y: e.clientY };
       this.pointers.set(e.pointerId, { kind: 'joy' });

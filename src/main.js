@@ -21,16 +21,33 @@ let settings = loadSettings();
 if (matchMedia('(pointer: coarse)').matches) input.setTouchMode(true);
 
 // ───────── Opções ─────────
+// Botões encolhem em telas baixas para nunca cobrir o jogo.
+function applyBtnScale() {
+  const fit = Math.max(0.78, Math.min(1.1, window.innerHeight / 400));
+  document.documentElement.style.setProperty('--btn-scale', (settings.btnSize * fit).toFixed(3));
+}
+window.addEventListener('resize', applyBtnScale);
+
 function applySettings() {
   audio.setMuted(settings.muted);
   input.vibration = settings.vibration;
-  document.documentElement.style.setProperty('--btn-scale', settings.btnSize);
+  applyBtnScale();
   document.documentElement.style.setProperty('--btn-alpha', settings.btnOpacity);
   for (const el of $$('[data-setting="muted"]')) el.textContent = settings.muted ? 'Desligado' : 'Ligado';
   for (const el of $$('[data-setting="vibration"]')) el.textContent = settings.vibration ? 'Ligada' : 'Desligada';
   for (const el of $$('[data-size]')) el.classList.toggle('active', Number(el.dataset.size) === settings.btnSize);
   for (const el of $$('[data-speed]')) el.classList.toggle('active', Number(el.dataset.speed) === settings.speed);
   game.speed = settings.speed || 1;
+  for (const el of $$('[data-zoom]')) el.classList.toggle('active', Number(el.dataset.zoom) === settings.zoom);
+  for (const el of $$('[data-quality]')) el.classList.toggle('active', el.dataset.quality === settings.quality);
+  for (const el of $$('[data-setting="lefty"]')) el.textContent = settings.lefty ? 'Ligada' : 'Desligada';
+  document.body.classList.toggle('lefty', !!settings.lefty);
+  touch.leftHanded = !!settings.lefty;
+  game.renderer.setZoom(settings.zoom || 1);
+  game.autoQuality = settings.quality === 'auto';
+  if (settings.quality === 'low') game.renderer.setQuality(0.6);
+  else if (game.renderer.fixedLow) game.renderer.setQuality(1);
+  game.renderer.fixedLow = settings.quality === 'low';
   for (const el of $$('.opt-opacity')) el.value = settings.btnOpacity;
   writeSettings(settings);
   requestAnimationFrame(() => touch.layout());
@@ -40,6 +57,9 @@ for (const el of $$('[data-setting="muted"]')) el.addEventListener('click', () =
 for (const el of $$('[data-setting="vibration"]')) el.addEventListener('click', () => { settings.vibration = !settings.vibration; applySettings(); input.vibrate(40); });
 for (const el of $$('[data-size]')) el.addEventListener('click', () => { settings.btnSize = Number(el.dataset.size); applySettings(); });
 for (const el of $$('[data-speed]')) el.addEventListener('click', () => { settings.speed = Number(el.dataset.speed); applySettings(); });
+for (const el of $$('[data-zoom]')) el.addEventListener('click', () => { settings.zoom = Number(el.dataset.zoom); applySettings(); game.updateCamera(true); });
+for (const el of $$('[data-quality]')) el.addEventListener('click', () => { settings.quality = el.dataset.quality; applySettings(); game.updateCamera(true); });
+for (const el of $$('[data-setting="lefty"]')) el.addEventListener('click', () => { settings.lefty = !settings.lefty; applySettings(); });
 for (const el of $$('.opt-opacity')) el.addEventListener('input', () => { settings.btnOpacity = Number(el.value); applySettings(); });
 for (const el of $$('.opt-fullscreen')) el.addEventListener('click', () => goFullscreen(true));
 
@@ -355,6 +375,8 @@ $('#btn-map').addEventListener('click', () => { if (game.state === 'play') game.
 $('#btn-pause').addEventListener('click', () => { if (game.state === 'play') game.openMenu('pause'); });
 $('#btn-resume').addEventListener('click', () => game.closeMenu());
 $('#btn-charms').addEventListener('click', () => { game.closeMenu(); game.craft.openCharms(); });
+$('#btn-open-options').addEventListener('click', () => { $('.pause-main').classList.add('hidden'); $('.pause-opts').classList.remove('hidden'); $('#pause-title').textContent = 'Opções'; });
+$('#btn-opts-back').addEventListener('click', () => { $('.pause-opts').classList.add('hidden'); $('.pause-main').classList.remove('hidden'); $('#pause-title').textContent = 'Pausado'; });
 $('#btn-pause-map').addEventListener('click', () => { game.closeMenu(); game.openMenu('map'); });
 $('#map-screen').addEventListener('click', () => game.closeMenu());
 $('#btn-quit').addEventListener('click', () => { game.persist(); toTitle(); });
@@ -392,6 +414,15 @@ input.onTouchModeChange = () => requestAnimationFrame(() => touch.layout());
 // Evita zoom por gesto/duplo toque no iOS
 document.addEventListener('gesturestart', (e) => e.preventDefault());
 document.addEventListener('dblclick', (e) => e.preventDefault());
+
+// Navegadores de celular só liberam o som depois de um toque: garante isso em todo toque.
+window.addEventListener('pointerdown', () => audio.unlock(), { passive: true });
+window.addEventListener('touchend', () => audio.unlock(), { passive: true });
+
+// iPhone não tem botão "instalar": explica como colocar o jogo em tela cheia.
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+if (isIOS && !standalone) $('#ios-hint').classList.remove('hidden');
 
 // ───────── PWA ─────────
 let installEvt = null;

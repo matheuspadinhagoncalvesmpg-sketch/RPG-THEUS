@@ -404,13 +404,14 @@ body.menu-open #touch-ui { display: none !important; }
   .subtitle { margin-bottom: 8px; }
   #dialog { padding: 10px 16px 12px; }
   .creator-form h2 { font-size: 20px; }
-  #pause-screen .panel {
-    width: min(700px, 100%);
-    display: grid; grid-template-columns: 1fr 1.3fr; gap: 0 18px; align-items: start;
-  }
-  #pause-screen .panel h2 { grid-column: 1 / -1; }
-  #pause-screen .menu-btn { grid-column: 1; }
-  #pause-screen .options { grid-column: 2; grid-row: 2 / span 3; margin: 0; }
+  #pause-screen .panel { width: min(580px, 100%); }
+  #pause-screen .pause-main { grid-template-columns: 1fr 1fr; }
+  #pause-screen .pause-main #btn-resume, #pause-screen .pause-main #btn-quit { grid-column: 1 / -1; }
+  #pause-screen .pause-opts .options { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 16px; margin: 0 0 6px; }
+  #pause-screen .opt { gap: 6px; font-size: 14px; }
+  #pause-screen .opt-btn { min-width: 0; padding: 4px 8px; }
+  #pause-screen .opt input[type=range] { width: 84px; }
+  #pause-screen .seg button { padding: 4px 8px; }
   .field { margin: 6px 0 2px; }
   .swatch { width: 30px; height: 30px; }
 }
@@ -459,7 +460,12 @@ body.menu-open #touch-ui { display: none !important; }
   background: rgba(10, 8, 16, 0.82); border: 1px solid var(--line); border-radius: 6px;
   padding: 6px 8px; text-align: center; max-width: calc(100vw - 24px);
 }
-body.touch-mode #hotbar { bottom: auto; top: calc(8px + var(--st)); }
+/* No celular a barra fica embaixo, entre o joystick e os botões (só tem chão ali): nunca cobre o HUD. */
+body.touch-mode #hotbar { top: auto; bottom: calc(10px + var(--sb)); width: calc(100vw - 310px); min-width: 230px; max-width: 560px; padding: 5px 6px; }
+body.touch-mode #hb-res { display: none; }
+body.touch-mode .hb-slot { width: 38px; height: 38px; flex: 0 0 auto; }
+body.touch-mode #hb-info { font-size: 12px; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+body.touch-mode .hb-row { gap: 4px; }
 #hb-res { display: flex; gap: 12px; justify-content: center; font-size: 13px; color: var(--ink-dim); margin-bottom: 4px; flex-wrap: wrap; }
 #hb-res b { color: var(--ink); font-family: var(--serif); }
 .hb-row { display: flex; gap: 6px; align-items: center; }
@@ -551,3 +557,37 @@ body.touch-mode #chat-feed { bottom: auto; top: calc(96px + var(--st)); }
 @keyframes pulse-num { 50% { transform: translateX(-50%) scale(1.18); } }
 .charm-dot { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; margin-right: 8px; color: #16121c; font-size: 12px; font-weight: 900; }
 .charm-slots { font-size: 15px; color: var(--ink-dim); }
+
+/* Celular: alvos de toque maiores, barra de construção rolável, mão esquerda */
+body.touch-mode .hud-btn { width: 44px; height: 44px; }
+body.touch-mode .hud-right { gap: 10px; }
+.hb-row { max-width: 100%; }
+#hb-slots { min-width: 0; overflow-x: auto; scrollbar-width: none; touch-action: pan-x; -webkit-overflow-scrolling: touch; }
+#hb-slots::-webkit-scrollbar { display: none; }
+#ios-hint { margin: 8px 0 0; padding: 0 6px; text-align: center; }
+
+body.lefty #joy-base { left: auto; right: calc(28px + var(--sr)); }
+body.lefty #joy-knob { left: auto; right: calc(28px + var(--sr) + (124px - 54px) / 2 * var(--btn-scale)); }
+body.lefty #pad { right: auto; left: calc(18px + var(--sl)); }
+body.lefty .tbtn[data-act="jump"]   { left: calc(48px * var(--btn-scale)); }
+body.lefty .tbtn[data-act="attack"] { left: calc(132px * var(--btn-scale)); }
+body.lefty .tbtn[data-act="dash"]   { left: calc(44px * var(--btn-scale)); }
+body.lefty .tbtn[data-act="spell"]  { left: calc(122px * var(--btn-scale)); }
+body.lefty .tbtn.ctx { right: auto; left: calc(30px + var(--sl)); }
+
+/* Pausa em duas telas: botões e opções */
+.pause-main { display: grid; grid-template-columns: 1fr; gap: 0 10px; }
+.pause-main .menu-btn { margin: 5px 0; }
+
+/* Telas baixas: nada de conteúdo cortado no topo (margens automáticas centram sem esconder) */
+.title-content { justify-content: flex-start; }
+.title-content h1 { margin-top: auto; }
+.title-menu { margin-bottom: auto; }
+.creator-actions { position: sticky; bottom: 0; z-index: 2; padding: 16px 0 6px; background: linear-gradient(rgba(11, 8, 18, 0), rgba(11, 8, 18, 0.96) 45%); }
+@media (max-height: 360px) {
+  .title-content { padding-top: calc(8px + var(--st)); padding-bottom: calc(8px + var(--sb)); }
+  .title-content h1 { font-size: clamp(40px, 13vh, 90px); }
+  .subtitle { margin: 2px 0 8px; font-size: 18px; }
+  .title-menu .menu-btn { padding: 6px 14px; margin: 3px 0; font-size: 14px; }
+  .title-menu .menu-btn small { font-size: 12px; }
+}

@@ -60,7 +60,7 @@ export class UI {
       $('#soul').classList.toggle('ready', game.soul >= 33);
     }
     if (this.last.geo !== s.geo) { this.last.geo = s.geo; this.geoEl.textContent = s.geo; }
-    const invKey = JSON.stringify(s.inv);
+    const invKey = `${s.inv.wood}|${s.inv.stone}|${s.inv.ore}|${s.inv.crystal}`;
     if (this.last.inv !== invKey) {
       this.last.inv = invKey;
       $('#inv').innerHTML = Object.entries(RESOURCES)

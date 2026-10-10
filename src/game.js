@@ -36,6 +36,7 @@ export class Game {
     this.net = new Net(this);
     this.raidSeq = 0;
     this.speed = 1;
+    this.autoQuality = true;
     this.slowmoT = 0;
     this.zoom = 0;
     this.challenge = { active: false, t: 0, armed: true };
@@ -46,10 +47,22 @@ export class Game {
     this.raf = null;
     this.onExit = null;
     this.onEnding = null;
-    const onResize = () => { this.renderer.resize(); this.updateCamera(true); };
+    // Girar a tela, tela cheia e o teclado do celular disparam vários "resize": junta tudo
+    // e nunca redimensiona o jogo enquanto o jogador digita (o zoom pularia).
+    let rt = null;
+    const typing = () => /^(INPUT|TEXTAREA)$/.test((document.activeElement || {}).tagName || '');
+    const doResize = () => {
+      if (typing()) { this.pendingResize = true; return; }
+      this.pendingResize = false;
+      this.renderer.resize();
+      this.updateCamera(true);
+      this.needsRender = true;
+    };
+    const onResize = () => { clearTimeout(rt); rt = setTimeout(doResize, 120); };
     window.addEventListener('resize', onResize);
     window.addEventListener('orientationchange', () => setTimeout(onResize, 300));
     document.addEventListener('fullscreenchange', () => setTimeout(onResize, 100));
+    document.addEventListener('focusout', () => { if (this.pendingResize) setTimeout(onResize, 250); });
   }
 
   // ───────── Início ─────────
@@ -187,20 +200,46 @@ export class Game {
   // ───────── Laço principal ─────────
   loop(now) {
     this.raf = requestAnimationFrame((t) => this.loop(t));
-    let dt = now - this.last;
+    const raw = now - this.last;
+    let dt = raw;
     this.last = now;
     if (dt > 250) dt = 250;
+    this.watchPerf(raw);
     this.acc += dt * this.speed * (this.slowmoT > 0 ? 0.35 : 1);
     let steps = 0;
     try {
       while (this.acc >= STEP && steps < 5) { this.step(); this.acc -= STEP; steps++; }
       if (steps === 5) this.acc = 0;
-      if (this.state !== 'off') this.render();
+      // Telas de 90/120 Hz: só desenha quando algo mudou (menos calor e bateria).
+      if (this.state !== 'off' && (steps > 0 || this.needsRender)) { this.render(); this.needsRender = false; }
     } catch (e) {
       // Um erro num quadro não pode congelar o jogo inteiro: registra e segue.
       console.error(e);
       if (!this.errorShown) { this.errorShown = true; this.ui.toast('Erro: ' + e.message, 6000); }
     }
+  }
+
+  // Resolução dinâmica: se o aparelho não aguenta, o jogo desenha com menos pixels
+  // (a tela continua do mesmo tamanho) e sobe de novo quando sobra fôlego.
+  watchPerf(raw) {
+    if (!this.autoQuality || raw > 120 || this.state === 'off') return;
+    const p = this.perf || (this.perf = { n: 0, slow: 0, fast: 0, good: 0, lock: 0 });
+    p.n++;
+    if (raw > 27) p.slow++; else if (raw < 19) p.fast++;
+    if (p.n < 90) return;
+    const r = this.renderer, t = performance.now();
+    if (p.slow > 36 && r.quality > 0.5) {
+      r.setQuality(Math.max(0.5, +(r.quality - 0.15).toFixed(2)));
+      this.updateCamera(true);
+      p.lock = t + 45000; p.good = 0;
+    } else if (p.fast > 80 && r.quality < 1 && t > p.lock) {
+      if (++p.good >= 3) {
+        r.setQuality(Math.min(1, +(r.quality + 0.1).toFixed(2)));
+        this.updateCamera(true);
+        p.good = 0; p.lock = t + 30000;
+      }
+    } else if (p.fast <= 80) p.good = 0;
+    p.n = p.slow = p.fast = 0;
   }
 
   step() {
@@ -598,7 +637,8 @@ export class Game {
     this.audio.play('death');
     this.input.vibrate(200);
     this.particles.burst(p.cx, p.cy, 30, { color: ['#0b0910', '#ffffff', this.save.profile.cloak], speed: 7, life: 50, grav: 0.1 });
-    this.save.shade = this.save.geo > 0 ? { room: this.room.id, x: p.lastSafe.x + p.w / 2, y: p.lastSafe.y + p.h, geo: this.save.geo } : null;
+    // Sem moedas a levar, a lápide anterior continua esperando (não se perde o que já estava guardado).
+    if (this.save.geo > 0) this.save.shade = { room: this.room.id, x: p.lastSafe.x + p.w / 2, y: p.lastSafe.y + p.h, geo: this.save.geo };
     this.save.geo = 0;
     if (this.boss) this.boss = null;
     this.persist();
@@ -833,7 +873,13 @@ export class Game {
     if (kind === 'map') {
       this.ui.show(this.ui.mapScreen);
       this.ui.drawMap(this);
-    } else this.ui.show(document.querySelector('#pause-screen'));
+    } else {
+      // A pausa sempre abre na tela de botões (não nas opções).
+      document.querySelector('.pause-main').classList.remove('hidden');
+      document.querySelector('.pause-opts').classList.add('hidden');
+      document.querySelector('#pause-title').textContent = 'Pausado';
+      this.ui.show(document.querySelector('#pause-screen'));
+    }
   }
 
   closeMenu() {

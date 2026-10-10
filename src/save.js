@@ -65,7 +65,12 @@ export function clearSave() {
   try { localStorage.removeItem(KEY); } catch (e) { /* ok */ }
 }
 
-export const DEFAULT_SETTINGS = { speed: 1, muted: false, vibration: true, btnSize: 1, btnOpacity: 0.55, showFps: false };
+const coarse = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
+// Celulares começam com a câmera um pouco mais perto (o herói fica maior na tela pequena).
+export const DEFAULT_SETTINGS = {
+  speed: 1, muted: false, vibration: true, btnSize: 1, btnOpacity: 0.55, showFps: false,
+  zoom: coarse ? 1.2 : 1, quality: 'auto', lefty: false,
+};
 
 export function loadSettings() {
   try {

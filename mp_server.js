@@ -75,9 +75,49 @@ function refreshHost(w, room) {
   if (w.hosts[room]) toWorld(w, { t: 'host', room, id: w.hosts[room] }, null, room);
 }
 
+// ───────── Validação: nada vindo de um jogador chega aos outros sem ser limpo ─────────
+const num = (v, d = 0) => (Number.isFinite(Number(v)) ? Number(v) : d);
+const lim = (v, a, b, d = 0) => Math.min(b, Math.max(a, num(v, d)));
+// Identificador de inimigo: número (inimigos da sala) ou texto curto ("boss", "r12").
+const eidOf = (v) => (typeof v === 'number' && Number.isFinite(v) ? Math.trunc(v) : clean(v, 12));
+
+function cleanState(c, msg, room) {
+  const m = {
+    t: 'st', id: c.id, room,
+    x: Math.round(lim(msg.x, -100000, 100000)), y: Math.round(lim(msg.y, -100000, 100000)),
+    f: msg.f < 0 ? -1 : 1, s: clean(msg.s, 8),
+    a: Array.isArray(msg.a) ? [clean(msg.a[0], 5), lim(msg.a[1], 0, 1)] : 0,
+    w: clean(msg.w, 10), ar: clean(msg.ar, 10), n: num(msg.n, 1) > 1 ? 2 : 1, sit: msg.sit ? 1 : 0,
+  };
+  if (msg.pr && typeof msg.pr === 'object') {
+    m.pr = { cloak: clean(msg.pr.cloak, 9), hair: clean(msg.pr.hair, 9), eyes: clean(msg.pr.eyes, 10), skin: clean(msg.pr.skin, 9) };
+    m.name = clean(msg.name, 14) || c.name;
+  }
+  return m;
+}
+
+function cleanSnap(msg, room) {
+  const e = (Array.isArray(msg.e) ? msg.e : []).slice(0, 60).filter(Array.isArray).map((a) => [
+    eidOf(a[0]), clean(a[1], 10), Math.round(lim(a[2], -100000, 100000)), Math.round(lim(a[3], -100000, 100000)),
+    lim(a[4], 0, 100000), a[5] < 0 ? -1 : 1, clean(a[6], 14), lim(a[7], 0, 100, 100), lim(a[8], 0, 200),
+  ]);
+  const p = (Array.isArray(msg.p) ? msg.p : []).slice(0, 80).filter(Array.isArray).map((a) => [
+    Math.round(lim(a[0], -100000, 100000)), Math.round(lim(a[1], -100000, 100000)), lim(a[2], -40, 40), lim(a[3], -40, 40),
+    clean(a[4], 8), lim(a[5], 1, 40, 6), lim(a[6], -2, 2),
+  ]);
+  const hb = (Array.isArray(msg.hb) ? msg.hb : []).slice(0, 20).filter((b) => b && typeof b === 'object').map((b) => ({
+    x: Math.round(lim(b.x, -100000, 100000)), y: Math.round(lim(b.y, -100000, 100000)), w: lim(b.w, 0, 600), h: lim(b.h, 0, 600),
+  }));
+  return { t: 'snap', room, e, p, hb, n: lim(msg.n, 0, 1), d: msg.d ? 1 : 0 };
+}
+
 // ───────── Mensagens ─────────
 function handle(c, msg) {
   if (!msg || typeof msg !== 'object') return;
+  // No máximo 150 mensagens por segundo por jogador (o jogo normal usa umas 30).
+  const now = Date.now();
+  if (now - (c.win || 0) > 1000) { c.win = now; c.cnt = 0; }
+  if (++c.cnt > 150) return;
   const w = c.world;
   switch (msg.t) {
     case 'hello': {
@@ -114,8 +154,7 @@ function handle(c, msg) {
         refreshHost(w, room);
         c.send({ t: 'host', room, id: w.hosts[room] });
       }
-      msg.id = c.id;
-      toWorld(w, msg, c);
+      toWorld(w, cleanState(c, msg, room), c);
       break;
     }
     case 'build': {
@@ -131,18 +170,19 @@ function handle(c, msg) {
     case 'snap': {
       // Só o anfitrião da sala manda o estado dos inimigos.
       if (!w || w.hosts[c.room] !== c.id) return;
-      msg.room = c.room;
-      toWorld(w, msg, c, c.room);
+      toWorld(w, cleanSnap(msg, c.room), c, c.room);
       break;
     }
     case 'hit': {
       if (!w) return;
       const host = w.players.get(w.hosts[c.room]);
-      if (host && host !== c) host.send({ t: 'hit', eid: msg.eid, dmg: Number(msg.dmg) || 0, kx: Number(msg.kx) || 0, ky: Number(msg.ky) || 0 });
+      if (host && host !== c) host.send({ t: 'hit', eid: eidOf(msg.eid), dmg: lim(msg.dmg, 0, 20), kx: lim(msg.kx, -2, 2), ky: lim(msg.ky, -2, 2) });
       break;
     }
     case 'chat': {
       if (!w) return;
+      if (now - (c.lastChat || 0) < 600) return; // no máximo ~1,5 mensagem por segundo
+      c.lastChat = now;
       const text = clean(msg.text, 120);
       if (text) toWorld(w, { t: 'chat', id: c.id, name: c.name, text });
       break;

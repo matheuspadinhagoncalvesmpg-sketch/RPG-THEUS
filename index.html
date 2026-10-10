@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-visual">
   <meta name="theme-color" content="#120d1c">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -11,11 +11,37 @@
   <title>THEUS: Ecos de Vésper</title>
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/svg+xml" href="icon.svg">
-  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <link rel="modulepreload" href="src/main.js">
+  <link rel="modulepreload" href="src/input.js">
+  <link rel="modulepreload" href="src/audio.js">
+  <link rel="modulepreload" href="src/ui.js">
+  <link rel="modulepreload" href="src/game.js">
+  <link rel="modulepreload" href="src/art.js">
+  <link rel="modulepreload" href="src/config.js">
+  <link rel="modulepreload" href="src/build.js">
+  <link rel="modulepreload" href="src/crafting.js">
+  <link rel="modulepreload" href="src/raids.js">
+  <link rel="modulepreload" href="src/net.js">
+  <link rel="modulepreload" href="src/cloud.js">
+  <link rel="modulepreload" href="src/save.js">
+  <link rel="modulepreload" href="src/ai.js">
+  <link rel="modulepreload" href="src/world.js">
+  <link rel="modulepreload" href="src/rooms.js">
+  <link rel="modulepreload" href="src/physics.js">
+  <link rel="modulepreload" href="src/player.js">
+  <link rel="modulepreload" href="src/enemies.js">
+  <link rel="modulepreload" href="src/bosses.js">
+  <link rel="modulepreload" href="src/entities.js">
+  <link rel="modulepreload" href="src/fx.js">
+  <link rel="modulepreload" href="src/render.js">
+  <link rel="modulepreload" href="src/util.js">
+  <link rel="modulepreload" href="src/dialog.js">
 </head>
 <body>
   <canvas id="game"></canvas>
@@ -107,25 +133,34 @@
 
   <div id="pause-screen" class="overlay hidden">
     <div class="panel">
-      <h2>Pausado</h2>
-      <button id="btn-resume" class="menu-btn">Continuar</button>
-      <button id="btn-pause-map" class="menu-btn">Mapa</button>
-      <button id="btn-charms" class="menu-btn">Amuletos</button>
-      <button class="menu-btn btn-manual">Manual dos controles</button>
-      <button class="menu-btn btn-mp">Multijogador e nuvem</button>
-      <div class="options">
+      <h2 id="pause-title">Pausado</h2>
+      <div class="pause-main">
+        <button id="btn-resume" class="menu-btn">Continuar</button>
+        <button id="btn-pause-map" class="menu-btn">Mapa</button>
+        <button id="btn-charms" class="menu-btn">Amuletos</button>
+        <button class="menu-btn btn-manual">Manual dos controles</button>
+        <button class="menu-btn btn-mp">Multijogador e nuvem</button>
+        <button id="btn-open-options" class="menu-btn">Opções</button>
+        <button id="btn-quit" class="menu-btn subtle">Salvar e sair para o título</button>
+      </div>
+      <div class="pause-opts hidden">
+        <div class="options">
         <div class="opt"><span>Som</span><button class="opt-btn" data-setting="muted"></button></div>
         <div class="opt"><span>Vibração</span><button class="opt-btn" data-setting="vibration"></button></div>
         <div class="opt"><span>Botões</span>
           <span class="seg"><button data-size="0.85">P</button><button data-size="1">M</button><button data-size="1.18">G</button></span>
         </div>
         <div class="opt"><span>Transparência</span><input class="opt-opacity" type="range" min="0.25" max="0.9" step="0.05"></div>
+        <div class="opt"><span>Câmera</span><span class="seg"><button data-zoom="1.2">Perto</button><button data-zoom="1">Normal</button><button data-zoom="0.85">Longe</button></span></div>
+        <div class="opt"><span>Gráficos</span><span class="seg"><button data-quality="auto">Auto</button><button data-quality="low">Leve</button></span></div>
+        <div class="opt"><span>Mão esquerda</span><button class="opt-btn" data-setting="lefty"></button></div>
         <div class="opt"><span>Velocidade</span>
           <span class="seg"><button data-speed="0.7">70%</button><button data-speed="0.85">85%</button><button data-speed="1">100%</button></span>
         </div>
         <div class="opt"><span>Tela cheia</span><button class="opt-btn opt-fullscreen">Alternar</button></div>
       </div>
-      <button id="btn-quit" class="menu-btn subtle">Salvar e sair para o título</button>
+        <button id="btn-opts-back" class="menu-btn">Voltar</button>
+      </div>
     </div>
   </div>
 
@@ -275,8 +310,12 @@
             <span class="seg"><button data-size="0.85">P</button><button data-size="1">M</button><button data-size="1.18">G</button></span>
           </div>
           <div class="opt"><span>Transparência</span><input class="opt-opacity" type="range" min="0.25" max="0.9" step="0.05"></div>
+        <div class="opt"><span>Câmera</span><span class="seg"><button data-zoom="1.2">Perto</button><button data-zoom="1">Normal</button><button data-zoom="0.85">Longe</button></span></div>
+        <div class="opt"><span>Gráficos</span><span class="seg"><button data-quality="auto">Auto</button><button data-quality="low">Leve</button></span></div>
+        <div class="opt"><span>Mão esquerda</span><button class="opt-btn" data-setting="lefty"></button></div>
         </div>
         <button id="btn-install" class="menu-btn subtle hidden">Instalar como app</button>
+        <p id="ios-hint" class="hint hidden">No iPhone: toque em Compartilhar e depois em "Adicionar à Tela de Início" para jogar em tela cheia.</p>
       </div>
     </div>
   </div>

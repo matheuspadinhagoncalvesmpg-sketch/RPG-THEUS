@@ -147,6 +147,9 @@ export class BuildMode {
       b.classList.toggle('active', i === this.sel);
       b.classList.toggle('poor', !it.tool && !this.canAfford(it));
     });
+    // No celular a barra rola: mantém o item escolhido à vista.
+    const act = this.slots[this.sel];
+    if (act && act.scrollIntoView) act.scrollIntoView({ inline: 'center', block: 'nearest' });
     const it = this.item;
     this.infoEl.textContent = it.tool
       ? 'Remover: devolve os materiais de uma peça construída'

@@ -16,21 +16,36 @@ export class Renderer {
     this.chunks = new Map();
     this.layers = {};
     this.ambient = [];
+    this.quality = 1; // multiplicador da resolução (o jogo baixa sozinho em aparelhos lentos)
+    this.zoom = 1;    // câmera: >1 aproxima
     this.scale = 1;
     this.viewW = VIEW_H * 16 / 9;
     this.viewH = VIEW_H;
     this.resize();
   }
 
+  setQuality(q) {
+    if (q === this.quality) return;
+    this.quality = q;
+    this.resize();
+  }
+
+  setZoom(z) {
+    if (z === this.zoom) return;
+    this.zoom = z;
+    this.resize();
+  }
+
   resize() {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = Math.min(window.devicePixelRatio || 1, 2) * this.quality;
     const cssW = window.innerWidth, cssH = window.innerHeight;
     // Celulares às vezes informam tamanho 0 por um instante (tela cheia, rotação,
     // barra de endereço). Ignora esse momento em vez de gerar escala 0/NaN.
     if (!(cssW > 0 && cssH > 0)) return;
-    let bh = Math.round(cssH * dpr);
-    let scale = bh / VIEW_H;
-    if (scale > MAX_RENDER_SCALE) { scale = MAX_RENDER_SCALE; bh = Math.round(VIEW_H * scale); }
+    const vh = VIEW_H / this.zoom;
+    let bh = Math.max(120, Math.round(cssH * dpr));
+    let scale = bh / vh;
+    if (scale > MAX_RENDER_SCALE) { scale = MAX_RENDER_SCALE; bh = Math.round(vh * scale); }
     const bw = Math.round((cssW / cssH) * bh);
     this.canvas.width = bw;
     this.canvas.height = bh;
@@ -40,6 +55,7 @@ export class Renderer {
     this.chunks.clear();
     this.layers = {};
     this.vignette = null;
+    this.skyGrad = null; // o gradiente do céu depende da altura do canvas
   }
 
   // Libera memória ao trocar de sala/região (importante no celular).
@@ -520,8 +536,9 @@ export class Renderer {
   // ───────── Partículas de ambiente ─────────
   updateAmbient(game, camX, camY) {
     const kind = AREAS[game.room.area].particles;
-    const want = kind === 'fireflies' ? 26 : 34;
+    const want = Math.round((kind === 'fireflies' ? 26 : 34) * (this.quality < 0.8 ? 0.5 : 1));
     if (this.ambientKind !== kind) { this.ambient = []; this.ambientKind = kind; }
+    if (this.ambient.length > want) this.ambient.length = want;
     while (this.ambient.length < want)
       this.ambient.push({ x: camX + rand(0, this.viewW), y: camY + rand(0, this.viewH), vx: 0, vy: 0, ph: rand(0, 6.28), s: rand(0.6, 1.4) });
     const W = this.viewW, H = this.viewH;
