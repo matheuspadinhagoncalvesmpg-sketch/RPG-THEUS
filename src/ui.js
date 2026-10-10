@@ -28,6 +28,7 @@ export class UI {
     this.last = {};
     this.dialog = null;
     this.aiBadge = $('#ai-badge');
+    this.challengeEl = $('#challenge');
     this.chatEl = $('#npc-chat');
     this.chatLog = $('#chat-log');
     this.chatInput = $('#chat-input');
@@ -232,6 +233,16 @@ export class UI {
     mark(game.room.x + p.cx / TILE, game.room.y + p.cy / TILE, '#ff3b4f', 5);
     mark(game.room.x + p.cx / TILE, game.room.y + p.cy / TILE, '#ffffff', 2);
     $('#map-room').textContent = `${AREAS[game.room.area].name} — ${game.room.name}`;
+  }
+
+  setChallenge(sec) {
+    const el = this.challengeEl;
+    if (sec == null) { if (!el.classList.contains('hidden')) el.classList.add('hidden'); this.last.chal = null; return; }
+    if (this.last.chal === sec) return;
+    this.last.chal = sec;
+    el.textContent = sec;
+    el.classList.toggle('urgent', sec <= 5);
+    el.classList.remove('hidden');
   }
 
   // ───── Conversa livre com personagens (Gemini) ─────

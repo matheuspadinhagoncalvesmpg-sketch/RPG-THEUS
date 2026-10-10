@@ -397,4 +397,140 @@ export class HollowKing extends Boss {
   }
 }
 
-export const BOSS_TYPES = { moss: MossKnight, king: HollowKing };
+// ───────────── RAINHA DAS MARÉS ─────────────
+export class TideQueen extends Boss {
+  constructor(x, y) {
+    super(x, y, { w: 64, h: 58, hp: 48, geo: 110 });
+    this.key = 'tide';
+    this.title = 'Rainha das Marés';
+    this.subtitle = 'Senhora do Templo Submerso';
+    this.bloodColor = '#7affd4';
+    this.gravity = false;
+    this.combo = 0;
+  }
+
+  // Desliza suavemente até (tx, ty).
+  glide(tx, ty, sp = 1.8, ease = 0.06) {
+    this.vx = clamp((tx - this.cx) * ease, -sp, sp);
+    this.vy = clamp((ty - this.cy) * ease, -sp, sp);
+  }
+
+  update(game) {
+    this.t++;
+    if (this.flash > 0) this.flash--;
+    const p = game.player, p2 = this.phase2, room = game.room;
+    const homeY = 5 * TILE;
+    switch (this.state) {
+      case 'intro':
+        this.face(game);
+        this.glide(room.pxW * 0.62, homeY, 2.6);
+        if (this.timer === 70) game.audio.play('roar');
+        if (--this.timer <= 0) this.idle(40, game);
+        break;
+      case 'idle':
+        this.face(game);
+        this.glide(p.cx + Math.sin(this.t * 0.03) * 60, homeY + Math.sin(this.t * 0.07) * 12, p2 ? 2.6 : 2);
+        if (--this.timer > 0) break;
+        this.begin(game.ai.pick(['bubbles', 'sweep', 'slam'], () => pick(['bubbles', 'sweep', 'slam'])), game);
+        break;
+      case 'bubWind':
+        this.glide(this.cx, homeY - 10, 1);
+        if (this.t % 3 === 0) game.particles.add({ x: this.cx + rand(-26, 26), y: this.cy + rand(-10, 20), vy: -0.8, life: 20, size: 3, color: '#7affd4', glow: true });
+        if (--this.timer <= 0) {
+          const n = p2 ? 12 : 8, off = rand(0, Math.PI * 2);
+          for (let i = 0; i < n; i++) {
+            const a = off + (i / n) * Math.PI * 2;
+            game.spawnProjectile(new Projectile(this.cx, this.cy, Math.cos(a) * 2.8, Math.sin(a) * 2.8, { kind: 'bubble', r: 8, life: 150, homing: p2 ? 0.02 : 0 }));
+          }
+          game.audio.play('orb');
+          if (p2 && this.combo-- > 0) { this.timer = 22; } else this.idle(60, game);
+        }
+        break;
+      case 'sweepWind':
+        this.glide(this.sweepFrom, this.sweepY, 3.4, 0.1);
+        if (--this.timer <= 0) { this.state = 'sweep'; this.timer = 100; this.vx = this.sweepDir * (p2 ? 10 : 8.5); this.vy = 0; game.audio.play('dash'); }
+        break;
+      case 'sweep':
+        this.vy = 0;
+        if (this.t % 2 === 0) game.particles.dust(this.cx, this.cy + 20, -this.sweepDir, 1, 'rgba(127,255,212,0.5)');
+        if (--this.timer <= 0 || wallAhead(this, room, game.world, this.sweepDir, true)) { this.vx = 0; this.idle(55, game); }
+        break;
+      case 'slamWind':
+        this.glide(p.cx, 3.2 * TILE, 2.4, 0.08);
+        if (--this.timer <= 0) { this.state = 'slam'; this.vx = 0; this.vy = 13; game.audio.play('dash'); }
+        break;
+      case 'slam':
+        this.vx = 0;
+        if (this.onGround) {
+          game.shake(10);
+          game.audio.play('shock');
+          for (const d of [-1, 1])
+            game.spawnProjectile(new Projectile(this.cx + d * 30, this.y + this.h - 12, d * (p2 ? 6.5 : 5), 0, { kind: 'wave', r: 9, life: 110, ground: true }));
+          game.particles.dust(this.cx, this.y + this.h, 0, 14, 'rgba(127,255,212,0.5)');
+          this.state = 'rise'; this.timer = 40;
+        }
+        break;
+      case 'rise':
+        this.glide(this.cx, homeY, 2.6);
+        if (--this.timer <= 0) { if (p2 && this.combo-- > 0) this.begin('slam', game, true); else this.idle(50, game); }
+        break;
+    }
+    this.physics(game, { ignoreOneWay: true });
+  }
+
+  begin(kind, game, chained = false) {
+    const p = game.player, room = game.room;
+    if (!chained) this.combo = this.phase2 ? 1 : 0;
+    if (kind === 'bubbles') { this.state = 'bubWind'; this.timer = 30; }
+    if (kind === 'sweep') {
+      this.sweepDir = p.cx < room.pxW / 2 ? -1 : 1;
+      this.sweepFrom = this.sweepDir < 0 ? room.pxW - 3 * TILE : 3 * TILE;
+      this.sweepY = clamp(p.cy, 4 * TILE, 14 * TILE);
+      this.state = 'sweepWind'; this.timer = this.phase2 ? 34 : 48;
+      game.audio.play('tele');
+    }
+    if (kind === 'slam') { this.state = 'slamWind'; this.timer = this.phase2 ? 36 : 52; game.audio.play('tele'); }
+  }
+
+  draw(ctx) {
+    ctx.save();
+    ctx.translate(this.cx, this.cy - 4);
+    const c = (x) => this.col(x);
+    const pulse = Math.sin(this.t * 0.12);
+    const wind = this.state === 'bubWind' || this.state === 'slamWind' || this.state === 'sweepWind';
+    // tentáculos
+    ctx.lineCap = 'round';
+    for (let i = 0; i < 7; i++) {
+      const bx = -26 + i * 8.7;
+      ctx.strokeStyle = c(i % 2 ? '#e86aa8' : '#c24a8a');
+      ctx.lineWidth = 3.2;
+      ctx.beginPath(); ctx.moveTo(bx, 6);
+      for (let k = 1; k <= 5; k++) ctx.lineTo(bx + Math.sin(this.t * 0.1 + i + k * 0.9) * (3 + k * 1.2), 6 + k * 9 - pulse * 1.5);
+      ctx.stroke();
+    }
+    // sino
+    const g = ctx.createRadialGradient(0, -14, 4, 0, -8, 42);
+    g.addColorStop(0, c('#d6fff7')); g.addColorStop(0.5, c('#4fd1c5')); g.addColorStop(1, c('#1d6f8a'));
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.moveTo(-34, 8);
+    ctx.quadraticCurveTo(-36, -34 + pulse * 2, 0, -36 - pulse * 2);
+    ctx.quadraticCurveTo(36, -34 + pulse * 2, 34, 8);
+    ctx.quadraticCurveTo(22, 14, 12, 8); ctx.quadraticCurveTo(0, 14, -12, 8); ctx.quadraticCurveTo(-22, 14, -34, 8);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    for (const [x, y, r] of [[-14, -18, 5], [8, -24, 4], [18, -10, 3.5], [-4, -8, 3]]) { ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); }
+    // coroa de coral
+    ctx.fillStyle = c('#ff8aa8');
+    for (const [x, h] of [[-12, 12], [0, 17], [12, 12]]) { ctx.beginPath(); ctx.moveTo(x - 4, -33); ctx.lineTo(x, -33 - h); ctx.lineTo(x + 4, -33); ctx.fill(); }
+    // olhos
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.fillStyle = wind || this.phase2 ? 'rgba(255,106,74,0.95)' : 'rgba(255,230,140,0.95)';
+    ctx.beginPath(); ctx.ellipse(-9, -2, 4, 2.6, 0.2, 0, Math.PI * 2); ctx.ellipse(9, -2, 4, 2.6, -0.2, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    ctx.restore();
+  }
+}
+
+export const BOSS_TYPES = { moss: MossKnight, king: HollowKing, tide: TideQueen };

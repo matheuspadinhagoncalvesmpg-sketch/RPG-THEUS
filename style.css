@@ -540,3 +540,14 @@ body.touch-mode #chat-feed { bottom: auto; top: calc(96px + var(--st)); }
 #chat-bar { position: fixed; left: 50%; transform: translateX(-50%); top: calc(64px + var(--st)); z-index: 41; display: flex; gap: 6px; width: min(520px, 90vw); }
 #chat-bar input { flex: 1; min-width: 0; padding: 9px 12px; font-size: 17px; font-family: var(--text); color: var(--ink); background: rgba(10, 8, 16, 0.92); border: 1px solid var(--gold); border-radius: 3px; outline: none; user-select: text; -webkit-user-select: text; }
 #chat-bar .menu-btn { width: auto; margin: 0; background: rgba(10, 8, 16, 0.92); }
+
+/* Desafio cronometrado */
+#challenge {
+  position: fixed; left: 50%; top: calc(12px + var(--st)); transform: translateX(-50%); z-index: 21;
+  font-family: var(--serif); font-weight: 900; font-size: 44px; color: #ffd36e; text-shadow: 0 2px 10px #000;
+  pointer-events: none;
+}
+#challenge.urgent { color: #ff6a5a; animation: pulse-num 0.5s infinite; }
+@keyframes pulse-num { 50% { transform: translateX(-50%) scale(1.18); } }
+.charm-dot { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; margin-right: 8px; color: #16121c; font-size: 12px; font-weight: 900; }
+.charm-slots { font-size: 15px; color: var(--ink-dim); }

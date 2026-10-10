@@ -7,7 +7,9 @@
 // Entidades (o bloco fica vazio):
 //   S  início   B  banco   N  personagem   L  placa de história
 //   A  habilidade   M  vaso de vida   $  rocha de geo   K  chefe
-//   c  rastejante   h  saltador   f  vagalume   p  cuspidor   g  sentinela
+//   c  gosma   h  cogumelo   f  morcego   p  flor carnívora   g  golem   q  peixe-lanterna
+//   ~  água    C  amuleto    T/E  início/fim do desafio cronometrado
+//   w r o k  árvore, rocha, minério e cristal (recursos)
 
 class RoomBuilder {
   constructor(w, h) {
@@ -257,12 +259,73 @@ const DEFS = [
       b.rect(0, 2, 1, 4);
       b.rect(23, 0, 1, 16);
       b.rect(0, 10, 24, 6);
+      b.rect(19, 10, 2, 6, '.'); // poço para os Jardins Submersos
       b.rect(14, 8, 4, 2).set(15, 7, 'A');
       b.plat(19, 5, 3).set(20, 4, 'M');
       b.set(6, 9, 'L').set(12, 9, 'k').set(21, 9, 'k');
     },
     ability: 'doubleJump',
     lore: ['Uma inscrição brilha no cristal:\n"Das cinzas do último pôr do sol nasceram asas. Quem as veste toca o céu duas vezes."'],
+  },
+
+  // ───────────── JARDINS SUBMERSOS ─────────────
+  {
+    id: 'jardins_poco', name: 'Poço das Marés', area: 'jardins',
+    x: 120, y: 64, w: 20, h: 26,
+    build: (b) => {
+      b.rect(0, 0, 20, 1).rect(9, 0, 2, 1, '.');
+      b.rect(0, 0, 2, 26).rect(18, 0, 2, 17).rect(18, 22, 2, 4);
+      b.rect(0, 24, 20, 2);
+      b.rect(2, 10, 16, 14, '~').rect(18, 17, 2, 5, '~');
+      b.rect(6, 19, 3, 5);
+      b.plat(3, 9, 4).plat(8, 7, 3).plat(12, 5, 3).plat(9, 3, 3);
+      b.set(13, 15, 'q').set(4, 13, 'q').set(15, 23, 'o');
+    },
+  },
+  {
+    id: 'jardins_recife', name: 'Recife das Lanternas', area: 'jardins',
+    x: 140, y: 72, w: 40, h: 18,
+    build: (b) => {
+      b.rect(0, 0, 40, 2).rect(30, 0, 3, 2, 'X');
+      b.rect(0, 16, 40, 2);
+      b.rect(0, 2, 1, 7).rect(0, 14, 1, 2);
+      b.rect(39, 2, 1, 2).rect(39, 10, 1, 6);
+      b.rect(1, 2, 38, 14, '~');
+      b.rect(0, 9, 1, 5, '~').rect(39, 4, 1, 6, '~');
+      b.rect(10, 11, 2, 5).rect(22, 8, 2, 8).rect(33, 12, 3, 4);
+      b.rect(25, 5, 4, 1).set(27, 4, 'C');
+      b.set(6, 6, 'q').set(16, 10, 'q').set(29, 9, 'q').set(36, 6, 'q');
+      b.set(14, 15, 'k').set(30, 15, 'o');
+    },
+    charm: 'vento_longo',
+  },
+  {
+    id: 'jardins_templo', name: 'Templo da Maré', area: 'jardins',
+    x: 180, y: 70, w: 34, h: 18,
+    build: (b) => {
+      b.rect(0, 0, 34, 2).rect(33, 0, 1, 18).rect(0, 15, 34, 3);
+      b.rect(0, 2, 1, 4).rect(0, 12, 1, 3);
+      b.rect(1, 6, 1, 6, 'D');
+      b.rect(1, 13, 32, 2, '~');
+      b.rect(28, 12, 5, 3);
+      b.plat(6, 9, 4).plat(20, 9, 4);
+      b.set(22, 14, 'K').set(30, 11, 'B');
+    },
+    boss: 'tide',
+  },
+  {
+    id: 'desafio_espinhos', name: 'Prova das Lâminas', area: 'jardins',
+    x: 150, y: 56, w: 26, h: 16,
+    build: (b) => {
+      b.rect(0, 0, 26, 1).rect(0, 0, 1, 16).rect(25, 0, 1, 16);
+      b.rect(0, 15, 26, 1).rect(20, 15, 3, 1, '.');
+      b.rect(1, 14, 18, 1, '^');
+      b.plat(17, 13, 2).plat(12, 11, 2).plat(7, 9, 2);
+      b.rect(1, 7, 4, 1);
+      b.set(2, 6, 'C').set(24, 14, 'T');
+    },
+    charm: 'lamina_rapida',
+    challenge: { seconds: 18, reward: 120 },
   },
 ];
 

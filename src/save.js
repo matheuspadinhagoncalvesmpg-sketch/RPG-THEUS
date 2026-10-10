@@ -32,6 +32,7 @@ export function newSave(profile) {
     weapon: 'errante',
     armor: 'none',
     items: {},
+    charms: { owned: {}, equipped: [] },
     chests: {},
     base: { smith: false, raids: 0 },
     playTime: 0,
@@ -46,7 +47,11 @@ export function loadSave() {
     const s = JSON.parse(raw);
     if (!s || s.v !== 2) return null;
     const base = newSave(s.profile);
-    return { ...base, ...s, inv: { ...base.inv, ...(s.inv || {}) }, builds: s.builds || {}, base: { ...base.base, ...(s.base || {}) } };
+    const ch = s.charms || {};
+    return {
+      ...base, ...s, inv: { ...base.inv, ...(s.inv || {}) }, builds: s.builds || {}, base: { ...base.base, ...(s.base || {}) },
+      charms: { owned: { ...(ch.owned || {}) }, equipped: [...(ch.equipped || [])] },
+    };
   } catch (e) {
     return null;
   }

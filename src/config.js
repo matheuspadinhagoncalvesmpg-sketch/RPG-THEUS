@@ -4,7 +4,7 @@ export const TILE = 32;
 export const VIEW_H = 352; // altura visível do mundo em pixels (11 blocos)
 export const MAX_RENDER_SCALE = 3;
 
-export const T = { EMPTY: 0, SOLID: 1, SPIKE: 2, ONEWAY: 3, BREAK: 4, DOOR: 5 };
+export const T = { EMPTY: 0, SOLID: 1, SPIKE: 2, ONEWAY: 3, BREAK: 4, DOOR: 5, WATER: 6 };
 
 // Física do herói (unidades: pixels por quadro a 60 fps)
 export const PHYS = {
@@ -86,6 +86,32 @@ export const AREAS = {
     horizon: 56 * 32,
     music: { root: 52, scale: [0, 2, 3, 7, 8], chords: [[0, 3, 7], [-4, 0, 3], [-5, -2, 2], [-7, -4, 0]] },
   },
+};
+
+AREAS.jardins = {
+  name: 'Jardins Submersos',
+  subtitle: 'onde a maré guarda segredos',
+  sky: ['#020a12', '#06202e', '#0b3a4a', '#145a66'],
+  far: '#0c3442', mid: '#082430', haze: '#3fd1c4',
+  ground: '#0a1a20', groundHi: '#1c3c44',
+  top: '#2f8f84', topHi: '#8ff0d8',
+  plank: '#3a5a5c',
+  accent: '#7affd4',
+  particles: 'bubbles',
+  dark: 0.35,
+  horizon: 84 * 32,
+  music: { root: 53, scale: [0, 2, 5, 7, 9], chords: [[0, 4, 9], [-3, 0, 4], [-5, -1, 2], [-7, -3, 2]] },
+};
+
+// Amuletos: equipe até 3 (troca só descansando numa fogueira).
+export const CHARM_SLOTS = 3;
+export const CHARMS = {
+  alma_faminta: { name: 'Alma Faminta', icon: '✶', color: '#c9b8ff', desc: 'Golpes enchem 50% mais ALMA.' },
+  vento_longo: { name: 'Vento Longo', icon: '»', color: '#bfe3ff', desc: 'O dash vai mais longe.' },
+  ima_moedas: { name: 'Ímã de Moedas', icon: '◎', color: '#ffcf4a', desc: 'Moedas e materiais vêm até você de longe.' },
+  pele_pedra: { name: 'Pele de Pedra', icon: '♥', color: '#ff7a8a', desc: '+1 coração enquanto equipado.' },
+  lamina_rapida: { name: 'Lâmina Rápida', icon: '⚔', color: '#e9fbff', desc: 'Ataques mais rápidos.' },
+  mare_viva: { name: 'Maré Viva', icon: '≈', color: '#7affd4', desc: 'Cura muito mais rápido.' },
 };
 
 export const ABILITIES = {

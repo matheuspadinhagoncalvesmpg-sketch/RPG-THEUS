@@ -36,13 +36,14 @@ O jogo tem um **Manual dos controles** completo na pausa e na tela inicial. No c
 
 ## 🗺️ O mundo
 
-16 salas conectadas, em 4 regiões, com mapa automático:
+20 salas conectadas, em 5 regiões, com mapa automático:
 
 - **Planície do Lar**: terra livre a oeste do início, a principal zona para construir sua base.
 - **Campos do Crepúsculo**: colinas sob um pôr do sol eterno. Abrigo com banco, Oren o andarilho e Mira a mercadora.
 - **Bosque das Lanternas**: floresta escura e cheia de vaga-lumes. Esconde um segredo atrás de uma parede.
 - **Ruínas Suspensas**: ilhas flutuando entre as nuvens, uma torre para escalar e o trono do Rei.
 - **Cavernas de Cristal**: chega-se por um chão rachado no Abrigo (golpeie para baixo...).
+- **Jardins Submersos**: um poço no Coração de Cristal desce a recifes inundados, com algas, bolhas, peixes-lanterna e o Templo da Maré. Dentro d'água o herói flutua e nada; perto da superfície o pulo vira um salto para fora.
 
 ### Coleta e construção (estilo Terraria)
 - Golpeie **árvores, rochas, veios de minério e cristais** para coletar **madeira, pedra, minério e cristal**.
@@ -60,7 +61,9 @@ O jogo tem um **Manual dos controles** completo na pausa e na tela inicial. No c
 - **Fogueiras** salvam o jogo e restauram a vida.
 - Ao morrer, você deixa uma **lápide** com todas as moedas. Volte até ela para recuperar.
 - Habilidades que abrem caminhos novos: **Manto do Vento** (dash), **Garras de Pedra** (escalar paredes), **Asas de Cinza** (pulo duplo) e **Chama da Alma** (magia).
-- Chefes: **Cavaleiro de Musgo** e **O Rei Sem Coroa**, cada um com segunda fase.
+- Chefes: **Cavaleiro de Musgo**, **Rainha das Marés** (opcional, nos Jardins) e **O Rei Sem Coroa**, cada um com segunda fase.
+- **Amuletos** (Pausa → Amuletos): equipe até 3, trocando só ao descansar numa fogueira. Alma Faminta, Vento Longo, Ímã de Moedas, Pele de Pedra, Lâmina Rápida e Maré Viva. Estão escondidos, são prêmio de chefe, são vendidos pela Mira ou valem um **desafio cronometrado**.
+- **Segredo**: no recife, o teto esconde uma sala com a Prova das Lâminas. Pise no selo dourado e alcance o amuleto antes do tempo acabar.
 - Loja, cristais de vida escondidos, paredes e chãos quebráveis, veios de ouro.
 - Inimigos: gosmas, cogumelos saltitantes, morcegos de brasa, flores carnívoras e golens de pedra.
 

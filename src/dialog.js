@@ -18,7 +18,7 @@ export const NPCS = {
       if (!a.dash) return ['Dizem que o vento obedece a quem chega ao santuário no fundo do Bosque.', 'Mas um cavaleiro coberto de musgo guarda a passagem.'];
       if (!a.wallJump) return ['Com o Manto do Vento, o abismo das Ruínas não é mais obstáculo.', 'Suba pelo Penhasco do Moinho e cruze a Ponte Partida.'];
       if (!a.doubleJump) return ['Ouvi ecos debaixo deste abrigo... como se o chão fosse oco.', 'Golpeie para baixo no ar, quem sabe?'];
-      if (!s.bosses.king) return ['A Torre dos Ventos leva ao Trono. Que a luz te acompanhe, Errante.'];
+      if (!s.bosses.king) return ['A Torre dos Ventos leva ao Trono. Que a luz te acompanhe, Errante.', 'Dizem também que um poço no Coração de Cristal desce a um templo submerso... e que há um segredo no teto do recife.'];
       return ['O céu... está clareando. Você conseguiu.'];
     },
   },
@@ -58,5 +58,8 @@ export const NPCS = {
 export const SHOP_ITEMS = [
   { id: 'mask', name: 'Fragmento de Vida', desc: '+1 coração de vida máxima.', price: 120, apply: (s) => { s.masksMax += 1; } },
   { id: 'nail', name: 'Afiar a Lâmina', desc: 'Seus golpes causam o dobro de dano.', price: 220, apply: (s) => { s.nail = 2; } },
+  { id: 'charm_alma_faminta', name: 'Amuleto: Alma Faminta', desc: 'Golpes enchem 50% mais ALMA.', price: 150, apply: (s) => { s.charms.owned.alma_faminta = true; } },
+  { id: 'charm_ima_moedas', name: 'Amuleto: Ímã de Moedas', desc: 'Moedas e materiais vêm até você.', price: 100, apply: (s) => { s.charms.owned.ima_moedas = true; } },
+  { id: 'charm_pele_pedra', name: 'Amuleto: Pele de Pedra', desc: '+1 coração enquanto equipado.', price: 200, apply: (s) => { s.charms.owned.pele_pedra = true; } },
   { id: 'mask2', name: 'Vaso Antigo', desc: '+1 coração de vida máxima.', price: 300, apply: (s) => { s.masksMax += 1; } },
 ];

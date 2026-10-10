@@ -149,6 +149,8 @@ export class AudioSystem {
       case 'orb': this.tone(520, { type: 'triangle', dur: 0.15, vol: 0.08, slide: 1.4 }); break;
       case 'spit': this.noise({ dur: 0.15, vol: 0.25, freq: 700, sweep: 0.6, q: 3 }); break;
       case 'ui': this.tone(660, { type: 'triangle', dur: 0.08, vol: 0.1 }); break;
+      case 'splash': this.noise({ dur: 0.25, vol: 0.3, freq: 1500, sweep: 0.35, q: 0.7 }); this.tone(300, { type: 'sine', dur: 0.12, vol: 0.08, slide: 0.5 }); break;
+      case 'swim': this.noise({ dur: 0.18, vol: 0.12, freq: 700, sweep: 1.8, q: 1.2 }); break;
       case 'chop': this.noise({ dur: 0.1, vol: 0.4, freq: 600, sweep: 0.6, q: 2 }); this.tone(140, { type: 'triangle', dur: 0.1, vol: 0.2, slide: 0.7 }); break;
       case 'pickup_small': this.tone(1200 + Math.random() * 200, { type: 'sine', dur: 0.08, vol: 0.07, slide: 1.3 }); break;
       case 'place': this.noise({ dur: 0.08, vol: 0.35, freq: 900, sweep: 0.5, type: 'lowpass' }); this.tone(220, { type: 'triangle', dur: 0.08, vol: 0.12 }); break;

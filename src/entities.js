@@ -1,5 +1,5 @@
 // Objetos das salas: fogueiras, personagens, placas, itens, recursos, moedas, lápide e construções.
-import { TILE, AREAS, NODE_CHARS, BUILD_BY_ID } from './config.js';
+import { TILE, AREAS, NODE_CHARS, BUILD_BY_ID, CHARMS } from './config.js';
 import { moveBody } from './physics.js';
 import { rand } from './util.js';
 import { NPCS } from './dialog.js';
@@ -60,6 +60,52 @@ export class LifeCrystal extends Entity {
   draw(ctx) { drawLifeCrystal(ctx, this.x, this.y - 16, this.t); }
 }
 
+// Amuleto: no desafio cronometrado só pode ser pego com o tempo correndo.
+export class CharmPickup extends Entity {
+  constructor(x, y, key, locked) { super(x, y); this.key = key; this.locked = locked; }
+  update(game) {
+    this.t++;
+    const active = !this.locked || game.challenge.active;
+    if (active && this.t % 5 === 0) {
+      game.particles.add({ x: this.x + rand(-12, 12), y: this.y - 16 + rand(-8, 8), vy: -0.6, life: 30, size: 2, color: CHARMS[this.key].color, glow: true, drag: 1 });
+    }
+    if (this.near(game.player, 22, 34)) {
+      if (active) { this.dead = true; game.collectCharm(this.key); }
+      else if (this.t % 120 === 0) game.ui.toast('Pise no selo brilhante e chegue aqui a tempo!');
+    }
+  }
+  draw(ctx, game) {
+    const c = CHARMS[this.key];
+    const active = !this.locked || game.challenge.active;
+    ctx.save();
+    if (!active) ctx.globalAlpha = 0.4;
+    drawOrb(ctx, this.x, this.y - 16, this.t, c.color);
+    ctx.fillStyle = '#16121c';
+    ctx.font = '900 11px "Cinzel", serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(c.icon, this.x, this.y - 12);
+    ctx.restore();
+  }
+}
+
+// Selo que dá a largada do desafio cronometrado.
+export class ChallengeSeal extends Entity {
+  draw(ctx, game) {
+    const on = game.challenge.active;
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.globalCompositeOperation = 'lighter';
+    const a = on ? 0.2 : 0.55 + Math.sin(this.t * 0.08) * 0.2;
+    const g = ctx.createRadialGradient(0, -2, 2, 0, -2, 26);
+    g.addColorStop(0, `rgba(255,211,110,${a})`); g.addColorStop(1, 'rgba(255,211,110,0)');
+    ctx.fillStyle = g; ctx.fillRect(-26, -26, 52, 28);
+    ctx.strokeStyle = `rgba(255,230,160,${a + 0.2})`; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.ellipse(0, -2, 14, 4, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-5, -2); ctx.lineTo(0, -6); ctx.lineTo(5, -2); ctx.lineTo(0, 2); ctx.closePath(); ctx.stroke();
+    ctx.restore();
+  }
+}
+
 // Veio de ouro (antiga rocha de geo): solta moedas.
 export class GeoRock extends Entity {
   constructor(x, y, id) { super(x, y); this.id = id; this.hp = 4; this.flash = 0; }
@@ -110,7 +156,7 @@ class Pickup {
     const p = game.player;
     const dx = p.cx - (this.x + 4), dy = p.cy - (this.y + 4);
     const d = Math.hypot(dx, dy);
-    if (this.t > 20 && d < 80) { this.vx += (dx / d) * 0.7; this.vy += (dy / d) * 0.7; this.vx *= 0.9; this.vy *= 0.9; }
+    if (this.t > 20 && d < (game.hasCharm('ima_moedas') ? 220 : 80)) { this.vx += (dx / d) * 0.7; this.vy += (dy / d) * 0.7; this.vx *= 0.9; this.vy *= 0.9; }
     this.vy = Math.min(this.vy + 0.35, 8);
     const hit = moveBody(this, game.room, game.world, { confine: true });
     if (hit.down) { this.vy = -this.vy * 0.4; this.vx *= 0.7; if (Math.abs(this.vy) < 1) this.vy = 0; }
@@ -184,6 +230,8 @@ export function spawnRoomEntities(room, save) {
       case 'L': list.push(new LoreStone(x, y, room.lore[e.index])); break;
       case 'A': if (!save.abilities[room.ability]) list.push(new AbilityPickup(x, y, room.ability)); break;
       case 'M': if (!save.collected[e.id]) list.push(new LifeCrystal(x, y, e.id)); break;
+      case 'C': if (!save.charms.owned[room.charm]) list.push(new CharmPickup(x, y, room.charm, !!room.challenge)); break;
+      case 'T': if (room.challenge && !save.collected['challenge:' + room.id]) list.push(new ChallengeSeal(x, y)); break;
       case '$': if (!save.collected[e.id]) list.push(new GeoRock(x, y, e.id)); break;
       default:
         if (NODE_CHARS[e.ch]) list.push(new ResourceNode(x, y, NODE_CHARS[e.ch]));

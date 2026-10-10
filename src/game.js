@@ -1,5 +1,5 @@
 // Núcleo do jogo: salas, transições, combate, câmera e estados.
-import { TILE, T, AREAS, ABILITIES, PHYS, SOUL_MAX, SOUL_PER_HIT, SOUL_COST, RESOURCES, WEAPONS } from './config.js';
+import { TILE, T, AREAS, ABILITIES, PHYS, SOUL_MAX, SOUL_PER_HIT, SOUL_COST, RESOURCES, WEAPONS, CHARMS } from './config.js';
 import { World } from './world.js';
 import { Player } from './player.js';
 import { ENEMY_TYPES, Projectile } from './enemies.js';
@@ -38,6 +38,7 @@ export class Game {
     this.speed = 1;
     this.slowmoT = 0;
     this.zoom = 0;
+    this.challenge = { active: false, t: 0, armed: true };
     this.cam = { x: 0, y: 0 };
     this.shakeMag = 0;
     this.state = 'off';
@@ -134,6 +135,8 @@ export class Game {
     this.spikeTimer = 0;
     this.bubbles = [];
     this.ai.onRoomEnter();
+    this.challenge = { active: false, t: 0, armed: true };
+    this.ui.setChallenge(null);
 
     const p = this.player;
     const keep = { vx: p.vx, vy: p.vy, facing: p.facing, airDash: p.airDash, canDouble: p.canDouble, dashTimer: p.dashTimer, dashDir: p.dashDir, jumpHeld: p.jumpHeld };
@@ -296,6 +299,7 @@ export class Game {
 
     this.ai.update();
     this.raids.update();
+    this.updateChallenge();
     for (const b of this.bubbles) b.t--;
     this.bubbles = this.bubbles.filter((b) => b.t > 0 && !b.target.dead);
 
@@ -327,7 +331,7 @@ export class Game {
       if (!enemyHit) this.ai.record(dir);
       enemyHit = true;
       if (dir === 'down') pogo = true;
-      this.soul = Math.min(SOUL_MAX, this.soul + SOUL_PER_HIT);
+      this.soul = Math.min(SOUL_MAX, this.soul + Math.round(SOUL_PER_HIT * (this.hasCharm('alma_faminta') ? 1.5 : 1)));
       const hx = clamp(p.cx + (dir === 'side' ? p.facing * 30 : 0), e.x, e.x + e.w);
       const hy = clamp(dir === 'up' ? p.y - 20 : dir === 'down' ? p.y + p.h + 20 : p.cy, e.y, e.y + e.h);
       this.particles.burst(hx, hy, 10, { type: 'spark', color: ['#ffffff', '#fff1c9'], speed: 7, speedMin: 3, life: 12, drag: 0.85, glow: true });
@@ -426,6 +430,64 @@ export class Game {
     if (this.room.id !== 'planicie_lar' || this.entities.some((e) => e.id === 'smith')) return;
     this.entities.push(new NPC(34 * TILE + TILE / 2, 13 * TILE, 'smith'));
     this.particles.burst(34 * TILE + TILE / 2, 12 * TILE, 20, { color: ['#ffd27a', '#ffffff'], speed: 3, life: 40, glow: true });
+  }
+
+  // ── Amuletos ──
+  hasCharm(key) { return this.save.charms.equipped.includes(key); }
+
+  acquireCharm(key) {
+    const c = CHARMS[key];
+    this.save.charms.owned[key] = true;
+    this.persist();
+    this.audio.play('pickup');
+    this.input.vibrate(100);
+    const p = this.player;
+    this.particles.burst(p.cx, p.cy, 30, { color: [c.color, '#ffffff'], speed: 6, life: 40, glow: true });
+    this.openBanner(c.icon, `Amuleto: ${c.name}`, c.desc, 'Equipe em Pausa → Amuletos, descansando numa fogueira.');
+  }
+
+  // Pegou um amuleto (se estava num desafio, também paga a recompensa).
+  collectCharm(key) {
+    const room = this.room;
+    if (room.challenge && this.challenge.active) {
+      this.save.collected['challenge:' + room.id] = true;
+      this.save.geo += room.challenge.reward;
+      this.endChallenge();
+      this.ui.toast(`Desafio concluído! +${room.challenge.reward} moedas`, 3500);
+      this.entities = this.entities.filter((e) => !(e.constructor.name === 'ChallengeSeal'));
+    }
+    this.acquireCharm(key);
+  }
+
+  // ── Desafio cronometrado ──
+  updateChallenge() {
+    const room = this.room, c = room.challenge, ch = this.challenge;
+    if (!c) { if (ch.active) this.endChallenge(); return; }
+    const start = room.entities.find((e) => e.ch === 'T');
+    const p = this.player;
+    if (start && !this.save.collected['challenge:' + room.id]) {
+      const sx = start.tx * TILE + TILE / 2;
+      const near = Math.abs(p.cx - sx) < 34 && Math.abs(p.y + p.h - (start.ty + 1) * TILE) < 40;
+      if (!near) ch.armed = true;
+      if (near && ch.armed && !ch.active) {
+        ch.active = true; ch.armed = false; ch.t = c.seconds * 60;
+        this.audio.play('door');
+        this.ui.toast(`Desafio! Alcance o amuleto em ${c.seconds} segundos`, 2500);
+      }
+    }
+    if (ch.active) {
+      this.ui.setChallenge(Math.ceil(ch.t / 60));
+      if (--ch.t <= 0) {
+        this.endChallenge();
+        this.audio.play('deny');
+        this.ui.toast('Tempo esgotado! Volte ao selo para tentar de novo.', 3000);
+      }
+    }
+  }
+
+  endChallenge() {
+    this.challenge.active = false;
+    this.ui.setChallenge(null);
   }
 
   // Dano do golpe: espada equipada x afiação da Mira.
@@ -754,6 +816,7 @@ export class Game {
     this.audio.intense = false;
     this.persist();
     setTimeout(() => this.audio.play('door'), 900);
+    if (key === 'tide') setTimeout(() => this.acquireCharm('mare_viva'), 1700);
     if (key === 'king') {
       this.save.finished = true;
       this.persist();
@@ -882,6 +945,7 @@ export class Game {
     for (const c of this.coins) c.draw(ctx);
     if (!this.player.dead) this.player.draw(ctx, this);
     for (const pr of this.projectiles) pr.draw(ctx);
+    r.drawWater(ctx, this, camX, camY);
     this.particles.draw(ctx);
     r.drawAmbient(ctx, this);
     this.drawBubbles(ctx);

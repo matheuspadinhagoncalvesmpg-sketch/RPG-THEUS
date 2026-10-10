@@ -13,6 +13,7 @@ for (const a of world.rooms)
       if (a.id < b.id) warn(`sobreposição: ${a.id} x ${b.id}`);
 
 const passable = (t) => t !== T.SOLID && t !== T.BREAK;
+const warnBreak = (t) => t === T.BREAK;
 for (const r of world.rooms) {
   for (const row of r.rows) if (row.length !== r.w) warn(`${r.id}: linha com largura errada`);
   const edges = [];

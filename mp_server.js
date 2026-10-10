@@ -200,7 +200,7 @@ function onUpgrade(req, socket) {
       const payload = Buffer.from(buf.subarray(off, off + len));
       if (masked) for (let i = 0; i < len; i++) payload[i] ^= buf[maskAt + (i & 3)];
       buf = buf.subarray(off + len);
-      if (op === 8) return socket.end();
+      if (op === 8) { socket.end(Buffer.from([0x88, 0x00])); return; } // responde o fechamento corretamente
       if (op === 9) { socket.write(Buffer.concat([Buffer.from([0x8a, payload.length]), payload])); continue; }
       if (op === 1) { try { handle(c, JSON.parse(payload.toString('utf8'))); } catch (e) { /* mensagem inválida */ } }
     }

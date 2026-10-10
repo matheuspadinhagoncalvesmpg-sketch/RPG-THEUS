@@ -18,7 +18,7 @@ const WORLD = `Mundo: Vésper, um reino onde o sol parou no crepúsculo. O Rei S
 O herói é o Errante, com um olho da cor do ocaso (vermelho) e outro da aurora (azul).
 Regiões: Planície do Lar (terra livre a oeste do início, onde o herói pode construir sua base com madeira, pedra, minério e cristal), Campos do Crepúsculo (início, Abrigo com fogueira), Bosque das Lanternas (Cavaleiro de Musgo guarda o Santuário do Vento com o Manto do Vento/dash),
 Ruínas Suspensas (Ponte Partida exige dash; Torre dos Ventos exige escalar paredes com as Garras de Pedra, achadas na Galeria dos Escaladores),
-Cavernas de Cristal (sob um chão rachado no Abrigo; guardam as Asas de Cinza/pulo duplo). A Chama da Alma (magia) está atrás de uma parede oca nas Raízes Profundas.
+Jardins Submersos (um poço no Coração de Cristal leva a um recife e ao Templo da Maré, onde vive a Rainha das Marés; há um teto secreto no recife e um amuleto numa prova cronometrada), Cavernas de Cristal (sob um chão rachado no Abrigo; guardam as Asas de Cinza/pulo duplo). A Chama da Alma (magia) está atrás de uma parede oca nas Raízes Profundas.
 O dinheiro são moedas. ALMA enche ao acertar golpes; segurar o botão de alma cura. Fogueiras salvam o jogo. Ao morrer, o herói deixa uma lápide com as moedas.`;
 
 const PERSONAS = {
@@ -30,6 +30,7 @@ const PERSONAS = {
 
 const BOSS_PERSONAS = {
   moss: 'o Cavaleiro de Musgo, guardião antigo, honrado e lento nas palavras, coberto de musgo',
+  tide: 'a Rainha das Marés, uma água-viva imensa e serena que guarda o Templo submerso; fala em metáforas do mar',
   king: 'o Rei Sem Coroa, arrogante, frio, teatral, que roubou a Coroa da Aurora',
 };
 
@@ -112,7 +113,7 @@ ${boss ? `Chefe em luta: ${boss}, vida ${clamp(s.bossHp, 0, 1, 1) * 100}%.` : ''
 Objetivo: luta desafiadora e justa. Se o herói está quase morrendo ou morreu muito aqui, alivie um pouco; se está dominando, pressione e explore os pontos fracos do estilo dele.
 Responda APENAS com JSON:
 {"aggression": 0.0-1.0, "speed": 0.8-1.3, "cooldown": 0.7-1.4, "tactic": "swarm"|"flank"|"kite"|"ambush",
- "bossWeights": ${s.boss === 'moss' ? '{"charge":n,"leap":n,"combo":n}' : s.boss === 'king' ? '{"tele":n,"orbs":n,"dive":n}' : 'null'},
+ "bossWeights": ${s.boss === 'moss' ? '{"charge":n,"leap":n,"combo":n}' : s.boss === 'king' ? '{"tele":n,"orbs":n,"dive":n}' : s.boss === 'tide' ? '{"bubbles":n,"sweep":n,"slam":n}' : 'null'},
  "taunt": ${boss ? '"uma fala curta (até 10 palavras) do chefe, em português, provocando o herói conforme a situação"' : 'null'},
  "reason": "explicação curta"}`;
   const raw = await gemini(prompt, { json: true, maxTokens: 200 });

@@ -70,7 +70,7 @@ export class Renderer {
     let any = false;
     for (let ty = cy * CHUNK; ty < Math.min(room.h, (cy + 1) * CHUNK) && !any; ty++)
       for (let tx = cx * CHUNK; tx < Math.min(room.w, (cx + 1) * CHUNK); tx++)
-        if (room.tile(tx, ty) !== T.EMPTY && room.tile(tx, ty) !== T.DOOR) { any = true; break; }
+        if (room.tile(tx, ty) !== T.EMPTY && room.tile(tx, ty) !== T.DOOR && room.tile(tx, ty) !== T.WATER) { any = true; break; }
     if (!any) { c.width = c.height = 1; this.chunks.set(key, c); return c; }
     for (let ty = cy * CHUNK; ty < Math.min(room.h, (cy + 1) * CHUNK); ty++)
       for (let tx = cx * CHUNK; tx < Math.min(room.w, (cx + 1) * CHUNK); tx++)
@@ -81,7 +81,7 @@ export class Renderer {
 
   drawTile(ctx, game, room, tx, ty, pal) {
     const t = room.tile(tx, ty);
-    if (t === T.EMPTY || t === T.DOOR) return;
+    if (t === T.EMPTY || t === T.DOOR || t === T.WATER) return;
     const rng = mulberry32(hashStr(room.id) ^ (tx * 73856093) ^ (ty * 19349663));
     const x = tx * TILE, y = ty * TILE;
     const area = room.area;
@@ -145,6 +145,20 @@ export class Renderer {
   }
 
   drawTopDecor(ctx, x, y, pal, area, rng) {
+    if (area === 'jardins') {
+      for (let i = 0; i < 5; i++) {
+        const bx = x + rng() * TILE, h = 6 + rng() * 12, lean = (rng() - 0.5) * 8;
+        ctx.strokeStyle = rng() < 0.5 ? pal.top : shade(pal.topHi, -0.25);
+        ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.moveTo(bx, y); ctx.quadraticCurveTo(bx + lean, y - h * 0.5, bx + lean * 1.5, y - h); ctx.stroke();
+      }
+      if (rng() < 0.12) {
+        const sx = x + 6 + rng() * 20;
+        ctx.fillStyle = '#f2c7d4';
+        ctx.beginPath(); ctx.ellipse(sx, y - 2, 4, 3, 0, Math.PI, 0); ctx.fill();
+      }
+      return;
+    }
     if (area === 'campos') {
       for (let i = 0; i < 7; i++) {
         const bx = x + rng() * TILE, h = 4 + rng() * 10, lean = (rng() - 0.5) * 6;
@@ -215,8 +229,8 @@ export class Renderer {
 
   drawSpikes(ctx, x, y, pal, area, rng) {
     const base = y + TILE;
-    const dark = area === 'ruinas' ? '#6b7290' : area === 'cristal' ? rgba(pal.accent, 0.9) : shade(pal.ground, 0.25);
-    const light = area === 'ruinas' ? '#dfe4f2' : area === 'cristal' ? '#e6fdff' : shade(pal.top, 0.1);
+    const dark = area === 'jardins' ? '#c2456b' : area === 'ruinas' ? '#6b7290' : area === 'cristal' ? rgba(pal.accent, 0.9) : shade(pal.ground, 0.25);
+    const light = area === 'jardins' ? '#ffb3c9' : area === 'ruinas' ? '#dfe4f2' : area === 'cristal' ? '#e6fdff' : shade(pal.top, 0.1);
     for (let i = 0; i < 4; i++) {
       const sx = x + 4 + i * 8, h = 14 + rng() * 6;
       ctx.fillStyle = dark;
@@ -327,6 +341,34 @@ export class Renderer {
         wrapDraw(() => {
           for (let k = 0; k < 4; k++) { ctx.beginPath(); ctx.ellipse(cx + k * 26, cy + (k % 2) * 6, 34, 16, 0, 0, Math.PI * 2); ctx.fill(); }
         });
+      }
+    } else if (areaKey === 'jardins') {
+      // feixes de luz vindos da superfície
+      ctx.fillStyle = rgba(pal.haze, depth === 0 ? 0.07 : 0.1);
+      for (let i = 0; i < 5; i++) {
+        const rx = rng() * LAYER_W, rw = 30 + rng() * 50;
+        wrapDraw(() => {
+          ctx.beginPath(); ctx.moveTo(rx, 0); ctx.lineTo(rx + rw, 0); ctx.lineTo(rx + rw - 140, G + 40); ctx.lineTo(rx - 140, G + 40); ctx.fill();
+        });
+      }
+      // algas e colunas de coral
+      ctx.strokeStyle = color; ctx.lineCap = 'round';
+      for (let i = 0; i < (depth === 0 ? 12 : 8); i++) {
+        const kx = rng() * LAYER_W, kh = 90 + rng() * 220, kw = 8 + rng() * 14;
+        wrapDraw(() => {
+          ctx.lineWidth = kw;
+          ctx.beginPath(); ctx.moveTo(kx, G + 40);
+          for (let k = 1; k <= 8; k++) ctx.lineTo(kx + Math.sin(k * 0.9 + i) * 10, G + 40 - (k * kh) / 8);
+          ctx.stroke();
+        });
+      }
+      ctx.fillStyle = color;
+      ctx.fillRect(0, G + 30, LAYER_W, LAYER_H);
+      for (let i = 0; i < 14; i++) {
+        const lx = rng() * LAYER_W, ly = 80 + rng() * 280;
+        const lg = ctx.createRadialGradient(lx, ly, 1, lx, ly, 16);
+        lg.addColorStop(0, rgba(pal.accent, depth === 0 ? 0.25 : 0.4)); lg.addColorStop(1, rgba(pal.accent, 0));
+        ctx.fillStyle = lg; ctx.fillRect(lx - 18, ly - 18, 36, 36);
       }
     } else if (areaKey === 'cristal') {
       for (let i = 0; i < (depth === 0 ? 16 : 10); i++) {
@@ -439,6 +481,42 @@ export class Renderer {
       }
   }
 
+  // ───────── Água (tingida por cima de tudo, com onda na superfície) ─────────
+  drawWater(ctx, game, camX, camY) {
+    const room = game.room;
+    if (room.waterRuns === undefined) {
+      room.waterRuns = [];
+      room.waterSurf = [];
+      for (let ty = 0; ty < room.h; ty++) {
+        let x0 = -1;
+        for (let tx = 0; tx <= room.w; tx++) {
+          const w = tx < room.w && room.tile(tx, ty) === T.WATER;
+          if (w && x0 < 0) x0 = tx;
+          if (!w && x0 >= 0) { room.waterRuns.push({ x0, x1: tx - 1, y: ty }); x0 = -1; }
+          // superfície: água com ar vazio logo acima
+          if (w && ty > 0 && room.tile(tx, ty - 1) === T.EMPTY) room.waterSurf.push([tx, ty]);
+        }
+      }
+    }
+    if (!room.waterRuns.length) return;
+    const t = game.frame;
+    const vx1 = camX + this.viewW, vy1 = camY + this.viewH;
+    ctx.save();
+    ctx.fillStyle = 'rgba(40,190,190,0.2)';
+    for (const r of room.waterRuns) {
+      const x = r.x0 * TILE, w = (r.x1 - r.x0 + 1) * TILE, y = r.y * TILE;
+      if (x > vx1 || x + w < camX || y > vy1 || y + TILE < camY) continue;
+      ctx.fillRect(x, y, w, TILE);
+    }
+    ctx.fillStyle = 'rgba(200,255,246,0.55)';
+    for (const [tx, ty] of room.waterSurf) {
+      const x = tx * TILE, y = ty * TILE;
+      if (x > vx1 || x + TILE < camX || y > vy1 || y + TILE < camY) continue;
+      for (let xx = 0; xx < TILE; xx += 4) ctx.fillRect(x + xx, y + 1 + Math.sin((x + xx) * 0.09 + t * 0.07) * 1.6, 4, 2);
+    }
+    ctx.restore();
+  }
+
   // ───────── Partículas de ambiente ─────────
   updateAmbient(game, camX, camY) {
     const kind = AREAS[game.room.area].particles;
@@ -452,6 +530,7 @@ export class Renderer {
       if (kind === 'pollen') { p.vx = 0.25 + Math.sin(p.ph) * 0.2; p.vy = -0.12 + Math.cos(p.ph * 0.7) * 0.15; }
       else if (kind === 'fireflies') { p.vx = Math.sin(p.ph * 0.9) * 0.5; p.vy = Math.cos(p.ph * 0.6) * 0.4; }
       else if (kind === 'motes') { p.vx = 0.6 * p.s; p.vy = Math.sin(p.ph) * 0.15; }
+      else if (kind === 'bubbles') { p.vx = Math.sin(p.ph) * 0.18; p.vy = -0.32 * p.s; }
       else { p.vx = Math.sin(p.ph) * 0.1; p.vy = -0.2 * p.s; }
       p.x += p.vx; p.y += p.vy;
       if (p.x < camX - 20) p.x += W + 40; else if (p.x > camX + W + 20) p.x -= W + 40;
@@ -470,6 +549,10 @@ export class Renderer {
         ctx.beginPath(); ctx.arc(p.x, p.y, 4 * p.s, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = rgba('#ffd27a', 0.9 * tw);
         ctx.beginPath(); ctx.arc(p.x, p.y, 1.3 * p.s, 0, Math.PI * 2); ctx.fill();
+      } else if (kind === 'bubbles') {
+        ctx.strokeStyle = rgba('#c9fff2', 0.55 * (0.6 + tw * 0.4));
+        ctx.lineWidth = 0.8;
+        ctx.beginPath(); ctx.arc(p.x, p.y, 1.6 * p.s + 1, 0, Math.PI * 2); ctx.stroke();
       } else {
         const c = kind === 'pollen' ? pal.accent : kind === 'sparkles' ? pal.accent : '#ffffff';
         ctx.fillStyle = rgba(c, (kind === 'sparkles' ? 0.7 : 0.4) * tw);

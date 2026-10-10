@@ -1,5 +1,5 @@
 // Inimigos comuns e projéteis.
-import { TILE } from './config.js';
+import { TILE, T } from './config.js';
 import { moveBody, groundAhead, wallAhead } from './physics.js';
 import { approach, clamp, rand, sign, shade, rgba } from './util.js';
 
@@ -367,7 +367,72 @@ export class Guard extends Enemy {
   }
 }
 
-export const ENEMY_TYPES = { c: Crawler, h: Hopper, f: Flyer, p: Spitter, g: Guard };
+// ── Peixe-lanterna: só nada na água e persegue o herói que entrar nela
+export class Fish extends Enemy {
+  constructor(x, y) {
+    super(x, y, { w: 28, h: 18, hp: 3, geo: 3 });
+    this.gravity = false;
+    this.home = { x: this.x, y: this.y };
+    this.bloodColor = '#7affd4';
+  }
+  update(game) {
+    this.t++;
+    if (this.flash > 0) this.flash--;
+    if (this.knockback(game)) return;
+    const p = game.player, T_ = game.ai.tactics;
+    const d = this.dist(game);
+    let tx, ty, max = 1.2 * T_.speed;
+    if (p.inWater && d < 260 && !p.dead) { tx = p.cx; ty = p.cy; max = 2.1 * T_.speed; }
+    else { tx = this.home.x + Math.sin(this.t * 0.015) * 70; ty = this.home.y + Math.sin(this.t * 0.04) * 14; }
+    const dx = tx - this.cx, dy = ty - this.cy, dd = Math.hypot(dx, dy) || 1;
+    this.vx = approach(this.vx, (dx / dd) * max, 0.08);
+    this.vy = approach(this.vy, (dy / dd) * max * 0.8, 0.08);
+    if (Math.abs(this.vx) > 0.2) this.dir = sign(this.vx);
+    const ox = this.x, oy = this.y;
+    this.physics(game, { ignoreOneWay: true });
+    // Nunca sai da água.
+    const wx = Math.floor(this.cx / TILE), wy = Math.floor(this.cy / TILE);
+    if (!game.room.inside(wx, wy) || game.room.tile(wx, wy) !== T.WATER) {
+      this.x = ox; this.y = oy; this.vx *= -0.6; this.vy *= -0.6;
+    }
+  }
+  draw(ctx, pal) {
+    ctx.save();
+    ctx.translate(this.cx, this.cy);
+    ctx.scale(this.dir, 1);
+    const wag = Math.sin(this.t * 0.3) * 3;
+    const body = this.col('#1d3a4a'), fin = this.col('#2f5f73');
+    // cauda
+    ctx.fillStyle = fin;
+    ctx.beginPath(); ctx.moveTo(-9, 0); ctx.lineTo(-18, -7 + wag); ctx.lineTo(-18, 7 + wag); ctx.fill();
+    // corpo
+    ctx.fillStyle = body;
+    ctx.beginPath(); ctx.ellipse(0, 1, 12, 9, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = this.col('#2f5f73');
+    ctx.beginPath(); ctx.ellipse(-2, 5, 8, 3, 0, 0, Math.PI * 2); ctx.fill();
+    // barbatana
+    ctx.fillStyle = fin;
+    ctx.beginPath(); ctx.moveTo(-3, -8); ctx.lineTo(1, -13 - wag * 0.3); ctx.lineTo(5, -8); ctx.fill();
+    // isca luminosa
+    ctx.strokeStyle = this.col('#2f5f73'); ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(4, -8); ctx.quadraticCurveTo(12, -17, 17, -9); ctx.stroke();
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    const g = ctx.createRadialGradient(17, -9, 1, 17, -9, 11);
+    g.addColorStop(0, 'rgba(255,245,170,0.9)'); g.addColorStop(1, 'rgba(120,255,212,0)');
+    ctx.fillStyle = g; ctx.fillRect(5, -21, 24, 24);
+    ctx.restore();
+    ctx.fillStyle = '#fff6b0'; ctx.beginPath(); ctx.arc(17, -9, 2, 0, Math.PI * 2); ctx.fill();
+    // olho e dentes
+    ctx.fillStyle = '#f4efe6'; ctx.beginPath(); ctx.arc(6, -1, 2.6, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#16121c'; ctx.beginPath(); ctx.arc(6.8, -1, 1.2, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = this.col('#f4efe6');
+    for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.moveTo(7 + i * 2, 5); ctx.lineTo(8 + i * 2, 8); ctx.lineTo(9 + i * 2, 5); ctx.fill(); }
+    ctx.restore();
+  }
+}
+
+export const ENEMY_TYPES = { c: Crawler, h: Hopper, f: Flyer, p: Spitter, g: Guard, q: Fish };
 
 // ── Projéteis (do herói e dos inimigos)
 export class Projectile {
@@ -408,7 +473,7 @@ export class Projectile {
       game.particles.add({ x: this.x + rand(-4, 4), y: this.y + rand(-4, 4), vx: -this.vx * 0.1, vy: rand(-0.5, 0.5), life: 14, size: rand(2, 4), color: this.color(game), glow: true });
   }
   color() {
-    return { blob: '#b6ff7a', spell: '#bfe9ff', orb: '#ffd36e', wave: '#9ef0c0', debris: '#a9a2b8' }[this.kind] || '#fff';
+    return { blob: '#b6ff7a', spell: '#bfe9ff', orb: '#ffd36e', wave: '#9ef0c0', debris: '#a9a2b8', bubble: '#9ff7e6' }[this.kind] || '#fff';
   }
   draw(ctx) {
     const c = this.color();
@@ -418,6 +483,13 @@ export class Projectile {
       ctx.beginPath(); ctx.arc(this.x, this.y, this.r + 1.5, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = c;
       ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2); ctx.fill();
+    } else if (this.kind === 'bubble') {
+      ctx.fillStyle = 'rgba(120,255,220,0.22)';
+      ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = 'rgba(190,255,242,0.95)'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2); ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,0.8)';
+      ctx.beginPath(); ctx.arc(this.x - this.r * 0.35, this.y - this.r * 0.35, this.r * 0.22, 0, Math.PI * 2); ctx.fill();
     } else if (this.kind === 'debris') {
       ctx.fillStyle = c;
       ctx.translate(this.x, this.y); ctx.rotate(this.t * 0.2);

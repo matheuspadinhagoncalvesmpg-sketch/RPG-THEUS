@@ -2,8 +2,8 @@
 import { T, TILE, BUILD_BY_ID } from './config.js';
 import { ROOM_DEFS } from './rooms.js';
 
-const TILE_CHARS = { '#': T.SOLID, '^': T.SPIKE, '=': T.ONEWAY, X: T.BREAK, D: T.DOOR };
-const ENTITY_CHARS = 'SBNLAM$Kchfpgwrok';
+const TILE_CHARS = { '#': T.SOLID, '^': T.SPIKE, '=': T.ONEWAY, X: T.BREAK, D: T.DOOR, '~': T.WATER };
+const ENTITY_CHARS = 'SBNLAM$KchfpgwrokqCTE';
 
 export class Room {
   constructor(def) {
@@ -19,6 +19,8 @@ export class Room {
         if (TILE_CHARS[ch] !== undefined) this.tiles[ty * this.w + tx] = TILE_CHARS[ch];
         else if (ENTITY_CHARS.includes(ch)) {
           const index = (counters[ch] = (counters[ch] || 0) + 1) - 1;
+          // Entidade dentro d'água: o bloco continua sendo água.
+          if (row[tx - 1] === '~' || row[tx + 1] === '~') this.tiles[ty * this.w + tx] = T.WATER;
           this.entities.push({ ch, tx, ty, index, id: `${this.id}:${ch}${tx},${ty}` });
         }
       }

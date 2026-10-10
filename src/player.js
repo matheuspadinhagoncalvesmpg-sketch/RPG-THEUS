@@ -1,5 +1,5 @@
 // O Errante: movimento, combate, cura e magia.
-import { PHYS, SOUL_COST, TILE, WEAPONS, ARMORS } from './config.js';
+import { PHYS, SOUL_COST, TILE, WEAPONS, ARMORS, T } from './config.js';
 import { moveBody, standingOnOneWay, touchesSpikes, wallAhead } from './physics.js';
 import { approach, rand } from './util.js';
 import { drawHero, drawSlash } from './art.js';
@@ -26,7 +26,7 @@ export class Player {
       attackTimer: 0, attackCd: 0, attackDir: 'side', hitSet: null,
       invuln: 0, hurtTimer: 0, recoilX: 0, flash: 0,
       focusing: false, focusTimer: 0, spellHold: 0, spellArmed: false,
-      sitting: false, dropThrough: 0, dead: false,
+      sitting: false, dropThrough: 0, dead: false, inWater: false,
       t: 0, state: 'idle', afterimages: [], lastSafe: { x, y },
     });
   }
@@ -55,6 +55,16 @@ export class Player {
       } else { this.state = 'sit'; return; }
     }
 
+    // ── Água: o herói flutua, nada e pode saltar para fora pela superfície
+    const wtx = Math.floor(this.cx / TILE), wty = Math.floor((this.y + this.h * 0.45) / TILE);
+    const wasWater = this.inWater;
+    this.inWater = room.inside(wtx, wty) && room.tile(wtx, wty) === T.WATER;
+    if (this.inWater !== wasWater && this.t > 3) {
+      game.audio.play('splash');
+      game.particles.burst(this.cx, this.y + this.h * 0.5, 10, { color: ['#d6fff7', '#7affd4'], speed: 3.5, life: 24, grav: 0.15 });
+    }
+    if (this.inWater && this.t % 24 === 0)
+      game.particles.add({ x: this.cx + rand(-3, 3), y: this.y + 4, vy: -0.7, life: 44, size: 1.8, color: 'rgba(200,255,246,0.8)', glow: true, drag: 0.99 });
     const stunned = this.hurtTimer > 0;
     let mx = (inp.held.right ? 1 : 0) - (inp.held.left ? 1 : 0);
     if (stunned) mx = 0;
@@ -72,7 +82,8 @@ export class Player {
           const a = rand(0, Math.PI * 2);
           game.particles.add({ x: this.cx + Math.cos(a) * 30, y: this.cy + Math.sin(a) * 30, vx: -Math.cos(a) * 1.4, vy: -Math.sin(a) * 1.4, life: 20, size: 2.5, color: '#e8f4ff', glow: true, drag: 1 });
         }
-        if (this.focusTimer >= FOCUS_FRAMES) { game.heal(); this.focusTimer = 0; this.focusing = false; }
+        this.focusMax = game.hasCharm('mare_viva') ? 30 : FOCUS_FRAMES;
+        if (this.focusTimer >= this.focusMax) { game.heal(); this.focusTimer = 0; this.focusing = false; }
       } else if (this.focusing) { this.focusing = false; this.focusTimer = 0; }
     }
     if (inp.released.spell && this.spellArmed) {
@@ -87,7 +98,7 @@ export class Player {
       let dir = mx || this.facing;
       if (this.wallSliding) dir = -this.wallDir;
       this.dashDir = dir; this.facing = dir;
-      this.dashTimer = P.dashFrames; this.dashCd = P.dashCooldown;
+      this.dashTimer = Math.round(P.dashFrames * (game.hasCharm('vento_longo') ? 1.4 : 1)); this.dashCd = P.dashCooldown;
       if (!this.onGround) this.airDash = false;
       this.vy = 0; this.wallSliding = false; this.attackTimer = 0;
       game.audio.play('dash');
@@ -107,7 +118,7 @@ export class Player {
     } else if (this.wallLock > 0) {
       this.wallLock--;
     } else {
-      this.vx = mx * P.run + this.recoilX;
+      this.vx = mx * P.run * (this.inWater ? 0.72 : 1) + this.recoilX;
     }
     this.recoilX = approach(this.recoilX, 0, 0.45);
     if (mx && this.dashTimer <= 0 && this.attackTimer <= 0 && !stunned && !this.wallSliding && this.wallLock <= 0) {
@@ -117,9 +128,13 @@ export class Player {
 
     // ── Gravidade
     if (this.dashTimer <= 0) {
-      let g = P.gravity;
+      let g = P.gravity, fall = P.maxFall;
       if (this.jumpHeld && Math.abs(this.vy) < 1.6) g *= 0.5; // flutuar no ápice
-      this.vy = Math.min(this.vy + g, P.maxFall);
+      if (this.inWater) {
+        g = 0.14; fall = 2.4;
+        if (inp.held.jump && !stunned && this.vy > -3.4) this.vy = Math.max(this.vy - 0.42, -3.4);
+      }
+      this.vy = Math.min(this.vy + g, fall);
       if (this.wallSliding && this.vy > P.wallSlide) this.vy = P.wallSlide;
     }
 
@@ -131,9 +146,17 @@ export class Player {
       if (this.onGround && inp.held.down && standingOnOneWay(this, room, world)) {
         this.dropThrough = 12; this.y += 2; this.onGround = false; this.jumpBuffer = 0;
       } else if (grounded) {
-        this.vy = P.jump; jumped = true; this.squash = -0.7;
+        this.vy = this.inWater ? P.jump * 0.62 : P.jump; jumped = true; this.squash = -0.7;
         game.audio.play('jump');
         game.particles.dust(this.cx, this.y + this.h, 0, 5);
+      } else if (this.inWater) {
+        // Braçada. Perto da superfície vira um pulo para fora da água.
+        const hx = Math.floor(this.cx / TILE), hy = Math.floor((this.y - 22) / TILE);
+        const air = room.inside(hx, hy) ? room.tile(hx, hy) !== T.WATER : true;
+        this.vy = air ? -9.4 : -4.4;
+        this.jumpBuffer = 0;
+        game.audio.play(air ? 'jump' : 'swim');
+        game.particles.burst(this.cx, this.cy + 6, 6, { color: ['#d6fff7', '#7affd4'], speed: 2.2, life: 22, grav: 0.1 });
       } else if (ab.wallJump && (this.wallSliding || this.wallCoyote > 0)) {
         const d = this.lastWallDir;
         this.vx = -d * P.wallJumpX; this.vy = P.wallJumpY;
@@ -161,6 +184,7 @@ export class Player {
     this.onGround = hit.down;
     if (this.dropThrough > 0) this.dropThrough--;
     if (hit.up) this.jumpHeld = false;
+    if (this.inWater) { this.airDash = true; this.canDouble = true; }
     if (this.onGround) {
       if (!wasGround && fallSpeed > 3) {
         this.squash = Math.min(1, fallSpeed / 10);
@@ -196,7 +220,7 @@ export class Player {
       }
       inp.aim = null;
       this.attackTimer = ATTACK_FRAMES;
-      this.attackCd = ATTACK_COOLDOWN;
+      this.attackCd = game.hasCharm('lamina_rapida') ? 11 : ATTACK_COOLDOWN;
       this.hitSet = new Set();
       game.audio.play('slash');
     }
@@ -249,7 +273,7 @@ export class Player {
       drawHero(ctx, a.x, a.y, { profile: game.save.profile, facing: a.facing, state: 'dash', t: a.t, alpha: a.life / 22, flash: 1 });
 
     if (this.focusing) {
-      const k = this.focusTimer / FOCUS_FRAMES;
+      const k = this.focusTimer / (this.focusMax || FOCUS_FRAMES);
       const g = ctx.createRadialGradient(this.cx, this.cy, 2, this.cx, this.cy, 26 + k * 24);
       g.addColorStop(0, `rgba(230,244,255,${0.25 + k * 0.4})`);
       g.addColorStop(1, 'rgba(230,244,255,0)');

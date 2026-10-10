@@ -354,6 +354,7 @@ $('#btn-build').addEventListener('click', () => { if (game.state === 'play') gam
 $('#btn-map').addEventListener('click', () => { if (game.state === 'play') game.openMenu('map'); });
 $('#btn-pause').addEventListener('click', () => { if (game.state === 'play') game.openMenu('pause'); });
 $('#btn-resume').addEventListener('click', () => game.closeMenu());
+$('#btn-charms').addEventListener('click', () => { game.closeMenu(); game.craft.openCharms(); });
 $('#btn-pause-map').addEventListener('click', () => { game.closeMenu(); game.openMenu('map'); });
 $('#map-screen').addEventListener('click', () => game.closeMenu());
 $('#btn-quit').addEventListener('click', () => { game.persist(); toTitle(); });

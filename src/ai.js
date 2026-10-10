@@ -7,6 +7,7 @@ export const TACTIC_NAMES = { swarm: 'Enxame', flank: 'Flanco', kite: 'Distânci
 
 const LOCAL_TAUNTS = {
   moss: ['O musgo cobre todos que caem aqui.', 'Volte quando sua lâmina pesar mais.', 'Este santuário não é seu.'],
+  tide: ['A maré sempre volta, Errante.', 'Afogue-se em silêncio.', 'Este templo é meu mar.'],
   king: ['A aurora nunca mais vai nascer.', 'Você é só mais uma sombra, Errante.', 'Ajoelhe-se diante do crepúsculo.'],
 };
 
@@ -85,10 +86,12 @@ export class AIDirector {
     if (boss) {
       bossWeights = boss.key === 'moss'
         ? { charge: avgDist > 160 ? 3 : 1, leap: s.down > 2 ? 1 : 2, combo: avgDist < 120 ? 3 : 1 }
-        : { tele: avgDist > 160 ? 3 : 1, orbs: s.dash > 2 ? 1 : 2, dive: s.down > 2 ? 1 : 2 };
+        : boss.key === 'tide'
+          ? { bubbles: avgDist > 160 ? 3 : 1, sweep: s.dash > 2 ? 1 : 2, slam: avgDist < 120 ? 3 : 1 }
+          : { tele: avgDist > 160 ? 3 : 1, orbs: s.dash > 2 ? 1 : 2, dive: s.down > 2 ? 1 : 2 };
       if (boss.phase2 && this.lastTauntPhase !== boss) {
         this.lastTauntPhase = boss;
-        const list = LOCAL_TAUNTS[boss.key];
+        const list = LOCAL_TAUNTS[boss.key] || LOCAL_TAUNTS.king;
         taunt = list[Math.floor(Math.random() * list.length)];
       }
     }

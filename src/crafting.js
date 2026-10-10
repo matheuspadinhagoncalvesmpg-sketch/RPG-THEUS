@@ -1,5 +1,5 @@
 // Painéis de fabricação (bancada/forja), baú e loja do ferreiro.
-import { RECIPES, RESOURCES, SMITH_STOCK, WEAPONS, ARMORS } from './config.js';
+import { RECIPES, RESOURCES, SMITH_STOCK, WEAPONS, ARMORS, CHARMS, CHARM_SLOTS } from './config.js';
 
 const $ = (s) => document.querySelector(s);
 
@@ -94,6 +94,44 @@ export class CraftUI {
           g.build.refresh();
           this.render();
         }, !inBag && !inBox);
+      }
+    });
+  }
+
+  // ── Amuletos: até 3 equipados; só se troca descansando numa fogueira ──
+  openCharms() {
+    const g = this.game;
+    this.open('Amuletos', '', () => {
+      const s = g.save, ch = s.charms;
+      const canSwap = g.player.sitting;
+      this.list.innerHTML = '';
+      $('#craft-sub').innerHTML = `<span class="charm-slots">Equipados: <b>${ch.equipped.length}/${CHARM_SLOTS}</b></span><br>${canSwap ? 'Descansando: você pode trocar.' : 'Descanse numa fogueira para trocar de amuleto.'}`;
+      const owned = Object.keys(CHARMS).filter((k) => ch.owned[k]);
+      if (!owned.length) {
+        const p = document.createElement('p');
+        p.className = 'si-desc';
+        p.textContent = 'Nenhum amuleto ainda. Procure nos Jardins Submersos, vença desafios ou compre com a Mira.';
+        this.list.appendChild(p);
+      }
+      for (const k of owned) {
+        const c = CHARMS[k], on = ch.equipped.includes(k);
+        const full = !on && ch.equipped.length >= CHARM_SLOTS;
+        this.item(`<span class="charm-dot" style="background:${c.color}">${c.icon}</span>${c.name}`, c.desc, on ? 'Equipado' : full ? 'Cheio' : 'Equipar', () => {
+          if (!canSwap) return;
+          if (ch.equipped.includes(k)) {
+            ch.equipped = ch.equipped.filter((x) => x !== k);
+            if (k === 'pele_pedra') s.masksMax -= 1;
+          } else if (ch.equipped.length < CHARM_SLOTS) {
+            ch.equipped.push(k);
+            if (k === 'pele_pedra') s.masksMax += 1;
+          } else return;
+          g.masks = s.masksMax; // descansando: vida cheia
+          g.audio.play('ui');
+          g.persist();
+          g.ui.resetHud();
+          g.ui.updateHud(g);
+          this.render();
+        }, !canSwap || (full && !on));
       }
     });
   }
