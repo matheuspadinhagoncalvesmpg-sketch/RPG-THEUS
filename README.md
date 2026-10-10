@@ -89,6 +89,12 @@ Com a variável `GEMINI_API_KEY` no servidor (veja `.env.example`):
 
 ---
 
+## 📖 A história
+
+A história completa (mundo, mitologia, personagens, chefes, monstros, finais e textos prontos) está na **bíblia da história**, em [`docs/historia/`](docs/historia/README.md). A pasta contém spoilers e **não é servida pelo site**.
+
+---
+
 ## 🧩 Estrutura do código
 
 ```

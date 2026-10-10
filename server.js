@@ -11,7 +11,7 @@ const ROOT = path.dirname(fileURLToPath(import.meta.url));
 loadEnv(ROOT);
 const PORT = process.env.PORT || process.argv[2] || 3000;
 // Arquivos que nunca devem ser servidos (a chave da IA fica no .env).
-const PRIVATE = /(^|\/)\.|^\/(server|ai_server|mp_server)\.js$|^\/(tools|node_modules|data)\//;
+const PRIVATE = /(^|\/)\.|^\/(server|ai_server|mp_server)\.js$|^\/(tools|node_modules|data|docs)\//;
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
