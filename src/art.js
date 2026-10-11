@@ -374,11 +374,8 @@ export function drawHero(ctx, x, y, o) {
       ctx.ellipse(ex, cy0 + 0.6, 1.9, blink ? 0.4 : 2.6, 0, 0, Math.PI * 2);
       ctx.fill();
       if (!blink && !flash) {
-        ctx.save();
-        ctx.globalCompositeOperation = 'lighter';
-        ctx.fillStyle = ec;
-        ellipse(ctx, ex + 0.3, cy0 - 0.6, 0.7, 0.7);
-        ctx.restore();
+        ctx.fillStyle = '#ffffff';
+        ellipse(ctx, ex, cy0 + 0.5, 1.15, 1.85);
       }
     }
   }
@@ -391,7 +388,7 @@ export function drawHero(ctx, x, y, o) {
   // Braço da frente + espada
   ctx.strokeStyle = tunic;
   ctx.lineWidth = 3.4;
-  const sx = 2, sy = -18 + by;
+  const sx = 2, sy = -16.4 + by;
   if (attacking) {
     const a = swingAngle(attacking.dir, attacking.k);
     const hx = sx + Math.cos(a) * 7, hyy = sy + Math.sin(a) * 7;
