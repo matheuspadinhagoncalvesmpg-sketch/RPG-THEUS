@@ -250,7 +250,7 @@ export function drawHero(ctx, x, y, o) {
   }
   ctx.rotate(lean);
   if (o.squash) ctx.scale(1 + o.squash * 0.16, 1 - o.squash * 0.16);
-  const by = bob + crouch;
+  const by = bob + crouch - 2.5; // tronco 2,5px acima: pernas mais longas
   const tunic = col(p.cloak);
   const tunicDark = col(shade(p.cloak, -0.38));
   const skin = col(p.skin);
@@ -311,7 +311,7 @@ export function drawHero(ctx, x, y, o) {
       return;
     }
     ctx.fillStyle = col('#2a2230');
-    ctx.fillRect(lx + off * 0.5, -9 + crouch, 3.2, 6 - crouch * 0.5);
+    ctx.fillRect(lx + off * 0.5, -11.5 + crouch, 3.2, 8.5 - crouch * 0.5);
     ctx.fillStyle = col('#5a3a24');
     ctx.fillRect(lx + off * 0.6 - 0.5, -3.5, 4.4, 3.5);
     ctx.fillStyle = col('#7a5232');
@@ -325,13 +325,13 @@ export function drawHero(ctx, x, y, o) {
   ctx.beginPath();
   ctx.moveTo(-5, -20 + by);
   ctx.lineTo(5, -20 + by);
-  ctx.lineTo(7 + wind * 0.15, -7 + crouch * 0.5);
-  ctx.lineTo(-7 - wind * 0.3, -7 + crouch * 0.5);
+  ctx.lineTo(7 + wind * 0.15, -9.5 + crouch * 0.5);
+  ctx.lineTo(-7 - wind * 0.3, -9.5 + crouch * 0.5);
   ctx.closePath();
   ctx.fill();
   ctx.fillStyle = tunicDark;
   ctx.beginPath();
-  ctx.moveTo(-5, -20 + by); ctx.lineTo(-2, -20 + by); ctx.lineTo(-3, -7 + crouch * 0.5); ctx.lineTo(-7 - wind * 0.3, -7 + crouch * 0.5);
+  ctx.moveTo(-5, -20 + by); ctx.lineTo(-2, -20 + by); ctx.lineTo(-3, -9.5 + crouch * 0.5); ctx.lineTo(-7 - wind * 0.3, -9.5 + crouch * 0.5);
   ctx.fill();
   ctx.fillStyle = col('#4a2f1c');
   ctx.fillRect(-6, -12 + by * 0.6, 12.5, 2.4);
@@ -354,19 +354,15 @@ export function drawHero(ctx, x, y, o) {
   const hy = -27 + by;
   // ao virar, a cabeça gira (achata no eixo x por alguns quadros)
   ctx.save();
+  const HS = 0.83, pvy = hy + 8.4;
+  ctx.translate(1, pvy); ctx.scale(HS, HS); ctx.translate(-1, -pvy);
   if (o.turn) { ctx.translate(1, hy); ctx.scale(1 - o.turn * 0.55, 1); ctx.translate(-1, -hy); }
   const [eFar, eNear] = EYE_COLORS[p.eyes] || EYE_COLORS.hetero;
   ctx.fillStyle = col('#1a1320');
-  ellipse(ctx, 0.6, hy, 7.4, 7.3);
-  const ivory = col('#f3eee4'), ivoryDark = col('#cfc6b6');
+  ellipse(ctx, 0.9, hy + 0.4, 8.2, 8.2);
+  const ivory = col('#f3eee4');
   ctx.fillStyle = ivory;
-  ctx.beginPath();
-  ctx.moveTo(-5.6, hy - 3.5);
-  ctx.quadraticCurveTo(0.5, hy - 8.6, 7.6, hy - 3);
-  ctx.bezierCurveTo(9.6, hy - 0.5, 9.4, hy + 6.6, 3.4, hy + 8.9);
-  ctx.bezierCurveTo(-1.8, hy + 10, -6.4, hy + 5.4, -5.8, hy + 1.2);
-  ctx.closePath();
-  ctx.fill();
+  ellipse(ctx, 0.9, hy + 0.4, 7.7, 7.7);
   if (o.state !== 'dead') {
     const blink = t % 220 < 6 && o.state === 'idle';
     for (const [ex, ec] of [[1.4, eFar], [5.4, eNear]]) {
