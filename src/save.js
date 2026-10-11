@@ -71,6 +71,7 @@ export function loadSave() {
     const ch = s.charms || {};
     return {
       ...base, ...s, inv: { ...base.inv, ...(s.inv || {}) }, builds: s.builds || {}, base: { ...base.base, ...(s.base || {}) },
+      profile: { ...DEFAULT_PROFILE, capeStyle: 'cachecol', ...(s.profile || {}) }, // saves antigos mantêm o cachecol
       charms: { owned: { ...(ch.owned || {}) }, equipped: [...(ch.equipped || [])] },
       brasas: { ...(s.brasas || {}) }, marcas: { ...(s.marcas || {}) },
     };

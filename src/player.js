@@ -292,9 +292,9 @@ export class Player {
     const swingK = this.attackTimer > 0 ? Math.min(1, (ATTACK_FRAMES - this.attackTimer) / 9) : 0;
     const level = game.save.nail;
     const wp = WEAPONS[game.save.weapon || 'errante'];
+    const C = classOf(game.save);
     const sword = { len: wp.len + (C.shot ? 0 : C.reach * 0.6), style: wp.style, glow: level > 1 };
     const armor = ARMORS[game.save.armor || 'none'];
-    const C = classOf(game.save);
     if (this.attackTimer > 0 && !this.shotOnly)
       drawSlash(ctx, this.cx + this.facing * 2, this.y + this.h - 18, this.attackDir, this.facing, swingK, level, wp.style);
     drawHero(ctx, this.cx, this.y + this.h, {

@@ -115,7 +115,7 @@ export class AIDirector {
     const state = {
       room: g.room.name,
       enemies: counts,
-      masks: g.masks, masksMax: g.save.masksMax, soul: g.soul,
+      masks: g.masks, masksMax: g.save.masksMax, classe: g.save.profile.classe, soul: g.soul,
       deaths: this.deaths[g.room.id] || 0,
       style: { side: s.side, up: s.up, down: s.down, dash: s.dash, heal: s.heal, hurt: s.hurt, dist: Math.round(s.distN ? s.distSum / s.distN : 150) },
       boss: boss ? boss.key : null,

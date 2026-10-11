@@ -100,11 +100,13 @@ const DEFS = [
       b.rect(0, 0, 40, 2);
       b.rect(0, 0, 2, 8).rect(38, 0, 2, 8);
       b.rect(0, 13, 40, 3);
-      b.rect(12, 13, 4, 1, '^');
-      b.rect(20, 10, 4, 3);
+      b.rect(12, 13, 3, 1, '^');
+      b.rect(16, 13, 3, 2, 'X').plat(17, 15, 2); // buraco secreto para a Gruta Sob as Raízes
+      b.set(10, 12, 'B');
+      b.rect(20, 11, 4, 2);
       b.plat(27, 8, 4).plat(32, 5, 4);
       b.set(34, 4, 'M').set(35, 4, 'a');
-      b.set(21, 9, 'p').set(8, 12, 'c').set(30, 12, 'c').set(17, 6, 'f');
+      b.set(21, 10, 'p').set(8, 12, 'c').set(30, 12, 'c').set(17, 6, 'f');
       b.set(5, 12, 'w').set(25, 12, 'w');
     },
   },
@@ -149,7 +151,7 @@ const DEFS = [
     build: (b) => {
       b.rect(0, 0, 22, 2);
       b.rect(0, 2, 1, 7);
-      b.rect(21, 0, 1, 16);
+      b.rect(21, 0, 1, 9); // abertura leste (linhas 9-12) para o Mirante dos Ventos
       b.rect(0, 13, 22, 3);
       b.rect(7, 11, 3, 2).set(8, 10, 'A');
       b.set(15, 12, 'B').set(18, 12, 'L').set(13, 12, 'v');
@@ -198,12 +200,12 @@ const DEFS = [
     x: 128, y: -40, w: 18, h: 48,
     build: (b) => {
       b.rect(0, 0, 18, 1);
-      b.rect(6, 0, 4, 1, '.');
+      b.plat(6, 0, 4);
       b.rect(0, 0, 2, 43).rect(16, 0, 2, 43);
       b.rect(0, 46, 18, 2);
-      for (let i = 0; i < 8; i++) b.plat(i % 2 ? 10 : 2, 41 - i * 5, 6);
-      b.plat(6, 3, 5);
-      b.set(9, 30, 'f').set(8, 15, 'f');
+      // degraus de 4 blocos: cabem no pulo duplo com folga
+      for (let i = 0; i < 11; i++) b.plat(i % 2 ? 10 : 2, 43 - i * 4, 6);
+      b.set(9, 29, 'f').set(8, 13, 'f');
     },
   },
   {
@@ -262,6 +264,7 @@ const DEFS = [
       b.rect(0, 0, 20, 1);
       b.rect(8, 0, 3, 1, '.');
       b.rect(0, 0, 2, 26);
+      b.rect(0, 21, 2, 3, '.'); // passagem para o Veio de Cristal
       b.rect(18, 0, 2, 20);
       b.rect(0, 24, 20, 2);
       b.plat(4, 21, 4).plat(10, 18, 4).plat(4, 15, 4);
@@ -330,6 +333,9 @@ const DEFS = [
       b.rect(0, 9, 1, 5, '~').rect(39, 4, 1, 6, '~');
       b.rect(10, 11, 2, 5).rect(22, 8, 2, 8).rect(33, 12, 3, 4);
       b.rect(25, 5, 4, 1).set(27, 4, 'C');
+      b.rect(8, 16, 3, 2, '~'); // passagem para a Gruta das Marés
+      b.rect(33, 2, 6, 3, '.').rect(34, 5, 5, 1).set(39, 4, '.'); // bolsão de ar
+      b.set(36, 4, 'B');
       b.set(6, 6, 'q').set(16, 10, 'q').set(29, 9, 'q').set(36, 6, 'q');
       b.set(14, 15, 'k').set(30, 15, 'o').set(5, 15, 'a');
     },
@@ -345,7 +351,7 @@ const DEFS = [
       b.rect(1, 13, 32, 2, '~');
       b.rect(28, 12, 5, 3);
       b.plat(6, 9, 4).plat(20, 9, 4);
-      b.set(22, 14, 'K').set(30, 11, 'B').set(28, 11, 'v');
+      b.set(22, 14, 'K').set(28, 11, 'v');
     },
     boss: 'tide',
     cape: 'bege',
@@ -364,6 +370,102 @@ const DEFS = [
     lore: ['PROVA DO ALVA\nQuem passar em 18 segundos ganha uma medalha.\n(O Brandão fez em 19.)'],
     charm: 'lamina_rapida',
     challenge: { seconds: 18, reward: 120 },
+  },
+
+  // ───────────── CÂMARAS OPCIONAIS COM MINI-CHEFES ─────────────
+  {
+    id: 'bosque_gruta', name: 'Gruta Sob as Raízes', area: 'bosque',
+    x: 104, y: 34, w: 40, h: 14,
+    build: (b) => {
+      b.rect(0, 0, 40, 1).rect(16, 0, 3, 1, '.');
+      b.rect(0, 1, 1, 5).rect(39, 1, 1, 10);
+      b.rect(0, 11, 40, 3);
+      b.plat(9, 9, 4).plat(14, 7, 4).plat(9, 5, 4).plat(14, 3, 4).plat(16, 1, 3);
+      b.set(34, 10, 'B').set(22, 10, 'c').set(27, 10, 'c').set(30, 10, 'h').set(5, 10, 'k').set(36, 10, 'k');
+    },
+  },
+  {
+    id: 'bosque_covil', name: 'Covil do Besouro-Rei', area: 'bosque',
+    x: 72, y: 34, w: 32, h: 14,
+    build: (b) => {
+      b.rect(0, 0, 32, 2).rect(0, 2, 1, 9).rect(31, 2, 1, 4);
+      b.rect(0, 11, 32, 3);
+      b.rect(30, 6, 1, 5, 'D');
+      b.plat(6, 7, 4).plat(20, 7, 4);
+      b.set(6, 10, 'K');
+    },
+    boss: 'mini_besouro', bossSide: 'right',
+  },
+  {
+    id: 'cristal_veio', name: 'Veio de Cristal', area: 'cristal',
+    x: 18, y: 44, w: 32, h: 16,
+    build: (b) => {
+      b.rect(0, 0, 32, 2).rect(0, 2, 1, 9).rect(31, 2, 1, 9);
+      b.rect(0, 14, 32, 2);
+      b.plat(5, 10, 4).plat(11, 8, 4).plat(17, 10, 4);
+      b.rect(12, 13, 3, 1, '^');
+      b.set(26, 13, 'B').set(8, 13, 'c').set(22, 13, 'h').set(4, 13, 'k').set(29, 13, 'k').set(19, 9, 'f').set(13, 7, 'o');
+    },
+  },
+  {
+    id: 'cristal_geodo', name: 'Geodo do Golem', area: 'cristal',
+    x: -14, y: 44, w: 32, h: 16,
+    build: (b) => {
+      b.rect(0, 0, 32, 2).rect(0, 2, 1, 12).rect(31, 2, 1, 9);
+      b.rect(0, 14, 32, 2);
+      b.rect(30, 11, 1, 3, 'D');
+      b.plat(6, 10, 4).plat(20, 10, 4);
+      b.set(6, 13, 'K');
+    },
+    boss: 'mini_golem', bossSide: 'right',
+  },
+  {
+    id: 'mirante_ventos', name: 'Mirante dos Ventos', area: 'bosque',
+    x: 228, y: 30, w: 36, h: 16,
+    build: (b) => {
+      b.rect(0, 0, 36, 2).rect(0, 2, 1, 7).rect(35, 2, 1, 7);
+      b.rect(0, 13, 36, 3);
+      b.rect(10, 13, 6, 3, '.').rect(10, 15, 6, 1).rect(10, 14, 6, 1, '^');
+      b.plat(19, 9, 4).plat(25, 6, 3);
+      b.set(31, 12, 'B').set(22, 12, 'c').set(14, 5, 'f').set(26, 5, 'f').set(5, 12, 'k');
+    },
+  },
+  {
+    id: 'ninho_vespa', name: 'Ninho da Vespa Rainha', area: 'bosque',
+    x: 264, y: 30, w: 32, h: 16,
+    build: (b) => {
+      b.rect(0, 0, 32, 2).rect(0, 2, 1, 7).rect(31, 0, 1, 16);
+      b.rect(0, 13, 32, 3);
+      b.rect(1, 9, 1, 4, 'D');
+      b.plat(8, 9, 4).plat(20, 9, 4);
+      b.set(24, 12, 'K');
+    },
+    boss: 'mini_vespa',
+  },
+  {
+    id: 'jardins_gruta', name: 'Gruta das Marés', area: 'jardins',
+    x: 140, y: 90, w: 40, h: 16,
+    build: (b) => {
+      b.rect(0, 0, 40, 2).rect(8, 0, 3, 2, '~');
+      b.rect(0, 2, 1, 14).rect(39, 2, 1, 6).rect(39, 11, 1, 5);
+      b.rect(0, 14, 40, 2);
+      b.rect(26, 11, 13, 3);
+      b.rect(1, 2, 25, 12, '~');
+      b.rect(8, 0, 3, 2, '~');
+      b.set(33, 10, 'B').set(8, 8, 'q').set(16, 10, 'q').set(21, 6, 'q').set(5, 13, 'k').set(24, 13, 'o');
+    },
+  },
+  {
+    id: 'jardins_covil', name: 'Covil da Lampreia', area: 'jardins',
+    x: 180, y: 90, w: 32, h: 16,
+    build: (b) => {
+      b.rect(0, 0, 32, 2).rect(0, 2, 1, 6).rect(0, 11, 6, 3).rect(31, 0, 1, 16);
+      b.rect(0, 14, 32, 2);
+      b.rect(1, 8, 1, 3, 'D');
+      b.rect(6, 2, 25, 12, '~');
+      b.set(22, 12, 'K');
+    },
+    boss: 'mini_lampreia',
   },
 ];
 

@@ -4,6 +4,7 @@ import { World } from './world.js';
 import { Player } from './player.js';
 import { ENEMY_TYPES, Projectile } from './enemies.js';
 import { BOSS_TYPES } from './bosses.js';
+import { MINI_TYPES } from './minibosses.js';
 import { spawnRoomEntities, GeoCoin, Tombstone, ItemDrop } from './entities.js';
 import { BuildMode } from './build.js';
 import { CraftUI } from './crafting.js';
@@ -328,7 +329,11 @@ export class Game {
     this.projectiles = this.projectiles.filter((pr) => !pr.dead);
 
     // Chefe acorda quando o herói entra na arena
-    if (this.bossPending && p.x > 6 * TILE && p.onGround && this.net.isHost()) this.startBoss();
+    if (this.bossPending && (p.onGround || p.inWater) && this.net.isHost()) {
+      // A luta começa quando o herói passa do portão (a entrada pode ser pela esquerda ou pela direita).
+      const inside = this.room.bossSide === 'right' ? p.x < (this.room.w - 7) * TILE : p.x > 6 * TILE;
+      if (inside) this.startBoss();
+    }
     this.net.update();
 
     // Dano por contato e golpes dos inimigos
@@ -878,7 +883,7 @@ export class Game {
   startBoss() {
     const b = this.bossPending;
     this.bossPending = null;
-    const boss = new BOSS_TYPES[b.type](b.x, b.y);
+    const boss = new (BOSS_TYPES[b.type] || MINI_TYPES[b.type])(b.x, b.y);
     boss.eid = 'boss';
     this.enemies.push(boss);
     this.boss = boss;
@@ -898,7 +903,16 @@ export class Game {
     setTimeout(() => this.audio.play('door'), 900);
     const L = BOSS_LINES[key];
     const depois = () => {
-      if (key === 'tide') this.acquireCharm('mare_viva');
+      if (key.startsWith('mini_')) {
+        // Mini-chefe: Fragmento de Vida (+1 coração) e a câmara se abre.
+        this.save.masksMax++;
+        this.masks = this.save.masksMax;
+        this.persist();
+        this.audio.play('pickup');
+        this.particles.burst(this.player.cx, this.player.cy, 30, { color: ['#ffffff', '#ffd27a'], speed: 6, life: 40, glow: true });
+        this.ui.updateHud(this);
+        this.ui.toast('Fragmento de Vida! +1 coração', 3500);
+      } else if (key === 'tide') this.acquireCharm('mare_viva');
       else if (key === 'king') {
         this.save.finished = true;
         this.persist();

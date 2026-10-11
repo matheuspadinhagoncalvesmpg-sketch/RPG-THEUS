@@ -14,8 +14,8 @@ const ORIGEM = [
 function dica(s) {
   const a = s.abilities, b = s.bosses;
   if (!a.dash) return ['Dizem que o vento obedece a quem chega ao santuário no fundo do Bosque.', 'Mas um cavaleiro coberto de musgo guarda a passagem.'];
-  if (!a.wallJump) return ['Com o Manto do Vento, o abismo das Ruínas não é mais obstáculo.', 'Suba pelo Penhasco do Moinho e cruze a Ponte Partida.'];
   if (!a.doubleJump) return ['Ouvi ecos debaixo deste abrigo... como se o chão fosse oco.', 'Golpeie para baixo no ar, quem sabe?'];
+  if (!a.wallJump) return ['Com asas nos pés, a Ponte Partida das Ruínas não é mais obstáculo.', 'Suba pelo Penhasco do Moinho. Dizem que os Escaladores deixaram algo na Galeria.'];
   if (!b.king) return ['A Torre dos Ventos leva ao Trono. Que a luz te acompanhe, Errante.', 'Dizem também que um poço no Coração de Cristal desce a um templo submerso... e que há um segredo no teto do recife.'];
   return [];
 }
@@ -39,10 +39,10 @@ export const NPCS = {
         historia = ['Fumaça nesta terra, de novo. Minha filha acendia fogo aqui.', 'Fique à vontade, Errante. Esta casa é sua tanto quanto minha.'];
       } else if (b.tide) {
         historia = ['Então você já sabe quem eu sou.', '...Não. Não sabe. Eu mesmo ainda não sei.', 'Venha ao Lar quando tiver tempo. Eu preciso te contar sobre uma casa.'];
-      } else if (a.doubleJump) {
-        historia = ['Você ouviu o poço?', 'Eu nunca ouvi. Mas já me disseram que ele chama. E que o nome é bonito.', 'Tenha cuidado com o que o mar guarda. Ele costuma devolver mais do que levou.'];
       } else if (a.wallJump) {
         historia = ['Os Escaladores... eu os conheci. A Mestra Íris tinha mãos como as suas.', 'Ela me contou uma vez que toda parede tem dois lados. Eu achei que era sobre paredes.'];
+      } else if (a.doubleJump) {
+        historia = ['Você ouviu o poço?', 'Eu nunca ouvi. Mas já me disseram que ele chama. E que o nome é bonito.', 'Tenha cuidado com o que o mar guarda. Ele costuma devolver mais do que levou.'];
       } else if (b.moss) {
         historia = ['Você viu o musgo. Ele guardava algo.', 'Fico feliz que tenha sido você a pegar.'];
       } else if (a.spell) {

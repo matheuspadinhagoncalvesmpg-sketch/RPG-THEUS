@@ -4,7 +4,7 @@ import { Enemy, Projectile } from './enemies.js';
 import { wallAhead } from './physics.js';
 import { approach, clamp, rand, sign, pick } from './util.js';
 
-class Boss extends Enemy {
+export class Boss extends Enemy {
   constructor(x, y, o) {
     super(x, y, { ...o, kbResist: 1 });
     this.isBoss = true;

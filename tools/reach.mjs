@@ -56,6 +56,7 @@ function macros(ab) {
   const list = [];
   for (const dir of [-1, 1]) list.push({ walk: true, dir });
   for (const dir of [-1, 0, 1]) for (const swim of [6, 10, 15]) list.push({ swim, dir });
+  for (const dir of [-1, 0, 1]) list.push({ drop: true, dir });
   for (const dir of [-1, 0, 1]) for (const rel of [5, 99]) {
     const dbls = ab.doubleJump ? [0, 12, 26] : [0];
     const dashes = ab.dash && dir ? [0, 8, 22] : [0];
@@ -76,7 +77,10 @@ function run(from, m, ab) {
   for (let f = 0; f < maxF; f++) {
     input.pressed = {}; input.released = {};
     input.held = { left: m.dir < 0, right: m.dir > 0, jump: false };
-    if (m.swim) {
+    if (m.drop) {
+      input.held.down = true;
+      if (f === 0) input.pressed.jump = true;
+    } else if (m.swim) {
       input.held.jump = f % m.swim < 3;
       if (f % m.swim === 0) input.pressed.jump = true;
     } else if (!m.walk) {

@@ -69,6 +69,20 @@ O jogo tem um **Manual dos controles** completo na pausa e na tela inicial. No c
 
 ---
 
+### Classes
+Escolhidas ao criar o herói (e não mudam depois): **Guerreiro** (equilibrado), **Guardião** (escudo, muita vida, lento e forte), **Ladino** (adaga veloz, dash ágil, pouca vida), **Arqueiro** (flechas; a magia vira chuva de flechas) e **Mago** (orbes; magia mais barata e forte). Arqueiro e Mago atacam à distância; o golpe para baixo continua sendo uma pancada que serve de pogo.
+
+### Mini-chefes
+Quatro câmaras opcionais (Gruta Sob as Raízes → Covil do Besouro-Rei, Veio de Cristal → Geodo do Golem, Mirante dos Ventos → Ninho da Vespa Rainha, Gruta das Marés → Covil da Lampreia). Cada mini-chefe dá um **Fragmento de Vida** (+1 coração). A fogueira fica sempre *antes* da arena, nunca dentro dela.
+
+### Testes do mundo
+```bash
+node tools/check-world.mjs      # salas sobrepostas e aberturas sem saída
+node tools/check-entities.mjs   # entidades dentro de blocos/flutuando, arenas sem portão
+node tools/reach.mjs            # usa a física REAL do herói para achar lugares inalcançáveis e armadilhas sem volta
+node tools/reach.mjs --classe=guardiao --margem=0.9
+```
+
 ## 🌐 Multijogador e nuvem
 
 - Em **Multijogador e nuvem** (tela inicial ou pausa), crie um **mundo** e passe o código de 5 letras, ou entre no mundo de alguém (até 6 jogadores).
