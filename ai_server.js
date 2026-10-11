@@ -145,7 +145,7 @@ async function invasionPlan(body) {
   const prompt = `Você é o diretor de eventos raros de Vésper, um jogo de aventura sombrio e poético (estilo Hollow Knight com invasões como no Terraria).
 ${WORLD}
 Uma invasão está prestes a acontecer na região "${str(body.area, 20)}": "${str(body.invasionName, 40)}" (${str(body.invasionSub, 80)}).
-Herói: ${str(body.name, 20)}, classe ${str(body.classe, 12)}, corações ${clamp(body.masks, 0, 20, 5)}/${clamp(body.masksMax, 1, 20, 5)}, invasões já vencidas ${clamp(body.done, 0, 999, 0)}, mortes nesta sala ${clamp(body.deaths, 0, 999, 0)}.
+Herói: ${str(body.name, 20)}, corações ${clamp(body.masks, 0, 20, 5)}/${clamp(body.masksMax, 1, 20, 5)}, invasões já vencidas ${clamp(body.done, 0, 999, 0)}, mortes nesta sala ${clamp(body.deaths, 0, 999, 0)}.
 Decida: "go" false se o herói está fraco ou machucado demais agora (a invasão é adiada); "scale" de 0.8 (suave) a 1.4 (brutal) conforme a força dele; "title" um nome curto e poético para a invasão (até 28 caracteres, sem revelar spoilers da história); "line" UMA frase de aviso, em português do Brasil, até 20 palavras, sem aspas e sem markdown.
 Responda APENAS com JSON: {"go": true|false, "scale": 0.8-1.4, "title": "...", "line": "..."}`;
   const raw = await gemini(prompt, { json: true, maxTokens: 160 });

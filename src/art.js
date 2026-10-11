@@ -27,11 +27,30 @@ const BLADES = {
   steel: ['#eef1f6', '#8e98ab', '#ff4a5a'],
   ore: ['#ffd9a0', '#b8742f', '#ffcf4a'],
   crystal: ['#e9fbff', '#5fc9e0', '#7ef0ff'],
+  bone: ['#f5eedc', '#bdb39a', '#e8dcc0'],
 };
 
 // style: 'steel' | 'ore' | 'crystal'; glow = lâmina afiada (brilho no gume).
 export function drawSword(ctx, len, style = 'steel', flash = false, glow = false) {
   if (typeof style === 'number') { glow = style > 1; style = 'steel'; }
+  if (style === 'spear' || style === 'axe') {
+    // Lança (ponta de folha) e machado (cabeça larga), ambos com cabo de madeira.
+    const wood = flash ? '#fff' : '#6b4a32', metal = flash ? '#fff' : '#cfd6e4', dark = flash ? '#fff' : '#7d889c';
+    ctx.fillStyle = wood;
+    ctx.fillRect(-8, -1.4, len - 4, 2.8);
+    ctx.fillStyle = flash ? '#fff' : '#3b2617';
+    for (let i = -6; i < 0; i += 3) ctx.fillRect(i, -1.5, 1.2, 3);
+    if (style === 'spear') {
+      ctx.fillStyle = metal;
+      ctx.beginPath(); ctx.moveTo(len - 12, 0); ctx.quadraticCurveTo(len - 8, -4.4, len + 4, 0); ctx.quadraticCurveTo(len - 8, 4.4, len - 12, 0); ctx.fill();
+      ctx.fillStyle = dark; ctx.fillRect(len - 13, -1.8, 2.4, 3.6);
+    } else {
+      ctx.fillStyle = metal;
+      ctx.beginPath(); ctx.moveTo(len - 12, -1); ctx.lineTo(len - 14, -9); ctx.quadraticCurveTo(len - 2, -11, len + 1, -2); ctx.lineTo(len - 1, 3); ctx.quadraticCurveTo(len - 8, 4, len - 12, 1); ctx.fill();
+      ctx.fillStyle = dark; ctx.fillRect(len - 13, -1.6, 2.2, 3.2);
+    }
+    return;
+  }
   const [bl, bd, gem] = BLADES[style] || BLADES.steel;
   const level = glow || style === 'crystal' ? 2 : 1;
   const steel = flash ? '#ffffff' : bl;
@@ -223,7 +242,7 @@ export function drawHero(ctx, x, y, o) {
   const flash = o.flash > 0;
   const col = (c) => (flash ? '#ffffff' : c);
   const sw0 = o.sword || { len: 27, style: 'steel', glow: (o.swordLevel || 1) > 1 };
-  const cl = o.classe || 'guerreiro';
+  const cl = o.wkind === 'bow' ? 'arqueiro' : o.wkind === 'staff' ? 'mago' : 'espada';
   const ranged = cl === 'arqueiro' || cl === 'mago';
   ctx.save();
   ctx.translate(x, y);
@@ -369,18 +388,6 @@ export function drawHero(ctx, x, y, o) {
     ellipse(ctx, 2.4, -18.6 + by, 3.4, 2.2);
   }
 
-  if (cl === 'guardiao') {
-    // Escudo redondo preso ao braço de trás
-    ctx.fillStyle = col(shade(p.cloak, -0.25));
-    ellipse(ctx, -1.5, -10.5 + by, 6.2, 6.8);
-    ctx.fillStyle = col('#c9a64e');
-    ellipse(ctx, -1.5, -10.5 + by, 4.6, 5.2);
-    ctx.fillStyle = col(shade(p.cloak, -0.1));
-    ellipse(ctx, -1.5, -10.5 + by, 3.4, 3.9);
-    ctx.fillStyle = col('#e0c870');
-    ellipse(ctx, -1.5, -10.5 + by, 1.1, 1.1);
-  }
-
   // Cabeça redonda: contorno escuro, rosto claro, cabelo e olhos altos de duas cores
   const hy = -26 + by;
   ctx.save();
@@ -408,7 +415,7 @@ export function drawHero(ctx, x, y, o) {
   drawTopper(ctx, p, hy, t, col);
   ctx.restore();
 
-  // Braço da frente + arma da classe
+  // Braço da frente + arma
   ctx.strokeStyle = tunic;
   ctx.lineWidth = 3.4;
   const sx = 2, sy = -16.4 + by;
@@ -871,5 +878,30 @@ export function drawMarkA(ctx, x, y, t, found) {
   ctx.strokeStyle = found ? 'rgba(255,230,170,0.55)' : 'rgba(255,230,170,0.95)';
   ctx.lineWidth = 1.6; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
   ctx.beginPath(); ctx.moveTo(-4.5, 5); ctx.lineTo(0, -6); ctx.lineTo(4.5, 5); ctx.moveTo(-2.5, 1); ctx.lineTo(2.5, 1); ctx.stroke();
+  ctx.restore();
+}
+
+// Baú de tesouro: madeira escura com ferragens; brilha na cor da raridade enquanto está fechado.
+export function drawTreasure(ctx, x, y, open, t, glowColor = '#ffd27a') {
+  ctx.save();
+  ctx.translate(x, y);
+  if (!open) {
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    const g = ctx.createRadialGradient(0, -10, 2, 0, -10, 24 + Math.sin(t * 0.08) * 2);
+    g.addColorStop(0, glowColor + '88'); g.addColorStop(1, glowColor + '00');
+    ctx.fillStyle = g; ctx.fillRect(-30, -40, 60, 50);
+    ctx.restore();
+  }
+  ctx.fillStyle = '#4a2f1c'; ctx.fillRect(-13, -14, 26, 14);
+  ctx.fillStyle = '#6b4526'; ctx.fillRect(-13, -14, 26, 3);
+  ctx.fillStyle = '#c9932f'; ctx.fillRect(-13, -8, 26, 2); ctx.fillRect(-14, -14, 2, 14); ctx.fillRect(12, -14, 2, 14);
+  if (open) {
+    ctx.fillStyle = '#3a2314'; ctx.beginPath(); ctx.moveTo(-13, -14); ctx.lineTo(-11, -26); ctx.lineTo(11, -26); ctx.lineTo(13, -14); ctx.fill();
+    ctx.fillStyle = '#120d18'; ctx.fillRect(-11, -14, 22, 3);
+  } else {
+    ctx.fillStyle = '#5a3a22'; ctx.beginPath(); ctx.moveTo(-13, -14); ctx.quadraticCurveTo(0, -26, 13, -14); ctx.fill();
+    ctx.fillStyle = '#c9932f'; ctx.fillRect(-3, -17, 6, 6);
+    ctx.fillStyle = '#1a1208'; ctx.fillRect(-1, -15, 2, 3);
+  }
   ctx.restore();
 }

@@ -3,14 +3,13 @@
 //   • lugares inalcançáveis (itens, fogueiras, chefes, salas)
 //   • armadilhas: lugares onde dá para chegar mas não dá para voltar a nenhuma fogueira
 //   • fogueiras dentro de arenas de chefe e outros erros de projeto.
-// Uso: node tools/reach.mjs [--classe=guardiao] [--mapa]
+// Uso: node tools/reach.mjs [--margem=0.9] [--quiet]
 import { World } from '../src/world.js';
-import { T, TILE, PHYS, CLASSES } from '../src/config.js';
+import { T, TILE, PHYS } from '../src/config.js';
 import { Player } from '../src/player.js';
 import { touchesSpikes } from '../src/physics.js';
 
 const argv = process.argv.slice(2);
-const classe = (argv.find((a) => a.startsWith('--classe=')) || '').slice(9) || 'guerreiro';
 const margin = Number((argv.find((a) => a.startsWith('--margem=')) || '').slice(9)) || 0.92;
 // Margem de segurança: um jogador comum não faz o salto perfeito. Reduz os saltos em ~8%.
 PHYS.jump *= margin; PHYS.doubleJump *= margin; PHYS.wallJumpY *= margin; PHYS.dashSpeed *= margin;
@@ -42,7 +41,7 @@ const gworld = {
 const noop = () => {};
 const input = { held: {}, pressed: {}, released: {}, aim: null, consume(a) { this.pressed[a] = false; } };
 const game = {
-  input, room: gr, world: gworld, save: { abilities: {}, weapon: 'errante', nail: 1, profile: { classe } },
+  input, room: gr, world: gworld, save: { abilities: {}, weapon: 'errante', nail: 1, profile: {} },
   audio: { play: noop }, particles: { add: noop, burst: noop, dust: noop, ring: noop },
   ai: { record: noop }, build: { active: false }, hasCharm: () => false, soul: 0, masks: 5,
   screenToWorld: () => ({ x: 0, y: 0 }), playerAttack: noop, spikeHit: noop, spawnSpell: noop,
@@ -151,7 +150,7 @@ const cnt = (ab) => (ab.dash ? 1 : 0) + (ab.wallJump ? 1 : 0) + (ab.doubleJump ?
 
 let problems = 0;
 const warn = (m) => { problems++; console.log('⚠ ' + m); };
-console.log(`Classe: ${classe}  |  estados alcançáveis: ` + results.map((r) => `${r.ab.name}=${r.states.size}`).join(', '));
+console.log(`Estados alcançáveis: ` + results.map((r) => `${r.ab.name}=${r.states.size}`).join(', '));
 
 // 1) Entidades importantes: mínimo de habilidades para alcançar
 const KIND = { A: 'habilidade', B: 'fogueira', M: 'vaso de vida', C: 'amuleto', K: 'chefe/mini-chefe', S: 'início', N: 'NPC', L: 'placa', k: 'cristal', o: 'minério', w: 'árvore', r: 'pedra', $: 'geo' };

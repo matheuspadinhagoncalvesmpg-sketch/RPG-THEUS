@@ -4,7 +4,7 @@ import { AudioSystem } from './audio.js';
 import { UI } from './ui.js';
 import { Game } from './game.js';
 import { drawHero, EYE_COLORS } from './art.js';
-import { BUILD_ITEMS, CLASSES } from './config.js';
+import { BUILD_ITEMS } from './config.js';
 import { cloudCode, setCloudCode, prettyCode, normalizeCode, downloadSave } from './cloud.js';
 import { loadSave, newSave, writeSave, clearSave, loadSettings, writeSettings, DEFAULT_PROFILE } from './save.js';
 import { shade } from './util.js';
@@ -134,7 +134,6 @@ const PALETTES = {
 };
 const EYE_LABELS = { hetero: 'Ocaso & Aurora', black: 'Preto', blue: 'Azul', red: 'Vermelho', green: 'Verde', gold: 'Dourado', violet: 'Violeta', cyan: 'Ciano', pink: 'Rosa', silver: 'Prata', ember: 'Brasa & Névoa', sea: 'Maré' };
 const CHOICES = {
-  classe: Object.entries(CLASSES).map(([k, c]) => [k, c.name]),
   build: [['padrao', 'Padrão'], ['pequeno', 'Ágil'], ['alto', 'Esguio'], ['robusto', 'Robusto']],
   capeStyle: [['cachecol', 'Cachecol'], ['capa', 'Capa longa'], ['nenhum', 'Nenhuma']],
   hairStyle: [['franja', 'Franja'], ['curto', 'Curto'], ['longo', 'Longo'], ['rabo', 'Rabo'], ['coque', 'Coque'], ['trancas', 'Tranças'], ['moicano', 'Moicano'], ['careca', 'Sem cabelo']],
@@ -179,8 +178,6 @@ function buildCreator() {
       wrap.appendChild(b);
     }
   }
-  $('#class-desc').textContent = (CLASSES[profile.classe] || CLASSES.guerreiro).desc;
-  $('#field-classe').classList.toggle('hidden', editing);
   const pre = $('#pick-preset');
   pre.innerHTML = '';
   for (const pr of PRESETS) {
@@ -204,7 +201,7 @@ function buildCreator() {
 
 $('#btn-random').addEventListener('click', () => {
   for (const [key, colors] of Object.entries(PALETTES)) profile[key] = pickRandom(colors);
-  for (const [key, list] of Object.entries(CHOICES)) if (key !== 'classe' || !editing) profile[key] = pickRandom(list)[0];
+  for (const [key, list] of Object.entries(CHOICES)) profile[key] = pickRandom(list)[0];
   profile.eyes = pickRandom(Object.keys(EYE_LABELS));
   audio.play('ui');
   buildCreator();
@@ -226,7 +223,7 @@ function previewLoop() {
   ctx.beginPath(); ctx.ellipse(0, 1, 12, 2.5, 0, 0, Math.PI * 2); ctx.fill();
   const phase = Math.floor(t / 150) % 3;
   const state = phase === 1 ? 'run' : 'idle';
-  drawHero(ctx, 0, 0, { profile, classe: profile.classe, facing: 1, state, t });
+  drawHero(ctx, 0, 0, { profile, facing: 1, state, t });
   previewRaf = requestAnimationFrame(previewLoop);
 }
 
@@ -442,6 +439,8 @@ $('#btn-map').addEventListener('click', () => { if (game.state === 'play') game.
 $('#btn-pause').addEventListener('click', () => { if (game.state === 'play') game.openMenu('pause'); });
 $('#btn-resume').addEventListener('click', () => game.closeMenu());
 $('#btn-charms').addEventListener('click', () => { game.closeMenu(); game.craft.openCharms(); });
+$('#btn-inventory').addEventListener('click', () => { game.closeMenu(); game.craft.openInventory(); });
+$('#btn-inv').addEventListener('click', () => { if (game.state === 'play') game.craft.openInventory(); });
 $('#btn-open-options').addEventListener('click', () => { $('.pause-main').classList.add('hidden'); $('.pause-opts').classList.remove('hidden'); $('#pause-title').textContent = 'Opções'; });
 $('#btn-opts-back').addEventListener('click', () => { $('.pause-opts').classList.add('hidden'); $('.pause-main').classList.remove('hidden'); $('#pause-title').textContent = 'Pausado'; });
 $('#btn-pause-map').addEventListener('click', () => { game.closeMenu(); game.openMenu('map'); });

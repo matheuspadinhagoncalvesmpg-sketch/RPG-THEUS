@@ -5,8 +5,10 @@ import { rand } from './util.js';
 import { NPCS } from './dialog.js';
 import {
   drawNPC, drawLoreStone, drawOrb, drawGeoRock, drawGeo, drawCampfire, drawTombstone,
-  drawLifeCrystal, drawResourceNode, drawResourceIcon, drawBuildDeco, drawCloakPost, drawMarkA,
+  drawLifeCrystal, drawResourceNode, drawResourceIcon, drawBuildDeco, drawCloakPost, drawMarkA, drawTreasure,
 } from './art.js';
+import { LOOT } from './loot.js';
+import { WEAPONS, RARITY, giveWeapon } from './config.js';
 import { CAPES, CAPE_ORDER, capeNote } from './story.js';
 
 class Entity {
@@ -83,6 +85,25 @@ export class MarkA extends Entity {
     }
   }
   draw(ctx, game) { drawMarkA(ctx, this.x, this.y, this.t, !!game.save.marcas[this.id]); }
+}
+
+// Baú de tesouro do mundo: abre uma vez e guarda o que for (arma, moedas, materiais).
+export class TreasureChest extends Entity {
+  constructor(x, y, id, loot, done) { super(x, y); this.id = id; this.loot = loot; this.label = 'Abrir'; this.done = !!done; }
+  isOpen() { return this.done; }
+  near(p) { return !this.done && Math.abs(p.cx - this.x) < 36 && Math.abs(p.y + p.h - this.y) < 40; }
+  interact(game) {
+    if (this.done) return;
+    this.done = true;
+    game.save.opened[this.id] = true;
+    game.audio.play('pickup');
+    game.particles.burst(this.x, this.y - 18, 22, { color: ['#ffffff', '#ffd27a'], speed: 5, life: 40, glow: true, grav: 0.06 });
+    game.giveLoot(this.loot);
+  }
+  draw(ctx, game) {
+    const w = this.loot.weapon && WEAPONS[this.loot.weapon];
+    drawTreasure(ctx, this.x, this.y, this.done, this.t, w ? RARITY[w.rarity].color : '#ffd27a');
+  }
 }
 
 export class AbilityPickup extends Entity {
@@ -278,6 +299,7 @@ export function spawnRoomEntities(room, save) {
       }
       case 'v': if (room.cape) list.push(new CloakPost(x, y, room.cape)); break;
       case 'V': list.push(new SevenCloaks(x, y)); break;
+      case 't': { const loot = (LOOT[room.id] || [])[e.index]; if (loot) list.push(new TreasureChest(x, y, e.id, loot, !!save.opened[e.id])); break; }
       case 'a': list.push(new MarkA(x, y, `${room.id}:${e.tx},${e.ty}`)); break;
       case 'L': list.push(new LoreStone(x, y, room.lore[e.index])); break;
       case 'A': if (!save.abilities[room.ability]) list.push(new AbilityPickup(x, y, room.ability)); break;

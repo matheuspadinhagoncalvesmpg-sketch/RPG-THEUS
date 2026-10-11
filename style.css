@@ -603,3 +603,6 @@ body.lefty .tbtn.ctx { right: auto; left: calc(30px + var(--sl)); }
 #inv-name { font-family: var(--serif); font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); margin-bottom: 4px; text-shadow: 0 1px 6px #000; }
 #inv-bar .bar { height: 7px; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 207, 122, 0.5); border-radius: 4px; overflow: hidden; }
 #inv-fill { height: 100%; background: linear-gradient(90deg, #b8742f, #ffcf7a); transform-origin: left; transition: transform 0.25s; }
+
+.inv-head { font-family: var(--serif); letter-spacing: 0.14em; font-size: 13px; color: var(--gold); text-transform: uppercase; margin: 14px 0 4px; text-align: left; border-bottom: 1px solid var(--line); padding-bottom: 3px; }
+.mat-dot { display: inline-block; width: 9px; height: 9px; border-radius: 2px; transform: rotate(45deg); margin-right: 8px; }

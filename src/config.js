@@ -169,21 +169,33 @@ export const BUILD_BY_ID = Object.fromEntries(BUILD_ITEMS.map((b) => [b.id, b]))
 export const BUILD_REACH = 7 * TILE;
 
 // Espadas: multiplicador de dano e visual da lâmina.
-// Classes do Errante (escolhidas ao criar o herói). cd = recarga do golpe (quadros).
-export const CLASSES = {
-  guerreiro: { name: 'Guerreiro', desc: 'Espada equilibrada. Boa vida e alcance médio.', masks: 5, run: 1, dmg: 1, cd: 19, reach: 0, dashCd: 1, spellDmg: 3, spellCost: 33, shot: null },
-  guardiao: { name: 'Guardião', desc: 'Escudo e lâmina pesada: muita vida, golpes lentos e fortes, anda devagar.', masks: 6, run: 0.9, dmg: 1.7, cd: 28, reach: -2, dashCd: 1.25, spellDmg: 3, spellCost: 33, shot: null },
-  ladino: { name: 'Ladino', desc: 'Adaga veloz e dash ágil, mas alcance curto e pouca vida.', masks: 4, run: 1.1, dmg: 0.7, cd: 11, reach: -14, dashCd: 0.6, spellDmg: 3, spellCost: 33, shot: null },
-  arqueiro: { name: 'Arqueiro', desc: 'Atira flechas à distância (para baixo: golpe de arco). A magia vira chuva de flechas.', masks: 4, run: 1.04, dmg: 0.85, cd: 17, reach: -12, dashCd: 1, spellDmg: 2, spellCost: 33, shot: 'arrow' },
-  mago: { name: 'Mago', desc: 'Orbes mágicos à distância, magia mais barata e poderosa. Pouca vida.', masks: 4, run: 1, dmg: 0.9, cd: 22, reach: -12, dashCd: 1, spellDmg: 6, spellCost: 22, shot: 'bolt' },
+// Armas (estilo Terraria): achadas em baús, fabricadas na forja ou compradas.
+// kind: melee (golpe corpo a corpo) | bow (flechas) | staff (orbes). cd = recarga do golpe, em quadros.
+export const RARITY = {
+  comum: { name: 'Comum', color: '#e8e4da' },
+  incomum: { name: 'Incomum', color: '#7fe39a' },
+  raro: { name: 'Raro', color: '#6ab8ff' },
+  epico: { name: 'Épico', color: '#c79bff' },
 };
-export const classOf = (save) => CLASSES[(save && save.profile && save.profile.classe) || (save && save.classe)] || CLASSES.guerreiro;
-
 export const WEAPONS = {
-  errante: { name: 'Lâmina do Errante', dmg: 1, len: 27, style: 'steel' },
-  minerio: { name: 'Espada de Minério', dmg: 1.5, len: 29, style: 'ore' },
-  cristal: { name: 'Espada de Cristal', dmg: 2.2, len: 32, style: 'crystal' },
+  errante: { name: 'Lâmina do Errante', desc: 'A espada pequena de quem acorda na Colina.', dmg: 1, len: 27, cd: 19, style: 'steel', kind: 'melee', rarity: 'comum' },
+  adaga: { name: 'Adaga de Osso', desc: 'Veloz, mas de alcance curto.', dmg: 0.75, len: 18, cd: 11, style: 'bone', kind: 'melee', rarity: 'incomum' },
+  lanca: { name: 'Lança do Caçador', desc: 'Longo alcance, golpes mais lentos.', dmg: 1.2, len: 46, cd: 25, style: 'spear', kind: 'melee', rarity: 'incomum' },
+  machado: { name: 'Machado de Pedra', desc: 'Pesado: dano alto, golpes lentos.', dmg: 2, len: 30, cd: 31, style: 'axe', kind: 'melee', rarity: 'raro' },
+  minerio: { name: 'Espada de Minério', desc: 'Dano x1,5. Lâmina de bronze.', dmg: 1.5, len: 29, cd: 19, style: 'ore', kind: 'melee', rarity: 'incomum' },
+  cristal: { name: 'Espada de Cristal', desc: 'Dano x2,2. Lâmina longa e brilhante.', dmg: 2.2, len: 32, cd: 19, style: 'crystal', kind: 'melee', rarity: 'raro' },
+  arco: { name: 'Arco do Caçador', desc: 'Dispara flechas à distância. Para baixo: pancada de arco.', dmg: 0.9, len: 15, cd: 17, style: 'steel', kind: 'bow', rarity: 'incomum' },
+  cajado: { name: 'Cajado da Névoa', desc: 'Lança orbes de névoa à distância.', dmg: 1.1, len: 15, cd: 22, style: 'steel', kind: 'staff', rarity: 'raro' },
 };
+
+// Entrega uma arma ao herói (a primeira vez) e a equipa.
+export function giveWeapon(s, key) {
+  s.weapons = s.weapons || { errante: true };
+  s.weapons[key] = true;
+  s.weapon = key;
+}
+export const ownsWeapon = (s, key) => !!(s.weapons && s.weapons[key]) || (s.weapon || 'errante') === key;
+
 
 // Armaduras: corações extras.
 export const ARMORS = {
@@ -197,8 +209,8 @@ export const ARMORS = {
 export const RECIPES = [
   { id: 'lantern', station: 'workbench', name: 'Lanterna', desc: 'Ilumina bosques e cavernas escuras.', cost: { wood: 3, ore: 2, crystal: 1 }, give: (s) => { s.items.lantern = true; }, owned: (s) => !!s.items.lantern },
   { id: 'armor_madeira', station: 'workbench', name: 'Armadura de Madeira', desc: '+1 coração.', cost: { wood: 12 }, give: (s) => equipArmor(s, 'madeira'), owned: (s) => ARMORS[s.armor || 'none'].hearts >= 1 },
-  { id: 'sword_minerio', station: 'forge', name: 'Espada de Minério', desc: 'Dano x1,5. Lâmina de bronze.', cost: { ore: 6, wood: 2 }, give: (s) => { s.weapon = 'minerio'; }, owned: (s) => WEAPONS[s.weapon || 'errante'].dmg >= 1.5 },
-  { id: 'sword_cristal', station: 'forge', name: 'Espada de Cristal', desc: 'Dano x2,2. Lâmina longa e brilhante.', cost: { crystal: 6, ore: 4 }, give: (s) => { s.weapon = 'cristal'; }, owned: (s) => (s.weapon || 'errante') === 'cristal' },
+  { id: 'sword_minerio', station: 'forge', name: 'Espada de Minério', desc: 'Dano x1,5. Lâmina de bronze.', cost: { ore: 6, wood: 2 }, give: (s) => giveWeapon(s, 'minerio'), owned: (s) => ownsWeapon(s, 'minerio') },
+  { id: 'sword_cristal', station: 'forge', name: 'Espada de Cristal', desc: 'Dano x2,2. Lâmina longa e brilhante.', cost: { crystal: 6, ore: 4 }, give: (s) => giveWeapon(s, 'cristal'), owned: (s) => ownsWeapon(s, 'cristal') },
   { id: 'armor_pedra', station: 'forge', name: 'Armadura de Pedra', desc: '+2 corações.', cost: { stone: 10, ore: 2 }, give: (s) => equipArmor(s, 'pedra'), owned: (s) => ARMORS[s.armor || 'none'].hearts >= 2 },
   { id: 'armor_cristal', station: 'forge', name: 'Armadura de Cristal', desc: '+3 corações.', cost: { crystal: 8, ore: 4 }, give: (s) => equipArmor(s, 'cristal'), owned: (s) => (s.armor || 'none') === 'cristal' },
 ];

@@ -11,6 +11,7 @@ import { VISOES } from './story.js';
 //   c  gosma   h  cogumelo   f  morcego   p  flor carnívora   g  golem   q  peixe-lanterna
 //   ~  água    C  amuleto    T/E  início/fim do desafio cronometrado
 //   w r o k  árvore, rocha, minério e cristal (recursos)
+//   t  baú de tesouro (conteúdo em loot.js)
 
 class RoomBuilder {
   constructor(w, h) {
@@ -87,7 +88,7 @@ const DEFS = [
       b.rect(2, 0, 10, 1).rect(16, 0, 10, 1);
       b.plat(4, 20, 4).plat(9, 17, 4).plat(15, 14, 4).plat(9, 11, 4);
       b.plat(15, 8, 4).plat(9, 5, 4).plat(13, 2, 3);
-      b.set(6, 22, '$').set(20, 22, 'c').set(20, 12, 'f');
+      b.set(6, 22, '$').set(20, 22, 'c').set(20, 12, 'f').set(14, 1, 't');
       b.set(10, 22, 'r').set(24, 22, 'w');
     },
   },
@@ -380,7 +381,7 @@ const DEFS = [
       b.rect(0, 1, 1, 5).rect(39, 1, 1, 10);
       b.rect(0, 11, 40, 3);
       b.plat(9, 9, 4).plat(14, 7, 4).plat(9, 5, 4).plat(14, 3, 4).plat(16, 1, 3);
-      b.set(34, 10, 'B').set(22, 10, 'c').set(27, 10, 'c').set(30, 10, 'h').set(5, 10, 'k').set(36, 10, 'k');
+      b.set(34, 10, 'B').set(22, 10, 'c').set(27, 10, 'c').set(30, 10, 'h').set(5, 10, 'k').set(36, 10, 'k').set(3, 10, 't');
     },
   },
   {
@@ -403,7 +404,7 @@ const DEFS = [
       b.rect(0, 14, 32, 2);
       b.plat(5, 10, 4).plat(11, 8, 4).plat(17, 10, 4);
       b.rect(12, 13, 3, 1, '^');
-      b.set(26, 13, 'B').set(8, 13, 'c').set(22, 13, 'h').set(4, 13, 'k').set(29, 13, 'k').set(19, 9, 'f').set(13, 7, 'o');
+      b.set(26, 13, 'B').set(8, 13, 'c').set(22, 13, 'h').set(4, 13, 'k').set(29, 13, 't').set(19, 9, 'f').set(13, 7, 'o');
     },
   },
   {
@@ -426,7 +427,7 @@ const DEFS = [
       b.rect(0, 13, 36, 3);
       b.rect(10, 13, 6, 3, '.').rect(10, 15, 6, 1).rect(10, 14, 6, 1, '^');
       b.plat(19, 9, 4).plat(25, 6, 3);
-      b.set(31, 12, 'B').set(22, 12, 'c').set(14, 5, 'f').set(26, 5, 'f').set(5, 12, 'k');
+      b.set(31, 12, 'B').set(22, 12, 'c').set(14, 5, 'f').set(26, 5, 'f').set(5, 12, 'k').set(27, 5, 't');
     },
   },
   {
@@ -451,7 +452,7 @@ const DEFS = [
       b.rect(26, 11, 13, 3);
       b.rect(1, 2, 25, 12, '~');
       b.rect(8, 0, 3, 2, '~');
-      b.set(33, 10, 'B').set(8, 8, 'q').set(16, 10, 'q').set(21, 6, 'q').set(5, 13, 'k').set(24, 13, 'o');
+      b.set(33, 10, 'B').set(8, 8, 'q').set(16, 10, 'q').set(21, 6, 'q').set(24, 13, 'o').set(36, 10, 't');
     },
   },
   {

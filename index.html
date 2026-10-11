@@ -43,6 +43,7 @@
   <link rel="modulepreload" href="src/util.js">
   <link rel="modulepreload" href="src/dialog.js">
   <link rel="modulepreload" href="src/story.js">
+  <link rel="modulepreload" href="src/loot.js">
   <link rel="modulepreload" href="src/invasions.js">
   <link rel="modulepreload" href="src/minibosses.js">
 </head>
@@ -67,6 +68,9 @@
       </button>
       <button id="btn-build" class="hud-btn hidden" aria-label="Construir">
         <svg viewBox="0 0 24 24"><path d="M14 4l6 6-3 3-6-6z M11 7L3.5 14.5a2 2 0 0 0 0 3l3 3a2 2 0 0 0 3 0L17 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+      </button>
+      <button id="btn-inv" class="hud-btn" aria-label="Inventário">
+        <svg viewBox="0 0 24 24"><path d="M6 9h12l1 11H5z M9 9V7a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
       </button>
       <button id="btn-map" class="hud-btn" aria-label="Mapa">
         <svg viewBox="0 0 24 24"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z M9 4v14 M15 6v14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
@@ -142,6 +146,7 @@
         <button id="btn-resume" class="menu-btn">Continuar</button>
         <button id="btn-pause-map" class="menu-btn">Mapa</button>
         <button id="btn-look" class="menu-btn">Aparência</button>
+        <button id="btn-inventory" class="menu-btn">Inventário</button>
         <button id="btn-charms" class="menu-btn">Amuletos</button>
         <button class="menu-btn btn-manual">Manual dos controles</button>
         <button class="menu-btn btn-mp">Multijogador e nuvem</button>
@@ -336,7 +341,6 @@
         <label class="field">Nome
           <input id="hero-name" type="text" maxlength="14" autocomplete="off" spellcheck="false">
         </label>
-        <div class="field" id="field-classe">Classe<div id="pick-classe" class="chips"></div><p id="class-desc" class="mp-hint"></p></div>
         <div class="field">Arquétipo<div id="pick-preset" class="chips"></div></div>
         <button id="btn-random" class="menu-btn subtle creator-random">Aleatório</button>
         <div class="field">Porte<div id="pick-build" class="chips"></div></div>

@@ -1,6 +1,6 @@
 // Entrada unificada: teclado, controle (gamepad) e toque com multitoque.
 
-export const ACTIONS = ['left', 'right', 'up', 'down', 'jump', 'attack', 'dash', 'spell', 'interact', 'map', 'pause', 'build'];
+export const ACTIONS = ['left', 'right', 'up', 'down', 'jump', 'attack', 'dash', 'spell', 'interact', 'map', 'pause', 'build', 'inv'];
 
 const KEYMAP = {
   ArrowLeft: 'left', KeyA: 'left',
@@ -13,6 +13,7 @@ const KEYMAP = {
   KeyV: 'spell', KeyF: 'spell', KeyI: 'spell',
   KeyE: 'interact', Enter: 'interact',
   KeyM: 'map', Tab: 'map',
+  KeyQ: 'inv',
   Escape: 'pause', KeyP: 'pause',
   KeyB: 'build',
 };

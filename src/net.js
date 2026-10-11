@@ -90,10 +90,10 @@ class RemotePlayer {
     const wp = WEAPONS[this.weapon] || WEAPONS.errante;
     const sword = { len: wp.len, style: wp.style, glow: this.nail > 1 };
     const cx = this.x + this.w / 2, fy = this.y + this.h;
-    if (this.attack) drawSlash(ctx, cx + this.facing * 2, fy - 18, this.attack[0], this.facing, this.attack[1], this.nail, wp.style);
+    if (this.attack && wp.kind === 'melee' || (this.attack && this.attack[0] === 'down')) drawSlash(ctx, cx + this.facing * 2, fy - 18, this.attack[0], this.facing, this.attack[1], this.nail, wp.style);
     drawHero(ctx, cx, fy, {
       profile: this.profile, facing: this.facing, state: this.sit ? 'sit' : this.state, t: this.t,
-      sword, armor: ARMORS[this.armor] || ARMORS.none,
+      sword, armor: ARMORS[this.armor] || ARMORS.none, wkind: wp.kind,
       attack: this.attack ? { dir: this.attack[0], k: this.attack[1] } : null,
     });
     ctx.save();
@@ -252,6 +252,13 @@ export class Net {
         if (e && this.isHost()) e.hurt(g, m.dmg, m.kx, m.ky);
         break;
       }
+      case 'shot': {
+        // Tiro de outro jogador: só visual (o dano é de quem atirou).
+        const pr = new Projectile(m.x, m.y, m.vx, m.vy, { kind: m.k, r: m.k === 'arrow' ? 5 : 8, life: m.k === 'arrow' ? 42 : 56, hostile: false, grav: m.k === 'arrow' ? 0.03 : 0 });
+        pr.visual = true;
+        g.projectiles.push(pr);
+        break;
+      }
       case 'chat':
         if (this.onChat) this.onChat(m.name, m.text, m.id === this.id);
         break;
@@ -343,6 +350,11 @@ export class Net {
     g.raids.remoteNight = m.n;
     g.invasions.remote = Array.isArray(m.iv) ? m.iv : null;
     g.room.doorsClosed = !!m.d;
+  }
+
+  // Tiro (flecha/orbe) para os outros verem; o dano é calculado por quem atirou.
+  sendShot(kind, x, y, vx, vy) {
+    if (this.online) this.send({ t: 'shot', k: kind, x: Math.round(x), y: Math.round(y), vx: +vx.toFixed(2), vy: +vy.toFixed(2) });
   }
 
   sendHit(e, dmg, kx, ky) { this.send({ t: 'hit', eid: e.eid, dmg, kx, ky }); }

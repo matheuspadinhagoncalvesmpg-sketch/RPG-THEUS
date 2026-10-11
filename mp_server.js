@@ -26,7 +26,7 @@ const clean = (v, n) => String(v ?? '').replace(/[\u0000-\u001f<>]/g, '').trim()
 const cleanProfile = (pr) => ({
   cloak: clean(pr.cloak, 9), hair: clean(pr.hair, 9), eyes: clean(pr.eyes, 10), skin: clean(pr.skin, 9),
   accent: clean(pr.accent, 9), hairStyle: clean(pr.hairStyle, 10), topper: clean(pr.topper, 10),
-  build: clean(pr.build, 10), capeStyle: clean(pr.capeStyle, 10), classe: clean(pr.classe, 10),
+  build: clean(pr.build, 10), capeStyle: clean(pr.capeStyle, 10),
 });
 const validCode = (c, n) => typeof c === 'string' && c.length === n && [...c].every((ch) => CODE_ABC.includes(ch));
 
@@ -183,6 +183,12 @@ function handle(c, msg) {
       if (!w) return;
       const host = w.players.get(w.hosts[c.room]);
       if (host && host !== c) host.send({ t: 'hit', eid: eidOf(msg.eid), dmg: lim(msg.dmg, 0, 20), kx: lim(msg.kx, -2, 2), ky: lim(msg.ky, -2, 2) });
+      break;
+    }
+    case 'shot': {
+      if (!w) return;
+      const k = msg.k === 'bolt' ? 'bolt' : 'arrow';
+      toWorld(w, { t: 'shot', id: c.id, k, x: Math.round(lim(msg.x, -100000, 100000)), y: Math.round(lim(msg.y, -100000, 100000)), vx: lim(msg.vx, -20, 20), vy: lim(msg.vy, -20, 20) }, c, c.room);
       break;
     }
     case 'chat': {

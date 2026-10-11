@@ -1,4 +1,3 @@
-import { CLASSES } from './config.js';
 // Progresso salvo no navegador (localStorage), sempre protegido por try/catch.
 
 const KEY = 'theus_save_v2';
@@ -15,7 +14,6 @@ export const DEFAULT_PROFILE = {
   topper: 'nenhum',
   build: 'padrao',
   capeStyle: 'nenhum',
-  classe: 'guerreiro',
 };
 
 export function newSave(profile) {
@@ -23,7 +21,10 @@ export function newSave(profile) {
     v: 2,
     profile: { ...DEFAULT_PROFILE, ...profile },
     bench: null,
-    masksMax: (CLASSES[(profile && profile.classe)] || CLASSES.guerreiro).masks,
+    masksMax: 5,
+    weapon: 'errante',
+    weapons: { errante: true },
+    opened: {},
     nail: 1,
     geo: 0,
     abilities: { dash: false, wallJump: false, doubleJump: false, spell: false },
@@ -72,6 +73,8 @@ export function loadSave() {
     return {
       ...base, ...s, inv: { ...base.inv, ...(s.inv || {}) }, builds: s.builds || {}, base: { ...base.base, ...(s.base || {}) },
       profile: { ...DEFAULT_PROFILE, capeStyle: 'cachecol', ...(s.profile || {}) }, // saves antigos mantêm o cachecol
+      weapons: { errante: true, [s.weapon || 'errante']: true, ...(s.weapons || {}) },
+      opened: { ...(s.opened || {}) },
       charms: { owned: { ...(ch.owned || {}) }, equipped: [...(ch.equipped || [])] },
       brasas: { ...(s.brasas || {}) }, marcas: { ...(s.marcas || {}) },
     };

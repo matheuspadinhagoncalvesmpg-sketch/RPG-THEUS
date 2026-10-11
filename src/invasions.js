@@ -122,7 +122,7 @@ export class Invasions {
     const def = INVASIONS[room.area];
     const n = g.save.base.invasions || 0;
     const ctx = {
-      area: room.area, invasion: def.id, name: g.save.profile.name, classe: g.save.profile.classe,
+      area: room.area, invasion: def.id, name: g.save.profile.name,
       masks: g.masks, masksMax: g.save.masksMax, done: n, deaths: g.ai.deaths[room.id] || 0,
     };
     const plan = await g.ai.invasionPlan(ctx, def);

@@ -1,5 +1,5 @@
 // Núcleo do jogo: salas, transições, combate, câmera e estados.
-import { TILE, T, AREAS, ABILITIES, PHYS, SOUL_MAX, SOUL_PER_HIT, SOUL_COST, RESOURCES, WEAPONS, CHARMS, classOf } from './config.js';
+import { TILE, T, AREAS, ABILITIES, PHYS, SOUL_MAX, SOUL_PER_HIT, SOUL_COST, RESOURCES, WEAPONS, CHARMS, RARITY, ARMORS, giveWeapon, equipArmor } from './config.js';
 import { World } from './world.js';
 import { Player } from './player.js';
 import { ENEMY_TYPES, Projectile } from './enemies.js';
@@ -259,6 +259,7 @@ export class Game {
       case 'play':
         if (inp.pressed.pause) return this.openMenu('pause');
         if (inp.pressed.map) return this.openMenu('map');
+        if (inp.pressed.inv) return this.craft.openInventory();
         if (inp.pressed.build) this.build.toggle();
         this.updatePlay();
         break;
@@ -486,6 +487,25 @@ export class Game {
     this.ui.toast(`${L.who}: "${L[key]}"`, 2600);
   }
 
+  // Entrega o conteúdo de um baú de tesouro.
+  giveLoot(loot) {
+    const s = this.save, parts = [];
+    if (loot.geo) { s.geo += loot.geo; parts.push(`${loot.geo} moedas`); }
+    for (const [k, n] of Object.entries(loot.res || {})) { s.inv[k] = (s.inv[k] || 0) + n; parts.push(`${n} ${RESOURCES[k].name}`); }
+    if (loot.armor && ARMORS[loot.armor].hearts > ARMORS[s.armor || 'none'].hearts) { equipArmor(s, loot.armor); this.masks = s.masksMax; parts.push(ARMORS[loot.armor].name); }
+    this.persist();
+    this.ui.resetHud();
+    this.ui.updateHud(this);
+    this.build.refresh();
+    if (loot.weapon) {
+      const w = WEAPONS[loot.weapon];
+      giveWeapon(s, loot.weapon);
+      this.persist();
+      this.openBanner(w.kind === 'bow' ? '🏹' : w.kind === 'staff' ? '✦' : '⚔', w.name, w.desc, `${RARITY[w.rarity].name} · já equipada (troque no Inventário: Q)`);
+      if (parts.length) this.ui.toast('Também: ' + parts.join(', '), 3500);
+    } else this.ui.toast('Você achou: ' + parts.join(', '), 3500);
+  }
+
   spawnSmith() {
     if (this.room.id !== 'planicie_lar' || this.entities.some((e) => e.id === 'smith')) return;
     this.entities.push(new NPC(34 * TILE + TILE / 2, 13 * TILE, 'smith'));
@@ -553,7 +573,7 @@ export class Game {
 
   // Dano do golpe: espada equipada x afiação da Mira.
   swordDamage() {
-    return Math.round(WEAPONS[this.save.weapon || 'errante'].dmg * this.save.nail * classOf(this.save).dmg * 10) / 10;
+    return Math.round(WEAPONS[this.save.weapon || 'errante'].dmg * this.save.nail * 10) / 10;
   }
 
   hitBreakable(g, tx, ty) {
@@ -584,6 +604,7 @@ export class Game {
       if (pr.hostile) {
         if (overlap(pr.box(), hb)) { this.damagePlayer(pr.dmg, pr.x); if (pr.kind !== 'wave') pr.dead = true; }
       } else {
+        if (pr.visual) continue;
         for (const e of this.enemies) {
           if (e.dead || pr.hitSet.has(e) || !overlap(pr.box(), e)) continue;
           pr.hitSet.add(e);
@@ -610,21 +631,13 @@ export class Game {
     });
     pr.soul = true;
     this.projectiles.push(pr);
+    this.net.sendShot(kind, x, y, pr.vx, pr.vy);
     this.audio.play(kind === 'arrow' ? 'spit' : 'orb');
     this.particles.burst(x, y, 5, { color: kind === 'arrow' ? ['#e8dcc0', '#ffffff'] : ['#d7b8ff', '#ffffff'], speed: 2.5, life: 10, glow: true });
   }
 
   spawnSpell(x, y, dir) {
-    const C = classOf(this.save);
-    if (C.shot === 'arrow') {
-      // Chuva de flechas: três flechas em leque que atravessam os inimigos.
-      for (const vy of [-2.2, 0, 2.2]) {
-        const a = new Projectile(x, y, dir * 12, vy, { kind: 'arrow', r: 5, life: 48, hostile: false, dmg: C.spellDmg, pierce: true });
-        this.projectiles.push(a);
-      }
-      return;
-    }
-    const pr = new Projectile(x, y, dir * 10, 0, { kind: 'spell', r: C.shot === 'bolt' ? 13 : 10, life: 55, hostile: false, dmg: C.spellDmg, pierce: true });
+    const pr = new Projectile(x, y, dir * 10, 0, { kind: 'spell', r: 10, life: 55, hostile: false, dmg: 3, pierce: true });
     this.projectiles.push(pr);
     this.particles.burst(x, y, 12, { color: ['#bfe9ff', '#ffffff'], speed: 4, life: 18, glow: true });
   }

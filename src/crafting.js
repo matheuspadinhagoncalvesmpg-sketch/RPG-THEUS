@@ -1,5 +1,5 @@
 // Painéis de fabricação (bancada/forja), baú e loja do ferreiro.
-import { RECIPES, RESOURCES, SMITH_STOCK, WEAPONS, ARMORS, CHARMS, CHARM_SLOTS } from './config.js';
+import { RECIPES, RESOURCES, SMITH_STOCK, WEAPONS, ARMORS, CHARMS, CHARM_SLOTS, RARITY, ownsWeapon } from './config.js';
 
 const $ = (s) => document.querySelector(s);
 
@@ -74,6 +74,50 @@ export class CraftUI {
           this.render();
         }, owned || !ok);
       }
+    });
+  }
+
+  heading(text) {
+    const h = document.createElement('p');
+    h.className = 'inv-head';
+    h.textContent = text;
+    this.list.appendChild(h);
+  }
+
+  // ── Inventário (estilo Terraria): armas, armadura, materiais e itens ──
+  openInventory() {
+    const g = this.game;
+    this.open('Inventário', '', () => {
+      const s = g.save;
+      this.list.innerHTML = '';
+      $('#craft-sub').innerHTML = this.equipped();
+      this.heading('Armas');
+      const owned = Object.keys(WEAPONS).filter((k) => ownsWeapon(s, k));
+      for (const k of owned) {
+        const w = WEAPONS[k], on = (s.weapon || 'errante') === k;
+        const kind = w.kind === 'bow' ? 'Arco' : w.kind === 'staff' ? 'Cajado' : 'Corpo a corpo';
+        this.item(`<span style="color:${RARITY[w.rarity].color}">${w.name}</span>`,
+          `${w.desc}<br>${kind} · dano ${w.dmg}× · recarga ${(w.cd / 60).toFixed(2)}s · ${RARITY[w.rarity].name}`,
+          on ? 'Equipada' : 'Equipar', () => {
+            if (on) return;
+            s.weapon = k;
+            g.audio.play('ui');
+            g.persist();
+            this.render();
+          }, on);
+      }
+      this.heading('Armadura');
+      const a = ARMORS[s.armor || 'none'];
+      this.item(a.name, a.hearts ? `+${a.hearts} coração${a.hearts > 1 ? 'ões' : ''}.` : 'Fabrique armaduras na bancada e na forja.', 'Equipada', () => {}, true);
+      this.heading('Materiais');
+      const mats = Object.entries(RESOURCES);
+      const any = mats.some(([k]) => (s.inv[k] || 0) > 0);
+      for (const [k, r] of mats) this.item(`<i class="mat-dot" style="background:${r.color}"></i>${r.name}`, r.desc || 'Material de construção e fabricação.', String(s.inv[k] || 0), () => {}, true);
+      if (!any) { const p = document.createElement('p'); p.className = 'si-desc'; p.textContent = 'Quebre árvores, pedras e minérios para coletar.'; this.list.appendChild(p); }
+      const items = [s.items.lantern ? ['Lanterna', 'Ilumina bosques e cavernas escuras.'] : null].filter(Boolean);
+      if (items.length) { this.heading('Itens'); for (const [n, d] of items) this.item(n, d, 'Possui', () => {}, true); }
+      this.heading('Atalhos');
+      this.item('Amuletos', 'Equipe até 3 (descansando numa fogueira).', 'Abrir', () => { this.close(); this.openCharms(); });
     });
   }
 
