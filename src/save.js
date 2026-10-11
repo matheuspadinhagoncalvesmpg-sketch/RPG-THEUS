@@ -9,6 +9,11 @@ export const DEFAULT_PROFILE = {
   hair: '#f2f2f2',
   eyes: 'hetero',
   skin: '#f2cfae',
+  accent: '',
+  hairStyle: 'franja',
+  topper: 'nenhum',
+  build: 'padrao',
+  capeStyle: 'cachecol',
 };
 
 export function newSave(profile) {

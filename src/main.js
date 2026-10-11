@@ -7,6 +7,7 @@ import { drawHero, EYE_COLORS } from './art.js';
 import { BUILD_ITEMS } from './config.js';
 import { cloudCode, setCloudCode, prettyCode, normalizeCode, downloadSave } from './cloud.js';
 import { loadSave, newSave, writeSave, clearSave, loadSettings, writeSettings, DEFAULT_PROFILE } from './save.js';
+import { shade } from './util.js';
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -126,11 +127,32 @@ $('#btn-options').addEventListener('click', () => { audio.unlock(); $('#title-op
 // ───────── Criação do herói ─────────
 const profile = { ...DEFAULT_PROFILE };
 const PALETTES = {
-  cloak: ['#3a4f8f', '#8f2f3a', '#2f6f4f', '#5b3a8f', '#b8742f', '#c75b8f', '#24232c', '#d9d4c7'],
-  hair: ['#f2f2f2', '#f472b6', '#ffd166', '#1a1a24', '#6a4126', '#ef4444', '#38bdf8', '#a855f7'],
-  skin: ['#f2cfae', '#ffe0bd', '#efe6da', '#e2b98f', '#c68642', '#8d5524', '#5c3818', '#a8dadc'],
+  cloak: ['#3a4f8f', '#8f2f3a', '#2f6f4f', '#5b3a8f', '#b8742f', '#c75b8f', '#24232c', '#d9d4c7', '#1f6f8b', '#6b7d2a', '#8a3b12', '#4b4f66', '#a52a6b', '#2b7a78', '#c9a227', '#7a1f2b'],
+  accent: ['', '#ffcf7a', '#e8e4da', '#c0392b', '#2e86de', '#27ae60', '#8e44ad', '#16a085', '#1a1a24'],
+  hair: ['#f2f2f2', '#f472b6', '#ffd166', '#1a1a24', '#6a4126', '#ef4444', '#38bdf8', '#a855f7', '#22c55e', '#f97316', '#9ca3af', '#7c2d12'],
+  skin: ['#f2cfae', '#ffe0bd', '#efe6da', '#e2b98f', '#c68642', '#8d5524', '#5c3818', '#a8dadc', '#b7d6a3', '#c9b8e8'],
 };
-const EYE_LABELS = { hetero: 'Ocaso & Aurora', black: 'Preto', blue: 'Azul', red: 'Vermelho', green: 'Verde', gold: 'Dourado' };
+const EYE_LABELS = { hetero: 'Ocaso & Aurora', black: 'Preto', blue: 'Azul', red: 'Vermelho', green: 'Verde', gold: 'Dourado', violet: 'Violeta', cyan: 'Ciano', pink: 'Rosa', silver: 'Prata', ember: 'Brasa & Névoa', sea: 'Maré' };
+const CHOICES = {
+  build: [['padrao', 'Padrão'], ['pequeno', 'Ágil'], ['alto', 'Esguio'], ['robusto', 'Robusto']],
+  capeStyle: [['cachecol', 'Cachecol'], ['capa', 'Capa longa'], ['nenhum', 'Nenhuma']],
+  hairStyle: [['franja', 'Franja'], ['curto', 'Curto'], ['longo', 'Longo'], ['rabo', 'Rabo'], ['coque', 'Coque'], ['trancas', 'Tranças'], ['moicano', 'Moicano'], ['careca', 'Sem cabelo']],
+  topper: [['nenhum', 'Nenhum'], ['chifres', 'Chifres'], ['orelhas', 'Orelhas'], ['chapeu', 'Chapéu'], ['coroa', 'Coroa de folhas'], ['halo', 'Halo'], ['antenas', 'Antenas']],
+};
+// Combinações prontas. O Errante é quem você quiser: nenhum arquétipo tem gênero.
+const PRESETS = [
+  { n: 'Andarilho', p: { cloak: '#3a4f8f', accent: '', hair: '#f2f2f2', skin: '#f2cfae', eyes: 'hetero', hairStyle: 'franja', topper: 'nenhum', build: 'padrao', capeStyle: 'cachecol' } },
+  { n: 'Guardião do Musgo', p: { cloak: '#2f6f4f', accent: '#e8e4da', hair: '#7c2d12', skin: '#c68642', eyes: 'green', hairStyle: 'trancas', topper: 'coroa', build: 'robusto', capeStyle: 'capa' } },
+  { n: 'Sombra', p: { cloak: '#24232c', accent: '#8e44ad', hair: '#1a1a24', skin: '#efe6da', eyes: 'violet', hairStyle: 'rabo', topper: 'nenhum', build: 'alto', capeStyle: 'capa' } },
+  { n: 'Brasa', p: { cloak: '#8a3b12', accent: '#ffcf7a', hair: '#f97316', skin: '#8d5524', eyes: 'ember', hairStyle: 'moicano', topper: 'chifres', build: 'robusto', capeStyle: 'cachecol' } },
+  { n: 'Maré', p: { cloak: '#1f6f8b', accent: '#16a085', hair: '#38bdf8', skin: '#a8dadc', eyes: 'sea', hairStyle: 'longo', topper: 'nenhum', build: 'padrao', capeStyle: 'capa' } },
+  { n: 'Raposa', p: { cloak: '#b8742f', accent: '#e8e4da', hair: '#f97316', skin: '#e2b98f', eyes: 'gold', hairStyle: 'curto', topper: 'orelhas', build: 'pequeno', capeStyle: 'cachecol' } },
+  { n: 'Cristal', p: { cloak: '#5b3a8f', accent: '#2e86de', hair: '#f472b6', skin: '#c9b8e8', eyes: 'cyan', hairStyle: 'coque', topper: 'halo', build: 'alto', capeStyle: 'cachecol' } },
+  { n: 'Peregrino', p: { cloak: '#4b4f66', accent: '#1a1a24', hair: '#9ca3af', skin: '#5c3818', eyes: 'silver', hairStyle: 'careca', topper: 'chapeu', build: 'padrao', capeStyle: 'capa' } },
+  { n: 'Vespa', p: { cloak: '#c9a227', accent: '#1a1a24', hair: '#1a1a24', skin: '#ffe0bd', eyes: 'black', hairStyle: 'curto', topper: 'antenas', build: 'pequeno', capeStyle: 'nenhum' } },
+];
+let editing = false;
+const pickRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
 function buildCreator() {
   for (const [key, colors] of Object.entries(PALETTES)) {
@@ -138,12 +160,32 @@ function buildCreator() {
     wrap.innerHTML = '';
     for (const c of colors) {
       const b = document.createElement('button');
-      b.className = 'swatch' + (profile[key] === c ? ' active' : '');
-      b.style.background = c;
-      b.setAttribute('aria-label', c);
+      b.className = 'swatch' + (profile[key] === c ? ' active' : '') + (c === '' ? ' auto' : '');
+      b.style.background = c || shade(profile.cloak, 0.45);
+      b.setAttribute('aria-label', c || 'automática');
       b.addEventListener('click', () => { profile[key] = c; audio.play('ui'); buildCreator(); });
       wrap.appendChild(b);
     }
+  }
+  for (const [key, list] of Object.entries(CHOICES)) {
+    const wrap = $(`#pick-${key}`);
+    wrap.innerHTML = '';
+    for (const [id, label] of list) {
+      const b = document.createElement('button');
+      b.className = 'chip' + (profile[key] === id ? ' active' : '');
+      b.textContent = label;
+      b.addEventListener('click', () => { profile[key] = id; audio.play('ui'); buildCreator(); });
+      wrap.appendChild(b);
+    }
+  }
+  const pre = $('#pick-preset');
+  pre.innerHTML = '';
+  for (const pr of PRESETS) {
+    const b = document.createElement('button');
+    b.className = 'chip';
+    b.innerHTML = `<i style="background:${pr.p.cloak}"></i><i style="background:${pr.p.hair}"></i>${pr.n}`;
+    b.addEventListener('click', () => { Object.assign(profile, pr.p); audio.play('ui'); buildCreator(); });
+    pre.appendChild(b);
   }
   const eyes = $('#pick-eyes');
   eyes.innerHTML = '';
@@ -156,6 +198,14 @@ function buildCreator() {
     eyes.appendChild(b);
   }
 }
+
+$('#btn-random').addEventListener('click', () => {
+  for (const [key, colors] of Object.entries(PALETTES)) profile[key] = pickRandom(colors);
+  for (const [key, list] of Object.entries(CHOICES)) profile[key] = pickRandom(list)[0];
+  profile.eyes = pickRandom(Object.keys(EYE_LABELS));
+  audio.play('ui');
+  buildCreator();
+});
 
 let previewRaf = null;
 function previewLoop() {
@@ -177,7 +227,10 @@ function previewLoop() {
   previewRaf = requestAnimationFrame(previewLoop);
 }
 
-function openCreator() {
+function openCreator(edit = false) {
+  editing = edit === true;
+  if (editing) Object.assign(profile, DEFAULT_PROFILE, game.save.profile);
+  $('#btn-start').textContent = editing ? 'Aplicar' : 'Despertar';
   $('#hero-name').value = profile.name;
   buildCreator();
   showScreen('creator-screen');
@@ -186,10 +239,21 @@ function openCreator() {
 }
 
 $('#hero-name').addEventListener('input', (e) => { profile.name = e.target.value.trim() || 'Errante'; });
-$('#btn-creator-back').addEventListener('click', () => { cancelAnimationFrame(previewRaf); toTitle(); });
+$('#btn-creator-back').addEventListener('click', () => {
+  cancelAnimationFrame(previewRaf);
+  if (editing) { editing = false; showScreen(null); } else toTitle();
+});
+$('#btn-look').addEventListener('click', () => openCreator(true));
 $('#btn-start').addEventListener('click', () => {
   cancelAnimationFrame(previewRaf);
   profile.name = ($('#hero-name').value.trim() || 'Errante').slice(0, 14);
+  if (editing) {
+    editing = false;
+    game.save.profile = { ...game.save.profile, ...profile };
+    game.persist();
+    showScreen(null);
+    return;
+  }
   const save = newSave(profile);
   writeSave(save);
   play(save);

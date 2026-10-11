@@ -23,6 +23,11 @@ export function initMultiplayer(server, root) {
 
 const randCode = (n) => Array.from(crypto.randomBytes(n), (b) => CODE_ABC[b % CODE_ABC.length]).join('');
 const clean = (v, n) => String(v ?? '').replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, n);
+const cleanProfile = (pr) => ({
+  cloak: clean(pr.cloak, 9), hair: clean(pr.hair, 9), eyes: clean(pr.eyes, 10), skin: clean(pr.skin, 9),
+  accent: clean(pr.accent, 9), hairStyle: clean(pr.hairStyle, 10), topper: clean(pr.topper, 10),
+  build: clean(pr.build, 10), capeStyle: clean(pr.capeStyle, 10),
+});
 const validCode = (c, n) => typeof c === 'string' && c.length === n && [...c].every((ch) => CODE_ABC.includes(ch));
 
 // ───────── Mundos ─────────
@@ -90,7 +95,7 @@ function cleanState(c, msg, room) {
     w: clean(msg.w, 10), ar: clean(msg.ar, 10), n: num(msg.n, 1) > 1 ? 2 : 1, sit: msg.sit ? 1 : 0,
   };
   if (msg.pr && typeof msg.pr === 'object') {
-    m.pr = { cloak: clean(msg.pr.cloak, 9), hair: clean(msg.pr.hair, 9), eyes: clean(msg.pr.eyes, 10), skin: clean(msg.pr.skin, 9) };
+    m.pr = cleanProfile(msg.pr);
     m.name = clean(msg.name, 14) || c.name;
   }
   return m;
@@ -124,7 +129,7 @@ function handle(c, msg) {
       if (w) return;
       c.name = clean(msg.name, 14) || 'Errante';
       const pr = msg.profile || {};
-      c.profile = { cloak: clean(pr.cloak, 9), hair: clean(pr.hair, 9), eyes: clean(pr.eyes, 10), skin: clean(pr.skin, 9) };
+      c.profile = cleanProfile(pr);
       let world;
       if (msg.create) {
         let code;

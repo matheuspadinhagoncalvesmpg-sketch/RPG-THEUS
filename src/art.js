@@ -8,6 +8,12 @@ export const EYE_COLORS = {
   red: ['#ff3b4f', '#ff3b4f'],
   green: ['#3ee08a', '#3ee08a'],
   gold: ['#ffcf4a', '#ffcf4a'],
+  violet: ['#b07bff', '#b07bff'],
+  cyan: ['#4de8e0', '#4de8e0'],
+  pink: ['#ff7ac8', '#ff7ac8'],
+  silver: ['#d9e2ef', '#d9e2ef'],
+  ember: ['#ffa13a', '#b07bff'],
+  sea: ['#4de8e0', '#3ba7ff'],
 };
 
 function ellipse(ctx, x, y, rx, ry) {
@@ -88,6 +94,128 @@ function swingAngle(dir, k) {
   return -2.1 + (1.0 + 2.1) * e;
 }
 
+// Porte do corpo (largura, altura): só visual, a caixa de colisão é a mesma.
+export const BUILDS = { padrao: [1, 1], pequeno: [0.9, 0.88], alto: [0.97, 1.1], robusto: [1.14, 1] };
+
+function hairCap(ctx, hy) {
+  ctx.beginPath();
+  ctx.moveTo(7.6, hy - 1.5);
+  ctx.quadraticCurveTo(8, hy - 8.5, 1, hy - 8.4);
+  ctx.quadraticCurveTo(-6, hy - 8.4, -7.2, hy - 1);
+  ctx.lineTo(-5.5, hy - 0.5);
+  ctx.quadraticCurveTo(0, hy - 4.5, 3, hy - 3.5);
+  ctx.lineTo(4.4, hy - 1.2);
+  ctx.lineTo(5.6, hy - 3.8);
+  ctx.lineTo(7.6, hy - 1.5);
+  ctx.fill();
+}
+
+// Penteados (coordenadas da cabeça; o rosto olha para +x).
+function drawHair(ctx, p, hy, wind, t, col) {
+  const st = p.hairStyle || 'franja';
+  if (st === 'careca') return;
+  const c = col(p.hair), c2 = col(shade(p.hair, 0.35));
+  const sw = Math.sin(t * 0.15);
+  ctx.fillStyle = c;
+  if (st === 'franja') {
+    ctx.beginPath();
+    ctx.moveTo(7.6, hy - 1.5);
+    ctx.quadraticCurveTo(8, hy - 8.5, 1, hy - 8.4);
+    ctx.quadraticCurveTo(-6, hy - 8.4, -7.2, hy - 1);
+    ctx.lineTo(-10 - wind * 0.4, hy + 3 + sw * 0.6);
+    ctx.lineTo(-6, hy + 2);
+    ctx.lineTo(-5.4, hy + 6);
+    ctx.lineTo(-3.4, hy - 1);
+    ctx.quadraticCurveTo(0, hy - 5, 3, hy - 4);
+    ctx.lineTo(4, hy - 1.6);
+    ctx.lineTo(5.4, hy - 4.2);
+    ctx.lineTo(7.6, hy - 1.5);
+    ctx.fill();
+  } else if (st === 'moicano') {
+    ctx.fillRect(-5, hy - 8.6, 10, 1.6);
+    for (let i = 0; i < 5; i++) {
+      const x = -4 + i * 2.4;
+      ctx.beginPath();
+      ctx.moveTo(x - 1.3, hy - 8); ctx.lineTo(x + 0.1, hy - 14.5 - (i % 2) * 2.2 + Math.sin(t * 0.1 + i) * 0.4); ctx.lineTo(x + 1.5, hy - 8);
+      ctx.fill();
+    }
+  } else {
+    hairCap(ctx, hy);
+    if (st === 'longo') {
+      ctx.beginPath();
+      ctx.moveTo(-7, hy - 2); ctx.lineTo(-9.5 - wind * 0.4, hy + 12 + sw); ctx.lineTo(-4, hy + 13); ctx.lineTo(-4, hy + 1);
+      ctx.fill();
+    } else if (st === 'rabo') {
+      ctx.beginPath();
+      ctx.moveTo(-6, hy - 3);
+      ctx.quadraticCurveTo(-14 - wind * 0.5, hy - 2, -12.5 - wind * 0.7, hy + 8 + sw);
+      ctx.quadraticCurveTo(-9, hy + 3, -5, hy + 1);
+      ctx.fill();
+      ctx.fillStyle = col('#e0ad45'); ctx.fillRect(-8, hy - 2.4, 2, 2.4);
+    } else if (st === 'coque') {
+      ctx.beginPath(); ctx.ellipse(-2.5, hy - 10, 3.6, 3.3, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = col('#e0ad45'); ctx.fillRect(-4, hy - 8.4, 3, 1.1);
+    } else if (st === 'trancas') {
+      for (let k = 0; k < 2; k++) {
+        for (let j = 0; j < 4; j++) {
+          ctx.fillStyle = j % 2 ? c2 : c;
+          ctx.beginPath();
+          ctx.ellipse(-7.5 - k * 2 - wind * 0.15 * j + Math.sin(t * 0.12 + j) * 0.4, hy + 1 + j * 3.1 + k * 0.8, 1.9, 1.7, 0, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    }
+  }
+  ctx.fillStyle = c2;
+  if (st !== 'moicano') ctx.fillRect(-2, hy - 7.4, 5, 1.1);
+}
+
+// Acessórios da cabeça.
+function drawTopper(ctx, p, hy, t, col) {
+  const tp = p.topper;
+  if (!tp || tp === 'nenhum') return;
+  if (tp === 'chifres') {
+    ctx.fillStyle = col('#e8dcc2');
+    ctx.beginPath(); ctx.moveTo(-4, hy - 7.5); ctx.quadraticCurveTo(-9, hy - 9, -8, hy - 15.5); ctx.quadraticCurveTo(-6, hy - 11, -1.5, hy - 8); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(5, hy - 7.5); ctx.quadraticCurveTo(10, hy - 9, 9.2, hy - 15.5); ctx.quadraticCurveTo(7, hy - 11, 2.5, hy - 8); ctx.fill();
+  } else if (tp === 'orelhas') {
+    ctx.fillStyle = col(p.hair);
+    ctx.beginPath(); ctx.moveTo(-5.8, hy - 6.5); ctx.lineTo(-5.2, hy - 14.5); ctx.lineTo(-0.2, hy - 8); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(7.2, hy - 5.5); ctx.lineTo(7.4, hy - 13.5); ctx.lineTo(2, hy - 8); ctx.fill();
+    ctx.fillStyle = col('#f3a8bd');
+    ctx.beginPath(); ctx.moveTo(-4.6, hy - 8); ctx.lineTo(-4.4, hy - 12.2); ctx.lineTo(-1.8, hy - 8.6); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(6.2, hy - 7.2); ctx.lineTo(6.3, hy - 11.4); ctx.lineTo(3.6, hy - 8); ctx.fill();
+  } else if (tp === 'chapeu') {
+    const hc = col(p.accent || '#2a211d');
+    ctx.fillStyle = hc;
+    ctx.beginPath(); ctx.ellipse(0.6, hy - 7.2, 12.5, 2.8, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillRect(-5, hy - 15, 11, 8);
+    ctx.fillStyle = col(shade(p.accent || '#2a211d', 0.4)); ctx.fillRect(-5, hy - 9.6, 11, 1.8);
+  } else if (tp === 'coroa') {
+    for (let i = 0; i < 5; i++) {
+      ctx.fillStyle = col(i % 2 ? '#2f8a50' : '#4caf6b');
+      ctx.beginPath();
+      ctx.ellipse(-5 + i * 2.9, hy - 8.4 - (i % 2) * 0.9, 1.5, 3, (i - 2) * 0.35, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.fillStyle = col('#ff6a8a'); ctx.beginPath(); ctx.arc(0.9, hy - 9.4, 1.2, 0, Math.PI * 2); ctx.fill();
+  } else if (tp === 'halo') {
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.strokeStyle = `rgba(255,214,120,${0.75 + Math.sin(t * 0.08) * 0.15})`;
+    ctx.lineWidth = 1.3;
+    ctx.beginPath(); ctx.ellipse(0.6, hy - 13.5 + Math.sin(t * 0.06) * 0.5, 6.4, 1.9, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.restore();
+  } else if (tp === 'antenas') {
+    ctx.strokeStyle = col(p.accent || p.hair); ctx.fillStyle = ctx.strokeStyle; ctx.lineWidth = 0.9; ctx.lineCap = 'round';
+    for (const [x0, dx] of [[-2, -3], [4, 3.5]]) {
+      const sway = Math.sin(t * 0.1 + x0) * 1.2;
+      ctx.beginPath(); ctx.moveTo(x0, hy - 8); ctx.quadraticCurveTo(x0 + dx * 0.2, hy - 12, x0 + dx + sway, hy - 15.5); ctx.stroke();
+      ctx.beginPath(); ctx.arc(x0 + dx + sway, hy - 15.8, 1.1, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+}
+
 // Herói. (x, y) = centro dos pés.
 export function drawHero(ctx, x, y, o) {
   const p = o.profile;
@@ -99,6 +227,8 @@ export function drawHero(ctx, x, y, o) {
   ctx.translate(x, y);
   ctx.scale(o.facing || 1, 1);
   if (o.alpha != null) ctx.globalAlpha *= o.alpha;
+  const bd = BUILDS[p.build] || BUILDS.padrao;
+  ctx.scale(bd[0], bd[1]);
 
   let bob = 0, lean = 0, legA = 0, legB = 0, wind = 0, crouch = 0, armSwing = 0;
   switch (o.state) {
@@ -123,19 +253,36 @@ export function drawHero(ctx, x, y, o) {
   const by = bob + crouch;
   const tunic = col(p.cloak);
   const tunicDark = col(shade(p.cloak, -0.38));
-  const scarf = col(shade(p.cloak, 0.45));
   const skin = col(p.skin);
   const attacking = o.attack;
 
-  // Cachecol esvoaçante (atrás de tudo)
+  // Cachecol esvoaçante ou capa longa (atrás de tudo)
   const sw = Math.sin(t * 0.18) * 2;
-  ctx.fillStyle = scarf;
-  ctx.beginPath();
-  ctx.moveTo(-2, -21 + by);
-  ctx.quadraticCurveTo(-10 - wind, -22 + by + sw, -15 - wind * 1.3, -17 + by + sw * 1.5 - wind * 0.3);
-  ctx.lineTo(-13 - wind * 1.2, -14 + by + sw - wind * 0.2);
-  ctx.quadraticCurveTo(-8 - wind * 0.6, -17 + by, -1, -18 + by);
-  ctx.fill();
+  const acc = col(p.accent || shade(p.cloak, 0.45));
+  if (p.capeStyle === 'capa') {
+    ctx.fillStyle = acc;
+    ctx.beginPath();
+    ctx.moveTo(-2, -21 + by);
+    ctx.quadraticCurveTo(-10 - wind * 0.6, -18 + by, -12 - wind * 1.4, -4 + sw);
+    ctx.lineTo(-4 - wind * 0.5, -3.5);
+    ctx.quadraticCurveTo(-3, -12 + by, 0, -19 + by);
+    ctx.fill();
+    ctx.fillStyle = col(shade(p.accent || shade(p.cloak, 0.45), -0.3));
+    ctx.beginPath();
+    ctx.moveTo(-3, -18 + by);
+    ctx.quadraticCurveTo(-7 - wind * 0.4, -12 + by, -8 - wind, -4 + sw * 0.6);
+    ctx.lineTo(-5 - wind * 0.4, -4);
+    ctx.quadraticCurveTo(-4, -11 + by, -2, -17 + by);
+    ctx.fill();
+  } else if (p.capeStyle !== 'nenhum') {
+    ctx.fillStyle = acc;
+    ctx.beginPath();
+    ctx.moveTo(-2, -21 + by);
+    ctx.quadraticCurveTo(-10 - wind, -22 + by + sw, -15 - wind * 1.3, -17 + by + sw * 1.5 - wind * 0.3);
+    ctx.lineTo(-13 - wind * 1.2, -14 + by + sw - wind * 0.2);
+    ctx.quadraticCurveTo(-8 - wind * 0.6, -17 + by, -1, -18 + by);
+    ctx.fill();
+  }
 
   // Espada embainhada nas costas
   if (!attacking && o.state !== 'sit') {
@@ -258,23 +405,8 @@ export function drawHero(ctx, x, y, o) {
     ctx.beginPath(); ctx.moveTo(4.2, hy + 8.5); ctx.lineTo(4.8, hy + 6.9); ctx.lineTo(4.2, hy + 5.9); ctx.stroke();
   }
 
-  // Cabelo: franja, topo e mecha de trás
-  ctx.fillStyle = col(p.hair);
-  ctx.beginPath();
-  ctx.moveTo(7.6, hy - 1.5);
-  ctx.quadraticCurveTo(8, hy - 8.5, 1, hy - 8.4);
-  ctx.quadraticCurveTo(-6, hy - 8.4, -7.2, hy - 1);
-  ctx.lineTo(-10 - wind * 0.4, hy + 3 + Math.sin(t * 0.15) * 0.6);
-  ctx.lineTo(-6, hy + 2);
-  ctx.lineTo(-5.4, hy + 6);
-  ctx.lineTo(-3.4, hy - 1);
-  ctx.quadraticCurveTo(0, hy - 5, 3, hy - 4);
-  ctx.lineTo(4, hy - 1.6);
-  ctx.lineTo(5.4, hy - 4.2);
-  ctx.lineTo(7.6, hy - 1.5);
-  ctx.fill();
-  ctx.fillStyle = col(shade(p.hair, 0.35));
-  ctx.fillRect(-2, hy - 7.4, 5, 1.1);
+  drawHair(ctx, p, hy, wind, t, col);
+  drawTopper(ctx, p, hy, t, col);
 
   ctx.restore();
 
