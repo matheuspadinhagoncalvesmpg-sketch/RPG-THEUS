@@ -469,16 +469,25 @@ export class Projectile {
       this.dead = true;
       game.particles.burst(this.x - this.vx, this.y - this.vy, 8, { color: this.color(game), speed: 3, life: 16, glow: this.kind !== 'blob' });
     }
-    if (this.kind === 'spell' || this.kind === 'orb' || this.kind === 'wave')
+    if (this.kind === 'spell' || this.kind === 'orb' || this.kind === 'wave' || this.kind === 'bolt')
       game.particles.add({ x: this.x + rand(-4, 4), y: this.y + rand(-4, 4), vx: -this.vx * 0.1, vy: rand(-0.5, 0.5), life: 14, size: rand(2, 4), color: this.color(game), glow: true });
   }
   color() {
-    return { blob: '#b6ff7a', spell: '#bfe9ff', orb: '#ffd36e', wave: '#9ef0c0', debris: '#a9a2b8', bubble: '#9ff7e6' }[this.kind] || '#fff';
+    return { arrow: '#e8dcc0', bolt: '#c7a2ff', blob: '#b6ff7a', spell: '#bfe9ff', orb: '#ffd36e', wave: '#9ef0c0', debris: '#a9a2b8', bubble: '#9ff7e6' }[this.kind] || '#fff';
   }
   draw(ctx) {
     const c = this.color();
     ctx.save();
-    if (this.kind === 'blob') {
+    if (this.kind === 'arrow') {
+      ctx.translate(this.x, this.y); ctx.rotate(Math.atan2(this.vy, this.vx));
+      ctx.strokeStyle = '#8a6a44'; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(-9, 0); ctx.lineTo(7, 0); ctx.stroke();
+      ctx.fillStyle = '#e8eef7';
+      ctx.beginPath(); ctx.moveTo(10, 0); ctx.lineTo(5, -3); ctx.lineTo(5, 3); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#c0392b';
+      ctx.beginPath(); ctx.moveTo(-9, 0); ctx.lineTo(-12, -3); ctx.lineTo(-7, -0.5); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(-9, 0); ctx.lineTo(-12, 3); ctx.lineTo(-7, 0.5); ctx.closePath(); ctx.fill();
+    } else if (this.kind === 'blob') {
       ctx.fillStyle = '#1f2a14';
       ctx.beginPath(); ctx.arc(this.x, this.y, this.r + 1.5, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = c;

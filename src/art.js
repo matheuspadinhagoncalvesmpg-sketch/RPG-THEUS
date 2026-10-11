@@ -223,6 +223,8 @@ export function drawHero(ctx, x, y, o) {
   const flash = o.flash > 0;
   const col = (c) => (flash ? '#ffffff' : c);
   const sw0 = o.sword || { len: 27, style: 'steel', glow: (o.swordLevel || 1) > 1 };
+  const cl = o.classe || 'guerreiro';
+  const ranged = cl === 'arqueiro' || cl === 'mago';
   ctx.save();
   ctx.translate(x, y);
   ctx.scale(o.facing || 1, 1);
@@ -285,7 +287,7 @@ export function drawHero(ctx, x, y, o) {
   }
 
   // Espada embainhada nas costas
-  if (!attacking && o.state !== 'sit') {
+  if (!attacking && o.state !== 'sit' && !ranged) {
     ctx.save();
     ctx.translate(-3, -24 + by);
     ctx.rotate(Math.PI * 0.62);
@@ -367,6 +369,18 @@ export function drawHero(ctx, x, y, o) {
     ellipse(ctx, 2.4, -18.6 + by, 3.4, 2.2);
   }
 
+  if (cl === 'guardiao') {
+    // Escudo redondo preso ao braço de trás
+    ctx.fillStyle = col(shade(p.cloak, -0.25));
+    ellipse(ctx, -1.5, -10.5 + by, 6.2, 6.8);
+    ctx.fillStyle = col('#c9a64e');
+    ellipse(ctx, -1.5, -10.5 + by, 4.6, 5.2);
+    ctx.fillStyle = col(shade(p.cloak, -0.1));
+    ellipse(ctx, -1.5, -10.5 + by, 3.4, 3.9);
+    ctx.fillStyle = col('#e0c870');
+    ellipse(ctx, -1.5, -10.5 + by, 1.1, 1.1);
+  }
+
   // Cabeça redonda: contorno escuro, rosto claro, cabelo e olhos altos de duas cores
   const hy = -26 + by;
   ctx.save();
@@ -394,11 +408,44 @@ export function drawHero(ctx, x, y, o) {
   drawTopper(ctx, p, hy, t, col);
   ctx.restore();
 
-  // Braço da frente + espada
+  // Braço da frente + arma da classe
   ctx.strokeStyle = tunic;
   ctx.lineWidth = 3.4;
   const sx = 2, sy = -16.4 + by;
-  if (attacking) {
+  if (ranged) {
+    // Arqueiro e mago seguram a arma à frente; ao atacar, o braço estica e recua um pouco.
+    const k = attacking ? attacking.k : 1;
+    const up = attacking && attacking.dir === 'up';
+    const rec = attacking ? (1 - k) * 3 : 0;
+    const hx = sx + (up ? 3 : 8) - rec, hyy = sy + (up ? -6 : 1);
+    ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(hx, hyy); ctx.stroke();
+    ctx.save();
+    ctx.translate(hx, hyy);
+    if (up) ctx.rotate(-Math.PI / 2 + 0.2);
+    if (cl === 'arqueiro') {
+      ctx.strokeStyle = col('#8a5a32'); ctx.lineWidth = 2; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.arc(-4, 0, 11, -1.15, 1.15); ctx.stroke();
+      ctx.strokeStyle = col('#f3efe6'); ctx.lineWidth = 0.7;
+      const pull = attacking ? 3 * (1 - k) : 0;
+      ctx.beginPath(); ctx.moveTo(-4 + Math.cos(-1.15) * 11, Math.sin(-1.15) * 11); ctx.lineTo(-4 + 6 - 11 * 0.35 - pull, 0); ctx.lineTo(-4 + Math.cos(1.15) * 11, Math.sin(1.15) * 11); ctx.stroke();
+      if (!attacking || k > 0.6) { ctx.strokeStyle = col('#c9b48a'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-3, 0); ctx.lineTo(8, 0); ctx.stroke(); }
+    } else {
+      ctx.strokeStyle = col('#6b4a32'); ctx.lineWidth = 2; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(-1, 12); ctx.lineTo(1, -15); ctx.stroke();
+      const glow = 0.6 + Math.sin(t * 0.12) * 0.25 + (attacking ? (1 - k) * 0.6 : 0);
+      if (!flash) {
+        ctx.save(); ctx.globalCompositeOperation = 'lighter';
+        const g = ctx.createRadialGradient(1, -16, 0, 1, -16, 8);
+        g.addColorStop(0, `rgba(215,184,255,${glow})`); g.addColorStop(1, 'rgba(215,184,255,0)');
+        ctx.fillStyle = g; ctx.fillRect(-8, -24, 18, 18); ctx.restore();
+      }
+      ctx.fillStyle = col('#d7b8ff'); ellipse(ctx, 1, -16, 2.6, 2.6);
+      ctx.fillStyle = col('#ffffff'); ellipse(ctx, 0.4, -16.8, 0.9, 0.9);
+    }
+    ctx.restore();
+    ctx.fillStyle = skin;
+    ellipse(ctx, hx, hyy, 1.6, 1.6);
+  } else if (attacking) {
     const a = swingAngle(attacking.dir, attacking.k);
     const hx = sx + Math.cos(a) * 7, hyy = sy + Math.sin(a) * 7;
     ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(hx, hyy); ctx.stroke();

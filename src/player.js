@@ -1,5 +1,5 @@
 // O Errante: movimento, combate, cura e magia.
-import { PHYS, SOUL_COST, TILE, WEAPONS, ARMORS, T } from './config.js';
+import { PHYS, SOUL_COST, TILE, WEAPONS, ARMORS, T, classOf } from './config.js';
 import { moveBody, standingOnOneWay, touchesSpikes, wallAhead } from './physics.js';
 import { approach, rand } from './util.js';
 import { drawHero, drawSlash } from './art.js';
@@ -39,6 +39,7 @@ export class Player {
     const ab = game.save.abilities;
     const { room, world } = game;
     const P = PHYS;
+    const C = classOf(game.save);
     this.t++;
     for (const k of ['dashCd', 'invuln', 'flash', 'attackCd', 'hurtTimer'])
       if (this[k] > 0) this[k]--;
@@ -98,7 +99,7 @@ export class Player {
       let dir = mx || this.facing;
       if (this.wallSliding) dir = -this.wallDir;
       this.dashDir = dir; this.facing = dir;
-      this.dashTimer = Math.round(P.dashFrames * (game.hasCharm('vento_longo') ? 1.4 : 1)); this.dashCd = P.dashCooldown;
+      this.dashTimer = Math.round(P.dashFrames * (game.hasCharm('vento_longo') ? 1.4 : 1)); this.dashCd = Math.round(P.dashCooldown * C.dashCd);
       if (!this.onGround) this.airDash = false;
       this.vy = 0; this.wallSliding = false; this.attackTimer = 0;
       game.audio.play('dash');
@@ -112,13 +113,13 @@ export class Player {
       this.vy = 0;
       this.dashTimer--;
       if (this.t % 2 === 0) this.afterimages.push({ x: this.cx, y: this.y + this.h, facing: this.facing, life: 10, t: this.t });
-      if (this.dashTimer === 0) this.vx = this.dashDir * P.run;
+      if (this.dashTimer === 0) this.vx = this.dashDir * P.run * C.run;
     } else if (stunned) {
       this.vx = approach(this.vx, 0, 0.25);
     } else if (this.wallLock > 0) {
       this.wallLock--;
     } else {
-      this.vx = mx * P.run * (this.inWater ? 0.72 : 1) + this.recoilX;
+      this.vx = mx * P.run * C.run * (this.inWater ? 0.72 : 1) + this.recoilX;
     }
     this.recoilX = approach(this.recoilX, 0, 0.45);
     if (mx && this.dashTimer <= 0 && this.attackTimer <= 0 && !stunned && !this.wallSliding && this.wallLock <= 0) {
@@ -220,13 +221,16 @@ export class Player {
       }
       inp.aim = null;
       this.attackTimer = ATTACK_FRAMES;
-      this.attackCd = game.hasCharm('lamina_rapida') ? 11 : ATTACK_COOLDOWN;
+      this.attackCd = game.hasCharm('lamina_rapida') ? Math.min(11, C.cd) : C.cd;
       this.hitSet = new Set();
-      game.audio.play('slash');
+      // Arco e cajado: o golpe vira um tiro (para baixo continua sendo uma pancada, que serve de pogo).
+      this.shotOnly = !!C.shot && this.attackDir !== 'down';
+      if (this.shotOnly) game.spawnShot(this, C.shot, this.attackDir);
+      else game.audio.play('slash');
     }
-    this.reach = WEAPONS[game.save.weapon || 'errante'].len - 27;
+    this.reach = WEAPONS[game.save.weapon || 'errante'].len - 27 + C.reach;
     if (this.attackTimer > 0) {
-      if (this.attackTimer > ATTACK_FRAMES - ATTACK_ACTIVE) game.playerAttack(this.attackBox(), this.attackDir, this.hitSet);
+      if (!this.shotOnly && this.attackTimer > ATTACK_FRAMES - ATTACK_ACTIVE) game.playerAttack(this.attackBox(), this.attackDir, this.hitSet);
       this.attackTimer--;
     }
 
@@ -250,8 +254,9 @@ export class Player {
   }
 
   castSpell(game) {
-    if (!game.save.abilities.spell || game.soul < SOUL_COST) return;
-    game.soul -= SOUL_COST;
+    const cost = classOf(game.save).spellCost;
+    if (!game.save.abilities.spell || game.soul < cost) return;
+    game.soul -= cost;
     game.spawnSpell(this.cx + this.facing * 10, this.cy - 2, this.facing);
     this.recoilX = -this.facing * 3;
     game.audio.play('spell');
@@ -287,13 +292,14 @@ export class Player {
     const swingK = this.attackTimer > 0 ? Math.min(1, (ATTACK_FRAMES - this.attackTimer) / 9) : 0;
     const level = game.save.nail;
     const wp = WEAPONS[game.save.weapon || 'errante'];
-    const sword = { len: wp.len, style: wp.style, glow: level > 1 };
+    const sword = { len: wp.len + (C.shot ? 0 : C.reach * 0.6), style: wp.style, glow: level > 1 };
     const armor = ARMORS[game.save.armor || 'none'];
-    if (this.attackTimer > 0)
+    const C = classOf(game.save);
+    if (this.attackTimer > 0 && !this.shotOnly)
       drawSlash(ctx, this.cx + this.facing * 2, this.y + this.h - 18, this.attackDir, this.facing, swingK, level, wp.style);
     drawHero(ctx, this.cx, this.y + this.h, {
       profile: game.save.profile, facing: this.facing, state: this.sitting ? 'sit' : this.state,
-      t: this.t, alpha, flash: this.flash, sword, armor,
+      t: this.t, alpha, flash: this.flash, sword, armor, classe: game.save.profile.classe,
       turn: (this.turnT || 0) / 8, squash: this.squash || 0,
       attack: this.attackTimer > 0 ? { dir: this.attackDir, k: swingK } : null,
     });

@@ -169,6 +169,16 @@ export const BUILD_BY_ID = Object.fromEntries(BUILD_ITEMS.map((b) => [b.id, b]))
 export const BUILD_REACH = 7 * TILE;
 
 // Espadas: multiplicador de dano e visual da lâmina.
+// Classes do Errante (escolhidas ao criar o herói). cd = recarga do golpe (quadros).
+export const CLASSES = {
+  guerreiro: { name: 'Guerreiro', desc: 'Espada equilibrada. Boa vida e alcance médio.', masks: 5, run: 1, dmg: 1, cd: 19, reach: 0, dashCd: 1, spellDmg: 3, spellCost: 33, shot: null },
+  guardiao: { name: 'Guardião', desc: 'Escudo e lâmina pesada: muita vida, golpes lentos e fortes, anda devagar.', masks: 6, run: 0.9, dmg: 1.7, cd: 28, reach: -2, dashCd: 1.25, spellDmg: 3, spellCost: 33, shot: null },
+  ladino: { name: 'Ladino', desc: 'Adaga veloz e dash ágil, mas alcance curto e pouca vida.', masks: 4, run: 1.1, dmg: 0.7, cd: 11, reach: -14, dashCd: 0.6, spellDmg: 3, spellCost: 33, shot: null },
+  arqueiro: { name: 'Arqueiro', desc: 'Atira flechas à distância (para baixo: golpe de arco). A magia vira chuva de flechas.', masks: 4, run: 1.04, dmg: 0.85, cd: 17, reach: -12, dashCd: 1, spellDmg: 2, spellCost: 33, shot: 'arrow' },
+  mago: { name: 'Mago', desc: 'Orbes mágicos à distância, magia mais barata e poderosa. Pouca vida.', masks: 4, run: 1, dmg: 0.9, cd: 22, reach: -12, dashCd: 1, spellDmg: 6, spellCost: 22, shot: 'bolt' },
+};
+export const classOf = (save) => CLASSES[(save && save.profile && save.profile.classe) || (save && save.classe)] || CLASSES.guerreiro;
+
 export const WEAPONS = {
   errante: { name: 'Lâmina do Errante', dmg: 1, len: 27, style: 'steel' },
   minerio: { name: 'Espada de Minério', dmg: 1.5, len: 29, style: 'ore' },

@@ -1,5 +1,5 @@
 // Service worker: deixa o jogo jogável offline depois da primeira visita.
-const CACHE = 'theus-v2.10.0';
+const CACHE = 'theus-v2.11.0';
 const ASSETS = [
   './', 'index.html', 'style.css', 'manifest.json', 'icon.svg', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png',
   'src/main.js', 'src/game.js', 'src/player.js', 'src/enemies.js', 'src/bosses.js', 'src/entities.js',

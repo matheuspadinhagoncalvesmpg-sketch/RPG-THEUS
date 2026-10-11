@@ -1,5 +1,5 @@
 // Núcleo do jogo: salas, transições, combate, câmera e estados.
-import { TILE, T, AREAS, ABILITIES, PHYS, SOUL_MAX, SOUL_PER_HIT, SOUL_COST, RESOURCES, WEAPONS, CHARMS } from './config.js';
+import { TILE, T, AREAS, ABILITIES, PHYS, SOUL_MAX, SOUL_PER_HIT, SOUL_COST, RESOURCES, WEAPONS, CHARMS, classOf } from './config.js';
 import { World } from './world.js';
 import { Player } from './player.js';
 import { ENEMY_TYPES, Projectile } from './enemies.js';
@@ -541,7 +541,7 @@ export class Game {
 
   // Dano do golpe: espada equipada x afiação da Mira.
   swordDamage() {
-    return Math.round(WEAPONS[this.save.weapon || 'errante'].dmg * this.save.nail * 10) / 10;
+    return Math.round(WEAPONS[this.save.weapon || 'errante'].dmg * this.save.nail * classOf(this.save).dmg * 10) / 10;
   }
 
   hitBreakable(g, tx, ty) {
@@ -576,6 +576,7 @@ export class Game {
           if (e.dead || pr.hitSet.has(e) || !overlap(pr.box(), e)) continue;
           pr.hitSet.add(e);
           this.hitEnemy(e, pr.dmg, sign(pr.vx), 0);
+          if (pr.soul) this.soul = Math.min(SOUL_MAX, this.soul + SOUL_PER_HIT);
           this.audio.play('hit');
           this.particles.burst(e.cx, e.cy, 10, { type: 'spark', color: '#bfe9ff', speed: 6, life: 14, glow: true });
           if (!pr.pierce) pr.dead = true;
@@ -586,8 +587,32 @@ export class Game {
 
   spawnProjectile(pr) { this.projectiles.push(pr); }
 
+  // Tiro do arqueiro (flecha) ou do mago (orbe). dir: 'side' | 'up'.
+  spawnShot(p, kind, dir) {
+    const up = dir === 'up';
+    const sp = kind === 'arrow' ? 13 : 8.5;
+    const x = p.cx + (up ? 0 : p.facing * 14), y = up ? p.y - 4 : p.cy - 4;
+    const pr = new Projectile(x, y, up ? 0 : p.facing * sp, up ? -sp : 0, {
+      kind, r: kind === 'arrow' ? 5 : 8, life: kind === 'arrow' ? 42 : 56, hostile: false,
+      dmg: this.swordDamage(), grav: kind === 'arrow' ? 0.03 : 0,
+    });
+    pr.soul = true;
+    this.projectiles.push(pr);
+    this.audio.play(kind === 'arrow' ? 'spit' : 'orb');
+    this.particles.burst(x, y, 5, { color: kind === 'arrow' ? ['#e8dcc0', '#ffffff'] : ['#d7b8ff', '#ffffff'], speed: 2.5, life: 10, glow: true });
+  }
+
   spawnSpell(x, y, dir) {
-    const pr = new Projectile(x, y, dir * 10, 0, { kind: 'spell', r: 10, life: 55, hostile: false, dmg: 3, pierce: true });
+    const C = classOf(this.save);
+    if (C.shot === 'arrow') {
+      // Chuva de flechas: três flechas em leque que atravessam os inimigos.
+      for (const vy of [-2.2, 0, 2.2]) {
+        const a = new Projectile(x, y, dir * 12, vy, { kind: 'arrow', r: 5, life: 48, hostile: false, dmg: C.spellDmg, pierce: true });
+        this.projectiles.push(a);
+      }
+      return;
+    }
+    const pr = new Projectile(x, y, dir * 10, 0, { kind: 'spell', r: C.shot === 'bolt' ? 13 : 10, life: 55, hostile: false, dmg: C.spellDmg, pierce: true });
     this.projectiles.push(pr);
     this.particles.burst(x, y, 12, { color: ['#bfe9ff', '#ffffff'], speed: 4, life: 18, glow: true });
   }

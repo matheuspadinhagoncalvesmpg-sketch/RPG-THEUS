@@ -26,7 +26,7 @@ const clean = (v, n) => String(v ?? '').replace(/[\u0000-\u001f<>]/g, '').trim()
 const cleanProfile = (pr) => ({
   cloak: clean(pr.cloak, 9), hair: clean(pr.hair, 9), eyes: clean(pr.eyes, 10), skin: clean(pr.skin, 9),
   accent: clean(pr.accent, 9), hairStyle: clean(pr.hairStyle, 10), topper: clean(pr.topper, 10),
-  build: clean(pr.build, 10), capeStyle: clean(pr.capeStyle, 10),
+  build: clean(pr.build, 10), capeStyle: clean(pr.capeStyle, 10), classe: clean(pr.classe, 10),
 });
 const validCode = (c, n) => typeof c === 'string' && c.length === n && [...c].every((ch) => CODE_ABC.includes(ch));
 

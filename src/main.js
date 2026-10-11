@@ -4,7 +4,7 @@ import { AudioSystem } from './audio.js';
 import { UI } from './ui.js';
 import { Game } from './game.js';
 import { drawHero, EYE_COLORS } from './art.js';
-import { BUILD_ITEMS } from './config.js';
+import { BUILD_ITEMS, CLASSES } from './config.js';
 import { cloudCode, setCloudCode, prettyCode, normalizeCode, downloadSave } from './cloud.js';
 import { loadSave, newSave, writeSave, clearSave, loadSettings, writeSettings, DEFAULT_PROFILE } from './save.js';
 import { shade } from './util.js';
@@ -134,6 +134,7 @@ const PALETTES = {
 };
 const EYE_LABELS = { hetero: 'Ocaso & Aurora', black: 'Preto', blue: 'Azul', red: 'Vermelho', green: 'Verde', gold: 'Dourado', violet: 'Violeta', cyan: 'Ciano', pink: 'Rosa', silver: 'Prata', ember: 'Brasa & Névoa', sea: 'Maré' };
 const CHOICES = {
+  classe: Object.entries(CLASSES).map(([k, c]) => [k, c.name]),
   build: [['padrao', 'Padrão'], ['pequeno', 'Ágil'], ['alto', 'Esguio'], ['robusto', 'Robusto']],
   capeStyle: [['cachecol', 'Cachecol'], ['capa', 'Capa longa'], ['nenhum', 'Nenhuma']],
   hairStyle: [['franja', 'Franja'], ['curto', 'Curto'], ['longo', 'Longo'], ['rabo', 'Rabo'], ['coque', 'Coque'], ['trancas', 'Tranças'], ['moicano', 'Moicano'], ['careca', 'Sem cabelo']],
@@ -178,6 +179,8 @@ function buildCreator() {
       wrap.appendChild(b);
     }
   }
+  $('#class-desc').textContent = (CLASSES[profile.classe] || CLASSES.guerreiro).desc;
+  $('#field-classe').classList.toggle('hidden', editing);
   const pre = $('#pick-preset');
   pre.innerHTML = '';
   for (const pr of PRESETS) {
@@ -201,7 +204,7 @@ function buildCreator() {
 
 $('#btn-random').addEventListener('click', () => {
   for (const [key, colors] of Object.entries(PALETTES)) profile[key] = pickRandom(colors);
-  for (const [key, list] of Object.entries(CHOICES)) profile[key] = pickRandom(list)[0];
+  for (const [key, list] of Object.entries(CHOICES)) if (key !== 'classe' || !editing) profile[key] = pickRandom(list)[0];
   profile.eyes = pickRandom(Object.keys(EYE_LABELS));
   audio.play('ui');
   buildCreator();
