@@ -66,6 +66,11 @@ export class Input {
   }
 
   setTouchMode(on) {
+    if (on) this.lastTouchAt = performance.now();
+    // Teclado/mouse "fantasma" (iPad com teclado, gestos, cliques sintéticos) não pode
+    // esconder os botões de quem está jogando no toque.
+    else if (this.touchMode && (performance.now() - (this.lastTouchAt || 0) < 20000
+      || !matchMedia('(any-pointer: fine)').matches)) return;
     if (this.touchMode === on) return;
     this.touchMode = on;
     document.body.classList.toggle('touch-mode', on);

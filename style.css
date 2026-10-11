@@ -505,7 +505,7 @@ kbd {
   border: 1px solid rgba(244, 239, 230, 0.4); border-bottom-width: 2px; border-radius: 4px;
   font-family: var(--serif); font-size: 12px; text-align: center; background: rgba(244, 239, 230, 0.06);
 }
-#manual-screen { z-index: 45; }
+#manual-screen { z-index: 60; }
 
 /* Fabricação */
 .craft-sub { font-size: 15px; color: var(--ink-dim); margin: -4px 0 8px; }
@@ -533,7 +533,7 @@ kbd {
 .mp-row input:focus { border-color: var(--gold); }
 #mp-players { list-style: none; margin: 8px 0; font-size: 16px; }
 #mp-players li::before { content: '● '; color: #7fe39a; }
-#mp-screen { z-index: 46; }
+#mp-screen { z-index: 60; }
 
 #chat-feed {
   position: fixed; left: calc(14px + var(--sl)); bottom: calc(14px + var(--sb)); z-index: 19;
