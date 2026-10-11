@@ -166,11 +166,8 @@ function drawHair(ctx, p, hy, wind, t, col) {
       }
     }
   }
-  if (st !== 'moicano') {
-    ctx.save(); ctx.globalAlpha *= 0.55; ctx.fillStyle = c2;
-    ctx.beginPath(); ctx.ellipse(0.2, hy - 6.2, 3.2, 0.7, -0.15, 0, Math.PI * 2); ctx.fill();
-    ctx.restore();
-  }
+  ctx.fillStyle = c2;
+  if (st !== 'moicano') ctx.fillRect(-2, hy - 7.4, 5, 1.1);
 }
 
 // Acessórios da cabeça.
@@ -359,25 +356,45 @@ export function drawHero(ctx, x, y, o) {
   ctx.save();
   if (o.turn) { ctx.translate(1, hy); ctx.scale(1 - o.turn * 0.55, 1); ctx.translate(-1, -hy); }
   const [eFar, eNear] = EYE_COLORS[p.eyes] || EYE_COLORS.hetero;
-  // Cabeça simples, estilo Hollow Knight: círculo de marfim e dois olhos pretos.
-  // Um brilho pequeno no olho mostra a cor (o esquerdo é do ocaso, o direito da aurora).
-  const cx0 = 0.8, cy0 = hy + 0.6;
   ctx.fillStyle = col('#1a1320');
-  ellipse(ctx, cx0, cy0 + 0.3, 8.3, 8.2);
-  ctx.fillStyle = col('#f4efe4');
-  ellipse(ctx, cx0, cy0, 7.9, 7.8);
+  ellipse(ctx, 0.6, hy, 7.4, 7.3);
+  const ivory = col('#f3eee4'), ivoryDark = col('#cfc6b6');
+  ctx.fillStyle = ivory;
+  ctx.beginPath();
+  ctx.moveTo(-5.6, hy - 3.5);
+  ctx.quadraticCurveTo(0.5, hy - 8.6, 7.6, hy - 3);
+  ctx.lineTo(7.9, hy + 2);
+  ctx.quadraticCurveTo(6.8, hy + 7.6, 2.4, hy + 8.8);
+  ctx.quadraticCurveTo(-3.8, hy + 7.4, -5.8, hy + 1.2);
+  ctx.closePath();
+  ctx.fill();
   if (o.state !== 'dead') {
     const blink = t % 220 < 6 && o.state === 'idle';
-    for (const [ex, ec] of [[cx0 + 0.4, eFar], [cx0 + 5.0, eNear]]) {
+    for (const [ex, ec] of [[1.4, eFar], [5.4, eNear]]) {
+      // marca pintada sob o olho
+      ctx.fillStyle = col(ec);
+      ctx.beginPath();
+      ctx.moveTo(ex - 0.5, hy + 2.4); ctx.lineTo(ex + 0.5, hy + 2.4); ctx.lineTo(ex + 0.1, hy + 5.6);
+      ctx.fill();
+      // fenda do olho
       ctx.fillStyle = '#120d18';
       ctx.beginPath();
-      ctx.ellipse(ex, cy0 + 0.6, 1.9, blink ? 0.4 : 2.6, 0, 0, Math.PI * 2);
+      ctx.ellipse(ex, hy + 0.2, 1.9, blink ? 0.35 : 1.5, -0.12, 0, Math.PI * 2);
       ctx.fill();
       if (!blink && !flash) {
-        ctx.fillStyle = '#ffffff';
-        ellipse(ctx, ex, cy0 + 0.5, 1.15, 1.85);
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.fillStyle = rgba(ec, 0.22);
+        ellipse(ctx, ex + 0.3, hy + 0.3, 2.1, 1.8);
+        ctx.fillStyle = ec;
+        ellipse(ctx, ex + 0.4, hy + 0.3, 0.95, 0.95);
+        ctx.restore();
       }
     }
+    // pequena rachadura
+    ctx.strokeStyle = col('#a89f90');
+    ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.moveTo(4.2, hy + 8.5); ctx.lineTo(4.8, hy + 6.9); ctx.lineTo(4.2, hy + 5.9); ctx.stroke();
   }
 
   drawHair(ctx, p, hy, wind, t, col);
