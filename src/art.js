@@ -363,9 +363,8 @@ export function drawHero(ctx, x, y, o) {
   ctx.beginPath();
   ctx.moveTo(-5.6, hy - 3.5);
   ctx.quadraticCurveTo(0.5, hy - 8.6, 7.6, hy - 3);
-  ctx.lineTo(7.9, hy + 2);
-  ctx.quadraticCurveTo(6.8, hy + 7.6, 2.4, hy + 8.8);
-  ctx.quadraticCurveTo(-3.8, hy + 7.4, -5.8, hy + 1.2);
+  ctx.bezierCurveTo(9.6, hy - 0.5, 9.4, hy + 6.6, 3.4, hy + 8.9);
+  ctx.bezierCurveTo(-1.8, hy + 10, -6.4, hy + 5.4, -5.8, hy + 1.2);
   ctx.closePath();
   ctx.fill();
   if (o.state !== 'dead') {
@@ -391,10 +390,6 @@ export function drawHero(ctx, x, y, o) {
         ctx.restore();
       }
     }
-    // pequena rachadura
-    ctx.strokeStyle = col('#a89f90');
-    ctx.lineWidth = 0.5;
-    ctx.beginPath(); ctx.moveTo(4.2, hy + 8.5); ctx.lineTo(4.8, hy + 6.9); ctx.lineTo(4.2, hy + 5.9); ctx.stroke();
   }
 
   drawHair(ctx, p, hy, wind, t, col);
