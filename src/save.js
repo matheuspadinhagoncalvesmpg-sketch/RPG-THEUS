@@ -8,12 +8,12 @@ export const DEFAULT_PROFILE = {
   cloak: '#3a4f8f',
   hair: '#f2f2f2',
   eyes: 'hetero',
-  skin: '#f2cfae',
+  skin: '#efe6da',
   accent: '',
   hairStyle: 'franja',
   topper: 'nenhum',
   build: 'padrao',
-  capeStyle: 'cachecol',
+  capeStyle: 'nenhum',
 };
 
 export function newSave(profile) {

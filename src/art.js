@@ -250,7 +250,7 @@ export function drawHero(ctx, x, y, o) {
   }
   ctx.rotate(lean);
   if (o.squash) ctx.scale(1 + o.squash * 0.16, 1 - o.squash * 0.16);
-  const by = bob + crouch - 2.5; // tronco 2,5px acima: pernas mais longas
+  const by = bob + crouch;
   const tunic = col(p.cloak);
   const tunicDark = col(shade(p.cloak, -0.38));
   const skin = col(p.skin);
@@ -303,42 +303,59 @@ export function drawHero(ctx, x, y, o) {
   ctx.lineTo(-4 - Math.sin(armSwing) * 4, -11 + by + Math.cos(armSwing) * 0.5);
   ctx.stroke();
 
-  // Pernas e botas
+  // Pernas curtas, quase escondidas pelo manto
   const leg = (lx, off) => {
     if (o.state === 'sit') {
-      ctx.fillStyle = col('#2a2230'); ctx.fillRect(lx - 1, -6, 7, 3);
-      ctx.fillStyle = col('#5a3a24'); ctx.fillRect(lx + 4, -6, 3, 6);
+      ctx.fillStyle = col('#15121d'); ctx.fillRect(lx - 1, -5, 7, 3);
+      ctx.fillStyle = col('#15121d'); ctx.fillRect(lx + 4, -5, 3, 5);
       return;
     }
-    ctx.fillStyle = col('#2a2230');
-    ctx.fillRect(lx + off * 0.5, -11.5 + crouch, 3.2, 8.5 - crouch * 0.5);
-    ctx.fillStyle = col('#5a3a24');
-    ctx.fillRect(lx + off * 0.6 - 0.5, -3.5, 4.4, 3.5);
-    ctx.fillStyle = col('#7a5232');
-    ctx.fillRect(lx + off * 0.6 - 0.5, -3.5, 4.4, 1);
+    ctx.fillStyle = col('#15121d');
+    ctx.fillRect(lx + off * 0.5, -8 + crouch, 3.2, 8 - crouch);
   };
   leg(-4, legA);
   leg(1, legB);
 
-  // Túnica com barra e cinto
-  ctx.fillStyle = tunic;
-  ctx.beginPath();
-  ctx.moveTo(-5, -20 + by);
-  ctx.lineTo(5, -20 + by);
-  ctx.lineTo(7 + wind * 0.15, -9.5 + crouch * 0.5);
-  ctx.lineTo(-7 - wind * 0.3, -9.5 + crouch * 0.5);
-  ctx.closePath();
-  ctx.fill();
-  ctx.fillStyle = tunicDark;
-  ctx.beginPath();
-  ctx.moveTo(-5, -20 + by); ctx.lineTo(-2, -20 + by); ctx.lineTo(-3, -9.5 + crouch * 0.5); ctx.lineTo(-7 - wind * 0.3, -9.5 + crouch * 0.5);
-  ctx.fill();
-  ctx.fillStyle = col('#4a2f1c');
-  ctx.fillRect(-6, -12 + by * 0.6, 12.5, 2.4);
-  ctx.fillStyle = col('#e0ad45');
-  ctx.fillRect(0.5, -12.4 + by * 0.6, 3, 3.2);
+  // Manto em forma de sino, com sombra e dobras (visual da primeira versão)
+  const hem = -3.5 + crouch * 0.6;
+  const fl = wind * 0.5;
+  const mp = () => {
+    ctx.beginPath();
+    ctx.moveTo(-6, -20 + by);
+    ctx.quadraticCurveTo(-10 - fl * 0.7, -10 + by, -11 - fl, hem + Math.sin(t * 0.2) * 0.8);
+    ctx.lineTo(-6 - fl * 0.6, hem - 2);
+    ctx.lineTo(-2 - fl * 0.3, hem + 1);
+    ctx.lineTo(3, hem - 1);
+    ctx.lineTo(9, hem + 0.5);
+    ctx.quadraticCurveTo(9.5, -12 + by, 6, -20 + by);
+    ctx.closePath();
+  };
+  let body = tunic;
+  if (!flash) {
+    body = ctx.createLinearGradient(-11, 0, 9, 0);
+    body.addColorStop(0, shade(p.cloak, -0.5));
+    body.addColorStop(0.45, p.cloak);
+    body.addColorStop(1, shade(p.cloak, 0.14));
+  }
+  ctx.fillStyle = body;
+  mp(); ctx.fill();
+  if (!flash) {
+    ctx.save();
+    mp(); ctx.clip();
+    // sombra na barra e dobras escuras
+    const hg = ctx.createLinearGradient(0, hem - 9, 0, hem + 2);
+    hg.addColorStop(0, 'rgba(10,8,20,0)'); hg.addColorStop(1, 'rgba(10,8,20,0.38)');
+    ctx.fillStyle = hg; ctx.fillRect(-14, hem - 9, 26, 12);
+    ctx.fillStyle = rgba(shade(p.cloak, -0.6), 0.5);
+    ctx.beginPath(); ctx.moveTo(-3, -18 + by); ctx.quadraticCurveTo(-6 - fl * 0.4, -9 + by, -6 - fl * 0.6, hem - 2); ctx.lineTo(-2 - fl * 0.3, hem + 1); ctx.quadraticCurveTo(-1.5, -10 + by, -3, -18 + by); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(4, -17 + by); ctx.quadraticCurveTo(5.5, -9 + by, 4.2, hem - 1.5); ctx.lineTo(2.4, hem - 1.2); ctx.quadraticCurveTo(3, -9 + by, 2.6, -16 + by); ctx.fill();
+    ctx.restore();
+  }
+  // gola
+  ctx.fillStyle = col(shade(p.cloak, 0.2));
+  ctx.beginPath(); ctx.ellipse(0, -19 + by, 7.2, 2.5, 0, 0, Math.PI * 2); ctx.fill();
 
-  // Armadura (peitoral e ombreira)
+  // Armadura (peitoral)
   if (o.armor && o.armor.color) {
     ctx.fillStyle = col(o.armor.color);
     ctx.beginPath();
@@ -350,47 +367,31 @@ export function drawHero(ctx, x, y, o) {
     ellipse(ctx, 2.4, -18.6 + by, 3.4, 2.2);
   }
 
-  // Cabeça com máscara de marfim: olhos acesos e marcas do ocaso (esq.) e da aurora (dir.)
-  const hy = -27 + by;
-  // ao virar, a cabeça gira (achata no eixo x por alguns quadros)
+  // Cabeça redonda: contorno escuro, rosto claro, cabelo e olhos altos de duas cores
+  const hy = -26 + by;
   ctx.save();
-  const HS = 0.83, pvy = hy + 8.4;
+  const HS = 0.93, pvy = hy + 8;
   ctx.translate(1, pvy); ctx.scale(HS, HS); ctx.translate(-1, -pvy);
   if (o.turn) { ctx.translate(1, hy); ctx.scale(1 - o.turn * 0.55, 1); ctx.translate(-1, -hy); }
   const [eFar, eNear] = EYE_COLORS[p.eyes] || EYE_COLORS.hetero;
-  ctx.fillStyle = col('#1a1320');
-  ellipse(ctx, 0.9, hy + 0.4, 8.2, 8.2);
-  const ivory = col('#f3eee4');
-  ctx.fillStyle = ivory;
-  ellipse(ctx, 0.9, hy + 0.4, 7.7, 7.7);
+  ctx.fillStyle = col('#0c0a12');
+  ellipse(ctx, 1, hy, 8.6, 8.6);
+  ctx.fillStyle = col(p.skin);
+  ellipse(ctx, 1, hy, 7.7, 7.7);
   if (o.state !== 'dead') {
     const blink = t % 220 < 6 && o.state === 'idle';
-    for (const [ex, ec] of [[1.4, eFar], [5.4, eNear]]) {
-      // marca pintada sob o olho
+    for (const [ex, ec] of [[0.2, eFar], [5, eNear]]) {
+      if (blink) { ctx.fillStyle = '#0c0a12'; ctx.fillRect(ex - 1.4, hy + 0.5, 2.8, 1); continue; }
+      ctx.fillStyle = flash ? '#fff' : '#0c0a12';
+      ellipse(ctx, ex, hy + 0.8, 1.9, 2.9);
       ctx.fillStyle = col(ec);
-      ctx.beginPath();
-      ctx.moveTo(ex - 0.5, hy + 2.4); ctx.lineTo(ex + 0.5, hy + 2.4); ctx.lineTo(ex + 0.1, hy + 5.6);
-      ctx.fill();
-      // fenda do olho
-      ctx.fillStyle = '#120d18';
-      ctx.beginPath();
-      ctx.ellipse(ex, hy + 0.2, 1.9, blink ? 0.35 : 1.5, -0.12, 0, Math.PI * 2);
-      ctx.fill();
-      if (!blink && !flash) {
-        ctx.save();
-        ctx.globalCompositeOperation = 'lighter';
-        ctx.fillStyle = rgba(ec, 0.22);
-        ellipse(ctx, ex + 0.3, hy + 0.3, 2.1, 1.8);
-        ctx.fillStyle = ec;
-        ellipse(ctx, ex + 0.4, hy + 0.3, 0.95, 0.95);
-        ctx.restore();
-      }
+      ellipse(ctx, ex, hy + 0.8, 1.3, 2.2);
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      ctx.fillRect(ex - 0.2, hy - 0.8, 0.9, 0.9);
     }
   }
-
   drawHair(ctx, p, hy, wind, t, col);
   drawTopper(ctx, p, hy, t, col);
-
   ctx.restore();
 
   // Braço da frente + espada

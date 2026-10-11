@@ -141,7 +141,7 @@ const CHOICES = {
 };
 // Combinações prontas. O Errante é quem você quiser: nenhum arquétipo tem gênero.
 const PRESETS = [
-  { n: 'Andarilho', p: { cloak: '#3a4f8f', accent: '', hair: '#f2f2f2', skin: '#f2cfae', eyes: 'hetero', hairStyle: 'franja', topper: 'nenhum', build: 'padrao', capeStyle: 'cachecol' } },
+  { n: 'Andarilho', p: { cloak: '#3a4f8f', accent: '', hair: '#f2f2f2', skin: '#efe6da', eyes: 'hetero', hairStyle: 'franja', topper: 'nenhum', build: 'padrao', capeStyle: 'nenhum' } },
   { n: 'Guardião do Musgo', p: { cloak: '#2f6f4f', accent: '#e8e4da', hair: '#7c2d12', skin: '#c68642', eyes: 'green', hairStyle: 'trancas', topper: 'coroa', build: 'robusto', capeStyle: 'capa' } },
   { n: 'Sombra', p: { cloak: '#24232c', accent: '#8e44ad', hair: '#1a1a24', skin: '#efe6da', eyes: 'violet', hairStyle: 'rabo', topper: 'nenhum', build: 'alto', capeStyle: 'capa' } },
   { n: 'Brasa', p: { cloak: '#8a3b12', accent: '#ffcf7a', hair: '#f97316', skin: '#8d5524', eyes: 'ember', hairStyle: 'moicano', topper: 'chifres', build: 'robusto', capeStyle: 'cachecol' } },
