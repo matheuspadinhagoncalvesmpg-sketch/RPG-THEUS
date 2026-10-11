@@ -27,6 +27,7 @@ export const NPCS = {
       const s = game.save, a = s.abilities, b = s.bosses;
       if (!s.talked.oren) return ORIGEM;
       if (b.king) return ['O céu... está clareando. Você conseguiu.'];
+      const olhos = b.moss && !s.talked.olhos ? ['Você nunca me perguntou por que seus olhos têm duas horas.', 'Quando um Alvorador morre, o Sol põe uma faísca de si numa criança que nasce no minuto em que o dia vira. O ocaso num olho, a aurora no outro.', 'Chamavam vocês de Filhos da Virada. Cada um é, de um jeito que ninguém diz alto, um filho do Sol.'] : [];
       // A história avança: cada marco muda o que ele diz (e o que ele evita dizer).
       let historia = [];
       if (s.base.smith && b.tide) {
@@ -48,7 +49,8 @@ export const NPCS = {
       } else if (a.spell) {
         historia = ['Você achou a lanterna. Ótimo. Ela é antiga.', '...Mais antiga do que parece.'];
       }
-      return [...historia, ...dica(s)];
+      if (olhos.length) s.talked.olhos = true;
+      return [...olhos, ...historia, ...dica(s)];
     },
   },
   mira: {
@@ -88,6 +90,7 @@ export const NPCS = {
       ];
       const out = ['A chama da alma queima em você agora...'];
       if (s.bosses.moss) out.push('O vento voltou. Escute. As folhas lembram como se mexer.');
+      out.push('Quando você abriu os olhos pela primeira vez, um era vermelho e o outro azul. O fim e o começo do dia, no mesmo rosto.');
       if (s.talked.visoes) out.push('Você viu.', 'Eu também vi, naquele dia. Eu sou a lanterna que ela acendeu primeiro.', 'Eu não posso mandar. Só posso lembrar.');
       out.push('Use-a com sabedoria. Toque rápido para lançar, segure para curar.');
       return out;

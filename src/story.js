@@ -50,6 +50,7 @@ export function capeNote(key) {
 // Visões do cristal no Coração (marca "visoes": o herói passa a conhecer a verdade sobre o Sol).
 export const VISOES = [
   'O cristal pulsa. Ao seu toque, o último pôr do sol de verdade se lembra de si mesmo.',
+  'Uma sala de pedra, num minuto exato em que o dia vira. Uma criança nasce. Abre os olhos: um vermelho como o ocaso, outro azul como a aurora. Lá no alto, o Sol sorri. A faísca que ela guarda é dele.',
   'Uma procissão atravessa uma ponte com doze estátuas. No meio, uma criança de manto azul e máscara de marfim segura a mão de um velho de barba cinzenta.',
   'Uma escadaria interna, cheia de mãos de escaladores. A criança sobe devagar e olha para trás, procurando alguém. Não acha.',
   'Um trono. Uma coroa dourada pousa na cabeça da criança. Os olhos dela se acendem. Ela não grita: pergunta baixinho, "dói assim mesmo?"',
