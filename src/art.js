@@ -166,8 +166,11 @@ function drawHair(ctx, p, hy, wind, t, col) {
       }
     }
   }
-  ctx.fillStyle = c2;
-  if (st !== 'moicano') ctx.fillRect(-2, hy - 7.4, 5, 1.1);
+  if (st !== 'moicano') {
+    ctx.save(); ctx.globalAlpha *= 0.55; ctx.fillStyle = c2;
+    ctx.beginPath(); ctx.ellipse(0.2, hy - 6.2, 3.2, 0.7, -0.15, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
 }
 
 // Acessórios da cabeça.
@@ -368,21 +371,29 @@ export function drawHero(ctx, x, y, o) {
   ctx.quadraticCurveTo(-3.8, hy + 7.4, -5.8, hy + 1.2);
   ctx.closePath();
   ctx.fill();
-  // sombra suave na parte de baixo da máscara
-  ctx.fillStyle = ivoryDark;
+  // contorno fino e brilho suave: máscara limpa, sem faixa escura embaixo (parecia barba)
+  ctx.strokeStyle = col('#d8cfbd');
+  ctx.lineWidth = 0.55;
   ctx.beginPath();
-  ctx.moveTo(-5.4, hy + 3);
-  ctx.quadraticCurveTo(0, hy + 6, 7.4, hy + 3.5);
-  ctx.quadraticCurveTo(6.6, hy + 7.6, 2.4, hy + 8.8);
-  ctx.quadraticCurveTo(-3.8, hy + 7.4, -5.4, hy + 3);
-  ctx.fill();
+  ctx.moveTo(-5.6, hy - 3.5);
+  ctx.quadraticCurveTo(0.5, hy - 8.6, 7.6, hy - 3);
+  ctx.lineTo(7.9, hy + 2);
+  ctx.quadraticCurveTo(6.8, hy + 7.6, 2.4, hy + 8.8);
+  ctx.quadraticCurveTo(-3.8, hy + 7.4, -5.8, hy + 1.2);
+  ctx.closePath();
+  ctx.stroke();
+  ctx.fillStyle = col('rgba(255,255,255,0.55)');
+  ctx.beginPath(); ctx.ellipse(-1.8, hy - 4.6, 2.6, 1.1, -0.35, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = col('rgba(224,205,190,0.45)');
+  ctx.beginPath(); ctx.ellipse(-1.2, hy + 5, 1.5, 0.9, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(6.2, hy + 5, 1.5, 0.9, 0, 0, Math.PI * 2); ctx.fill();
   if (o.state !== 'dead') {
     const blink = t % 220 < 6 && o.state === 'idle';
     for (const [ex, ec] of [[1.4, eFar], [5.4, eNear]]) {
       // marca pintada sob o olho
       ctx.fillStyle = col(ec);
       ctx.beginPath();
-      ctx.moveTo(ex - 0.5, hy + 2.4); ctx.lineTo(ex + 0.5, hy + 2.4); ctx.lineTo(ex + 0.1, hy + 5.6);
+      ctx.moveTo(ex - 0.45, hy + 2.5); ctx.lineTo(ex + 0.45, hy + 2.5); ctx.lineTo(ex + 0.05, hy + 4.4);
       ctx.fill();
       // fenda do olho
       ctx.fillStyle = '#120d18';
@@ -399,10 +410,6 @@ export function drawHero(ctx, x, y, o) {
         ctx.restore();
       }
     }
-    // pequena rachadura
-    ctx.strokeStyle = col('#a89f90');
-    ctx.lineWidth = 0.5;
-    ctx.beginPath(); ctx.moveTo(4.2, hy + 8.5); ctx.lineTo(4.8, hy + 6.9); ctx.lineTo(4.2, hy + 5.9); ctx.stroke();
   }
 
   drawHair(ctx, p, hy, wind, t, col);
