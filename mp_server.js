@@ -113,7 +113,8 @@ function cleanSnap(msg, room) {
   const hb = (Array.isArray(msg.hb) ? msg.hb : []).slice(0, 20).filter((b) => b && typeof b === 'object').map((b) => ({
     x: Math.round(lim(b.x, -100000, 100000)), y: Math.round(lim(b.y, -100000, 100000)), w: lim(b.w, 0, 600), h: lim(b.h, 0, 600),
   }));
-  return { t: 'snap', room, e, p, hb, n: lim(msg.n, 0, 1), d: msg.d ? 1 : 0 };
+  const iv = Array.isArray(msg.iv) ? [clean(msg.iv[0], 40), lim(msg.iv[1], 0, 1)] : null;
+  return { t: 'snap', room, e, p, hb, n: lim(msg.n, 0, 1), d: msg.d ? 1 : 0, iv };
 }
 
 // ───────── Mensagens ─────────

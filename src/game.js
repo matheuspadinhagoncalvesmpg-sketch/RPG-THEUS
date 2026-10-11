@@ -9,6 +9,7 @@ import { spawnRoomEntities, GeoCoin, Tombstone, ItemDrop } from './entities.js';
 import { BuildMode } from './build.js';
 import { CraftUI } from './crafting.js';
 import { Raids } from './raids.js';
+import { Invasions } from './invasions.js';
 import { NPC, makeBuilt } from './entities.js';
 import { Net } from './net.js';
 import { scheduleUpload } from './cloud.js';
@@ -35,6 +36,8 @@ export class Game {
     this.build = new BuildMode(this);
     this.craft = new CraftUI(this);
     this.raids = new Raids(this);
+    this.invasions = new Invasions(this);
+    this.invSeq = 0;
     this.net = new Net(this);
     this.raidSeq = 0;
     this.speed = 1;
@@ -145,6 +148,7 @@ export class Game {
     this.floaters = [];
     this.build.onRoomEnter(room);
     this.raids.onRoomEnter(room);
+    this.invasions.onRoomEnter(room);
     this.projectiles = [];
     this.coins = [];
     this.hostileBoxes = [];
@@ -346,6 +350,7 @@ export class Game {
 
     this.ai.update();
     this.raids.update();
+    this.invasions.update();
     this.updateChallenge();
     for (const b of this.bubbles) b.t--;
     this.bubbles = this.bubbles.filter((b) => b.t > 0 && !b.target.dead);
@@ -676,6 +681,7 @@ export class Game {
     this.state = 'dead';
     this.ai.onDeath(this.room.id);
     this.deathCount = (this.deathCount || 0) + 1;
+    this.invasions.onDeath();
     this.deathTimer = 110;
     this.audio.play('death');
     this.input.vibrate(200);
@@ -1051,6 +1057,7 @@ export class Game {
     this.net.drawPlayers(ctx);
     const pal = AREAS[this.room.area];
     for (const e of this.enemies) e.draw(ctx, pal);
+    this.invasions.drawOverlay(ctx);
     for (const c of this.coins) c.draw(ctx);
     if (!this.player.dead) this.player.draw(ctx, this);
     for (const pr of this.projectiles) pr.draw(ctx);

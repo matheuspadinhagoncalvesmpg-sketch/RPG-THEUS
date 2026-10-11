@@ -594,3 +594,12 @@ body.lefty .tbtn.ctx { right: auto; left: calc(30px + var(--sl)); }
 
 .creator-random { margin: 8px 0 2px; padding: 7px 12px; }
 .swatch.auto { background-image: linear-gradient(135deg, transparent 46%, rgba(255,255,255,0.7) 46% 54%, transparent 54%) !important; }
+
+/* Barra de invasão (estilo Terraria) */
+#inv-bar {
+  position: fixed; left: 50%; top: calc(58px + var(--st)); transform: translateX(-50%);
+  width: min(360px, 52vw); z-index: 15; pointer-events: none; text-align: center;
+}
+#inv-name { font-family: var(--serif); font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); margin-bottom: 4px; text-shadow: 0 1px 6px #000; }
+#inv-bar .bar { height: 7px; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 207, 122, 0.5); border-radius: 4px; overflow: hidden; }
+#inv-fill { height: 100%; background: linear-gradient(90deg, #b8742f, #ffcf7a); transform-origin: left; transition: transform 0.25s; }

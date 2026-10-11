@@ -75,6 +75,9 @@ Escolhidas ao criar o herói (e não mudam depois): **Guerreiro** (equilibrado),
 ### Mini-chefes
 Quatro câmaras opcionais (Gruta Sob as Raízes → Covil do Besouro-Rei, Veio de Cristal → Geodo do Golem, Mirante dos Ventos → Ninho da Vespa Rainha, Gruta das Marés → Covil da Lampreia). Cada mini-chefe dá um **Fragmento de Vida** (+1 coração). A fogueira fica sempre *antes* da arena, nunca dentro dela.
 
+### Invasões (eventos raros, estilo Terraria)
+De tempos em tempos (a cada ~8–13 min de jogo, depois de vencer o Cavaleiro de Musgo) uma horda temática ataca a região onde você está: Horda de Gosmas (Campos), Enxame das Lanternas (Bosque), Marcha dos Golems (Ruínas), Procissão de Cacos (Cristal) e Cardume Faminto (Jardins). Há aviso, barra de progresso no topo, ondas contínuas e, no fim, um **capitão** com aura dourada. Vencer dá moedas e materiais; morrer ou sair da região dispersa a horda. A IA (Gemini) só decide *se é a hora*, o título, a frase de aviso e a força (0,8–1,4×); sem IA, um sorteio local faz o mesmo. No multijogador o anfitrião comanda e todos veem a barra.
+
 ### Testes do mundo
 ```bash
 node tools/check-world.mjs      # salas sobrepostas e aberturas sem saída

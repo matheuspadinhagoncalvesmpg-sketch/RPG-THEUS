@@ -20,6 +20,9 @@ export class UI {
     this.bossTitleEl = $('#boss-title');
     this.bossBar = $('#boss-bar');
     this.bossFill = $('#boss-fill');
+    this.invBarEl = $('#inv-bar');
+    this.invName = $('#inv-name');
+    this.invFill = $('#inv-fill');
     this.toastEl = $('#toast');
     this.interactBtn = $('#tb-interact');
     this.mapScreen = $('#map-screen');
@@ -148,6 +151,14 @@ export class UI {
     this.areaEl.querySelector('h2').textContent = name;
     this.areaEl.querySelector('p').textContent = sub || '';
     this.flash(this.areaEl, 3600);
+  }
+
+  // Barra da invasão: [nome, 0..1] ou null para esconder.
+  invBar(h) {
+    this.show(this.invBarEl, !!h);
+    if (!h) return;
+    if (this.last.inv !== h[0]) { this.last.inv = h[0]; this.invName.textContent = h[0]; }
+    this.invFill.style.transform = `scaleX(${Math.max(0, Math.min(1, h[1]))})`;
   }
 
   bossTitle(title, sub) {

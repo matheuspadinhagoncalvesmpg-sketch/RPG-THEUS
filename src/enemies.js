@@ -34,6 +34,7 @@ export class Enemy {
 
   die(game) {
     this.dead = true;
+    if (game.invasions) game.invasions.onKill(this);
     game.audio.play('kill');
     game.particles.burst(this.cx, this.cy, 16, { color: ['#ffffff', this.bloodColor || '#ff9a5c', '#2a2333'], speed: 6, life: 32, grav: 0.18, drag: 0.94 });
     game.particles.ring(this.cx, this.cy, '#ffffff', 8, 2.6, 14);

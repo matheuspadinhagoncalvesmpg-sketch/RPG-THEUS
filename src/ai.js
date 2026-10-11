@@ -172,6 +172,34 @@ export class AIDirector {
     }
   }
 
+  // Invasão rara: a IA decide se é a hora, o título, a frase de aviso e a força (0,8 a 1,4).
+  // Sem IA (ou se ela demorar), um sorteio local com o mesmo formato assume.
+  async invasionPlan(ctx, def) {
+    const ratio = ctx.masks / Math.max(1, ctx.masksMax);
+    const local = {
+      go: ratio > 0.4,
+      title: def.name,
+      line: def.lines[Math.floor(Math.random() * def.lines.length)],
+      scale: Math.max(0.8, Math.min(1.4, 0.9 + ctx.masksMax * 0.05 + ctx.done * 0.05 - (ratio < 0.6 ? 0.15 : 0))),
+      source: 'local',
+    };
+    if (!this.enabled) return local;
+    try {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 5000);
+      const r = await fetch('api/ai/event', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: ctrl.signal,
+        body: JSON.stringify({ ...ctx, invasionName: def.name, invasionSub: def.sub }),
+      });
+      clearTimeout(timer);
+      if (!r.ok) throw new Error(r.status);
+      const j = await r.json();
+      return { ...local, ...j, source: 'gemini' };
+    } catch (e) {
+      return local;
+    }
+  }
+
   // ───── Conversa livre com personagens ─────
   async npcReply(npcId, message) {
     const g = this.game;

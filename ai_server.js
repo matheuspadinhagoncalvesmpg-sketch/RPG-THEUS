@@ -16,7 +16,7 @@ export function loadEnv(root) {
 
 const WORLD = `Mundo: Vésper, um reino onde o sol parou no crepúsculo. O Rei Sem Coroa roubou a Coroa da Aurora e espera no Trono, no alto das Ruínas Suspensas.
 O herói é o Errante, com um olho da cor do ocaso (vermelho) e outro da aurora (azul).
-Regiões: Planície do Lar (terra livre a oeste do início, onde o herói pode construir sua base com madeira, pedra, minério e cristal), Campos do Crepúsculo (início, Abrigo com fogueira), Bosque das Lanternas (Cavaleiro de Musgo guarda o Santuário do Vento com o Manto do Vento/dash),
+Regiões: Planície do Lar (terra livre a oeste do início, onde o herói pode construir sua base com madeira, pedra, minério e cristal), Campos do Crepúsculo (início, Abrigo com fogueira), Bosque das Lanternas (o Cavaleiro de Musgo guarda o bosque; quem o vence ganha o Manto do Vento/dash),
 Ruínas Suspensas (Ponte Partida exige dash; Torre dos Ventos exige escalar paredes com as Garras de Pedra, achadas na Galeria dos Escaladores),
 Jardins Submersos (um poço no Coração de Cristal leva a um recife e ao Templo da Maré, onde vive a Rainha das Marés; há um teto secreto no recife e um amuleto numa prova cronometrada), Cavernas de Cristal (sob um chão rachado no Abrigo; guardam as Asas de Cinza/pulo duplo). A Chama da Alma (magia) está atrás de uma parede oca nas Raízes Profundas.
 O dinheiro são moedas. ALMA enche ao acertar golpes; segurar o botão de alma cura. Fogueiras salvam o jogo. Ao morrer, o herói deixa uma lápide com as moedas.`;
@@ -137,7 +137,26 @@ const EVENTS = {
   smith_arrive: 'Um ferreiro chamado Tibério acabou de se mudar para a base que o herói construiu na Planície do Lar.',
   raid_start: 'Anoiteceu e uma horda de monstros está prestes a atacar a base do herói na Planície do Lar.',
   raid_end: 'O herói acabou de defender sua base de um ataque noturno.',
+  invasion_end: 'O herói acabou de derrotar o capitão de uma invasão de monstros numa região de Vésper e a horda se desfez.',
 };
+
+// Invasão rara: a IA só decide se é a hora, o tom e a força. O jogo executa tudo.
+async function invasionPlan(body) {
+  const prompt = `Você é o diretor de eventos raros de Vésper, um jogo de aventura sombrio e poético (estilo Hollow Knight com invasões como no Terraria).
+${WORLD}
+Uma invasão está prestes a acontecer na região "${str(body.area, 20)}": "${str(body.invasionName, 40)}" (${str(body.invasionSub, 80)}).
+Herói: ${str(body.name, 20)}, classe ${str(body.classe, 12)}, corações ${clamp(body.masks, 0, 20, 5)}/${clamp(body.masksMax, 1, 20, 5)}, invasões já vencidas ${clamp(body.done, 0, 999, 0)}, mortes nesta sala ${clamp(body.deaths, 0, 999, 0)}.
+Decida: "go" false se o herói está fraco ou machucado demais agora (a invasão é adiada); "scale" de 0.8 (suave) a 1.4 (brutal) conforme a força dele; "title" um nome curto e poético para a invasão (até 28 caracteres, sem revelar spoilers da história); "line" UMA frase de aviso, em português do Brasil, até 20 palavras, sem aspas e sem markdown.
+Responda APENAS com JSON: {"go": true|false, "scale": 0.8-1.4, "title": "...", "line": "..."}`;
+  const raw = await gemini(prompt, { json: true, maxTokens: 160 });
+  const j = JSON.parse(raw.replace(/^```json|```$/g, ''));
+  return {
+    go: j.go !== false,
+    scale: clamp(j.scale, 0.8, 1.4, 1),
+    title: j.title ? str(j.title, 28) : null,
+    line: j.line ? str(j.line, 140).replace(/^["'“]|["'”]$/g, '') : null,
+  };
+}
 
 async function narrate(body) {
   const ev = EVENTS[body.event];
@@ -177,6 +196,7 @@ export function handleAI(req, res) {
       if (url === '/api/ai/npc') send(200, await npcReply(body));
       else if (url === '/api/ai/director') send(200, await director(body));
       else if (url === '/api/ai/narrate') send(200, await narrate(body));
+      else if (url === '/api/ai/event') send(200, await invasionPlan(body));
       else send(404, { error: 'rota' });
     } catch (e) {
       console.error('[IA]', e.message);

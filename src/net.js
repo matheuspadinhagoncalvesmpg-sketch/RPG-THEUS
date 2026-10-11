@@ -293,7 +293,7 @@ export class Net {
     ]);
     const pr = g.projectiles.filter((q) => q.hostile && !q.dead).map((q) => [Math.round(q.x), Math.round(q.y), +q.vx.toFixed(2), +q.vy.toFixed(2), q.kind, q.r, q.grav]);
     const hb = g.hostileBoxes.map((b) => ({ x: Math.round(b.x), y: Math.round(b.y), w: Math.round(b.w), h: Math.round(b.h) }));
-    this.send({ t: 'snap', e, p: pr, hb, n: +g.raids.night.toFixed(2), d: g.room.doorsClosed ? 1 : 0 });
+    this.send({ t: 'snap', e, p: pr, hb, n: +g.raids.night.toFixed(2), d: g.room.doorsClosed ? 1 : 0, iv: g.invasions.hud() });
   }
 
   // ── Aplicar foto (convidado) ──
@@ -341,6 +341,7 @@ export class Net {
     g.projectiles = g.projectiles.filter((q) => !q.hostile);
     for (const [x, y, vx, vy, kind, r, grav] of m.p) g.projectiles.push(new Projectile(x, y, vx, vy, { kind, r, grav, life: 8 }));
     g.raids.remoteNight = m.n;
+    g.invasions.remote = Array.isArray(m.iv) ? m.iv : null;
     g.room.doorsClosed = !!m.d;
   }
 
