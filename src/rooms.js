@@ -153,10 +153,9 @@ const DEFS = [
       b.rect(0, 2, 1, 7);
       b.rect(21, 0, 1, 9); // abertura leste (linhas 9-12) para o Mirante dos Ventos
       b.rect(0, 13, 22, 3);
-      b.rect(7, 11, 3, 2).set(8, 10, 'A');
+      b.rect(7, 11, 3, 2); // altar vazio: o Manto do Vento agora vem do Cavaleiro de Musgo
       b.set(15, 12, 'B').set(18, 12, 'L').set(13, 12, 'v');
     },
-    ability: 'dash',
     cape: 'roxa',
     lore: [['Gravado no altar:\n"Quem corre com o vento jamais cai no abismo. Siga para o alto, além do moinho."',
             'Em letra pequenina, no rodapé:\n"Guardado por Brandão, Capitão. Que ninguém o toque até que a centelha volte."']],

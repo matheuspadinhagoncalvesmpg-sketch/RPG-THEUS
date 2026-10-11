@@ -82,7 +82,7 @@ export class UI {
   resetHud() { this.last = {}; }
 
   refreshButtons(ab) {
-    document.querySelector('[data-act="dash"]').classList.toggle('hidden', !ab.dash);
+    document.querySelector('[data-act="dash"]').classList.toggle('locked', !ab.dash); // sempre visível; tracejado até vencer o Cavaleiro de Musgo
     document.querySelector('[data-act="spell"]').classList.toggle('locked', !ab.spell);
   }
 

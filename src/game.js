@@ -77,6 +77,8 @@ export class Game {
     this.lastArea = null;
     if (!this.ai) this.ai = new AIDirector(this);
     this.ui.resetHud();
+    // Saves de quando o manto ficava num altar: quem já venceu o Cavaleiro de Musgo recebe o dash.
+    if (save.bosses.moss && !save.abilities.dash) save.abilities.dash = true;
     this.ui.refreshButtons(save.abilities);
     this.respawn(true);
     this.state = 'play';
@@ -913,6 +915,7 @@ export class Game {
         this.ui.updateHud(this);
         this.ui.toast('Fragmento de Vida! +1 coração', 3500);
       } else if (key === 'tide') this.acquireCharm('mare_viva');
+      else if (key === 'moss') { this.ui.toast('O Cavaleiro cai... e o vento obedece a você.', 3000); this.acquireAbility('dash'); }
       else if (key === 'king') {
         this.save.finished = true;
         this.persist();

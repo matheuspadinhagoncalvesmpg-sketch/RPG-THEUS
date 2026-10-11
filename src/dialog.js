@@ -13,7 +13,7 @@ const ORIGEM = [
 // Dica prática do próximo passo (o que o jogador ainda não fez).
 function dica(s) {
   const a = s.abilities, b = s.bosses;
-  if (!a.dash) return ['Dizem que o vento obedece a quem chega ao santuário no fundo do Bosque.', 'Mas um cavaleiro coberto de musgo guarda a passagem.'];
+  if (!a.dash) return ['Um cavaleiro coberto de musgo guarda o Bosque. Dizem que o vento obedece a quem o vencer.', 'Descanse numa fogueira antes de encontrá-lo.'];
   if (!a.doubleJump) return ['Ouvi ecos debaixo deste abrigo... como se o chão fosse oco.', 'Golpeie para baixo no ar, quem sabe?'];
   if (!a.wallJump) return ['Com asas nos pés, a Ponte Partida das Ruínas não é mais obstáculo.', 'Suba pelo Penhasco do Moinho. Dizem que os Escaladores deixaram algo na Galeria.'];
   if (!b.king) return ['A Torre dos Ventos leva ao Trono. Que a luz te acompanhe, Errante.', 'Dizem também que um poço no Coração de Cristal desce a um templo submerso... e que há um segredo no teto do recife.'];
