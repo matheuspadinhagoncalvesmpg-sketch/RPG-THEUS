@@ -359,39 +359,26 @@ export function drawHero(ctx, x, y, o) {
   ctx.save();
   if (o.turn) { ctx.translate(1, hy); ctx.scale(1 - o.turn * 0.55, 1); ctx.translate(-1, -hy); }
   const [eFar, eNear] = EYE_COLORS[p.eyes] || EYE_COLORS.hetero;
-  // Rosto redondinho e fofo: máscara de marfim em círculo, olhos grandes e brilhantes
+  // Cabeça simples, estilo Hollow Knight: círculo de marfim e dois olhos pretos.
+  // Um brilho pequeno no olho mostra a cor (o esquerdo é do ocaso, o direito da aurora).
   const cx0 = 0.8, cy0 = hy + 0.6;
   ctx.fillStyle = col('#1a1320');
-  ellipse(ctx, cx0, cy0 + 0.4, 8.3, 8.2); // sombra/contorno
-  ctx.fillStyle = col('#f6f1e7');
+  ellipse(ctx, cx0, cy0 + 0.3, 8.3, 8.2);
+  ctx.fillStyle = col('#f4efe4');
   ellipse(ctx, cx0, cy0, 7.9, 7.8);
-  ctx.fillStyle = col('rgba(255,255,255,0.7)');
-  ctx.beginPath(); ctx.ellipse(cx0 - 2.4, cy0 - 4.6, 2.4, 1.2, -0.45, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = col('#e7dfd0');
-  ctx.beginPath(); ctx.ellipse(cx0 + 0.6, cy0 + 6.4, 5, 1.3, 0, 0, Math.PI * 2); ctx.fill();
   if (o.state !== 'dead') {
     const blink = t % 220 < 6 && o.state === 'idle';
-    // bochechas rosadas
-    ctx.fillStyle = col('rgba(255,150,170,0.5)');
-    ellipse(ctx, cx0 - 1.6, cy0 + 3.8, 1.7, 1.05);
-    ellipse(ctx, cx0 + 6.2, cy0 + 3.8, 1.7, 1.05);
-    for (const [ex, ec] of [[cx0 + 0.6, eFar], [cx0 + 5.0, eNear]]) {
-      // olho grande e redondo
-      ctx.fillStyle = '#17101f';
+    for (const [ex, ec] of [[cx0 + 0.4, eFar], [cx0 + 5.0, eNear]]) {
+      ctx.fillStyle = '#120d18';
       ctx.beginPath();
-      ctx.ellipse(ex, cy0 + 0.4, 2.15, blink ? 0.4 : 2.7, 0, 0, Math.PI * 2);
+      ctx.ellipse(ex, cy0 + 0.6, 1.9, blink ? 0.4 : 2.6, 0, 0, Math.PI * 2);
       ctx.fill();
       if (!blink && !flash) {
         ctx.save();
         ctx.globalCompositeOperation = 'lighter';
-        ctx.fillStyle = rgba(ec, 0.3);
-        ellipse(ctx, ex, cy0 + 0.9, 2.1, 2.3);
         ctx.fillStyle = ec;
-        ellipse(ctx, ex, cy0 + 1.1, 1.45, 1.6);
+        ellipse(ctx, ex + 0.3, cy0 - 0.6, 0.7, 0.7);
         ctx.restore();
-        ctx.fillStyle = '#ffffff';
-        ellipse(ctx, ex + 0.65, cy0 - 0.5, 0.6, 0.6);
-        ellipse(ctx, ex - 0.55, cy0 + 1.7, 0.3, 0.3);
       }
     }
   }
