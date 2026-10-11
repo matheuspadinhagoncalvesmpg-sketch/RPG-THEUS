@@ -122,7 +122,9 @@ export class AIDirector {
       bossHp: boss ? +(boss.hp / boss.maxHp).toFixed(2) : null,
     };
     try {
-      const r = await fetch('api/ai/director', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ state }) });
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 6000); // rede ruim nunca pode travar o planejamento
+      const r = await fetch('api/ai/director', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ state }), signal: ctrl.signal }).finally(() => clearTimeout(timer));
       if (!r.ok) throw new Error(r.status);
       const t = await r.json();
       // A resposta chega depois: só aplica se ainda estamos na mesma luta.
@@ -176,11 +178,14 @@ export class AIDirector {
     const hist = (this.histories[npcId] = this.histories[npcId] || []);
     hist.push({ who: 'player', text: message });
     const progress = { abilities: g.save.abilities, bosses: g.save.bosses, geo: g.save.geo, room: g.room.name };
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 14000);
     const r = await fetch('api/ai/npc', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ npc: npcId, message, history: hist.slice(-7, -1), progress }),
-    });
+      signal: ctrl.signal,
+    }).finally(() => clearTimeout(timer));
     if (!r.ok) throw new Error(r.status);
     const { reply } = await r.json();
     hist.push({ who: 'npc', text: reply });

@@ -5,8 +5,9 @@ import { rand } from './util.js';
 import { NPCS } from './dialog.js';
 import {
   drawNPC, drawLoreStone, drawOrb, drawGeoRock, drawGeo, drawCampfire, drawTombstone,
-  drawLifeCrystal, drawResourceNode, drawResourceIcon, drawBuildDeco,
+  drawLifeCrystal, drawResourceNode, drawResourceIcon, drawBuildDeco, drawCloakPost, drawMarkA,
 } from './art.js';
+import { CAPES, CAPE_ORDER, capeNote } from './story.js';
 
 class Entity {
   constructor(x, y) { this.x = x; this.y = y; this.t = Math.floor(rand(0, 100)); this.dead = false; }
@@ -35,10 +36,53 @@ export class NPC extends Entity {
   draw(ctx, game) { drawNPC(ctx, this.id, this.x, this.y, this.t, game.player.cx < this.x ? -1 : 1); }
 }
 
+// Pedra, placa ou inscrição. A entrada pode ser texto, lista de falas, ou { lines, flag }
+// (a "flag" marca no save que o jogador viu aquilo, e a história passa a depender disso).
 export class LoreStone extends Entity {
-  constructor(x, y, text) { super(x, y); this.text = text; this.label = 'Ler'; }
-  interact(game) { game.showDialog(null, [this.text]); }
+  constructor(x, y, entry) { super(x, y); this.entry = entry; this.label = 'Ler'; }
+  interact(game) {
+    const t = this.entry;
+    const lines = typeof t === 'string' ? [t] : Array.isArray(t) ? t : t.lines;
+    const flag = t && t.flag;
+    game.showDialog(null, lines, flag ? () => { game.save.talked[flag] = true; game.persist(); } : null);
+  }
   draw(ctx, game) { drawLoreStone(ctx, this.x, this.y, this.t, AREAS[game.room.area]); }
+}
+
+// A capa de um Errante que veio antes, ao lado de uma fogueira (com um bilhete no bolso).
+export class CloakPost extends Entity {
+  constructor(x, y, key) { super(x, y); this.key = key; this.label = 'Ler'; }
+  interact(game) { game.showDialog(null, [capeNote(this.key)]); }
+  draw(ctx) { drawCloakPost(ctx, this.x, this.y, CAPES[this.key].color, this.t); }
+}
+
+// As sete capas do corredor do Trono, mais uma estaca vazia (a sua).
+export class SevenCloaks extends Entity {
+  constructor(x, y) { super(x, y); this.label = 'Ler'; }
+  near(p) { return Math.abs(p.cx - (this.x + 78)) < 110 && Math.abs(p.y + p.h - this.y) < 40; }
+  interact(game) {
+    game.showDialog(null, ['Sete capas penduradas em estacas, uma ao lado da outra: vermelha, verde, roxa, laranja, rosa, preta, bege.', 'Na estaca mais perto da porta, uma oitava, vazia.']);
+  }
+  draw(ctx) {
+    CAPE_ORDER.forEach((k, i) => drawCloakPost(ctx, this.x + i * 26, this.y, CAPES[k].color, this.t + i * 9));
+    drawCloakPost(ctx, this.x + 7 * 26, this.y, '#000', this.t, true);
+  }
+}
+
+// O "A" minúsculo entalhado por Alva criança: a mão do herói reconhece sem saber por quê.
+export class MarkA extends Entity {
+  constructor(x, y, id) { super(x, y); this.id = id; }
+  update(game) {
+    this.t++;
+    if (!game.save.marcas[this.id] && this.near(game.player, 36, 44)) {
+      game.save.marcas[this.id] = true;
+      game.persist();
+      game.audio.play('pickup_small');
+      game.particles.burst(this.x, this.y - 10, 10, { color: ['#ffd27a', '#ffffff'], speed: 2, life: 40, glow: true, grav: -0.03 });
+      game.ui.toast('Um "A" minúsculo, entalhado por mãos pequenas. Sua mão treme.', 3500);
+    }
+  }
+  draw(ctx, game) { drawMarkA(ctx, this.x, this.y, this.t, !!game.save.marcas[this.id]); }
 }
 
 export class AbilityPickup extends Entity {
@@ -226,7 +270,15 @@ export function spawnRoomEntities(room, save) {
     const { x, y } = at(e);
     switch (e.ch) {
       case 'B': list.push(new Campfire(x, y)); break;
-      case 'N': list.push(new NPC(x, y, room.npcs[e.index])); break;
+      case 'N': {
+        const who = room.npcs[e.index];
+        if (who === 'oren' && save.base && save.base.smith) break; // Oren se mudou para o Lar
+        list.push(new NPC(x, y, who));
+        break;
+      }
+      case 'v': if (room.cape) list.push(new CloakPost(x, y, room.cape)); break;
+      case 'V': list.push(new SevenCloaks(x, y)); break;
+      case 'a': list.push(new MarkA(x, y, `${room.id}:${e.tx},${e.ty}`)); break;
       case 'L': list.push(new LoreStone(x, y, room.lore[e.index])); break;
       case 'A': if (!save.abilities[room.ability]) list.push(new AbilityPickup(x, y, room.ability)); break;
       case 'M': if (!save.collected[e.id]) list.push(new LifeCrystal(x, y, e.id)); break;
@@ -237,7 +289,10 @@ export function spawnRoomEntities(room, save) {
         if (NODE_CHARS[e.ch]) list.push(new ResourceNode(x, y, NODE_CHARS[e.ch]));
     }
   }
-  if (room.id === 'planicie_lar' && save.base && save.base.smith) list.push(new NPC(34 * TILE + TILE / 2, 13 * TILE, 'smith'));
+  if (room.id === 'planicie_lar' && save.base && save.base.smith) {
+    list.push(new NPC(34 * TILE + TILE / 2, 13 * TILE, 'smith'));
+    list.push(new NPC(30 * TILE + TILE / 2, 13 * TILE, 'oren'));
+  }
   for (const [idx, id] of room.placed) {
     const ent = makeBuilt(room, idx, id);
     if (ent) list.push(ent);

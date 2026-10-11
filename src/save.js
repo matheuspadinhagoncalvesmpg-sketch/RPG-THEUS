@@ -34,23 +34,38 @@ export function newSave(profile) {
     items: {},
     charms: { owned: {}, equipped: [] },
     chests: {},
+    brasas: {},
+    marcas: {},
     base: { smith: false, raids: 0 },
     playTime: 0,
     finished: false,
   };
 }
 
+// Lê o save; se o principal estiver corrompido (celular sem espaço, aba fechada no meio da escrita),
+// usa a cópia de segurança em vez de apagar o progresso.
+function readRaw() {
+  for (const k of [KEY, KEY + '_bak']) {
+    try {
+      const raw = localStorage.getItem(k);
+      if (!raw) continue;
+      const s = JSON.parse(raw);
+      if (s && s.v === 2) return s;
+    } catch (e) { /* tenta a cópia */ }
+  }
+  return null;
+}
+
 export function loadSave() {
   try {
-    const raw = localStorage.getItem(KEY);
-    if (!raw) return null;
-    const s = JSON.parse(raw);
-    if (!s || s.v !== 2) return null;
+    const s = readRaw();
+    if (!s) return null;
     const base = newSave(s.profile);
     const ch = s.charms || {};
     return {
       ...base, ...s, inv: { ...base.inv, ...(s.inv || {}) }, builds: s.builds || {}, base: { ...base.base, ...(s.base || {}) },
       charms: { owned: { ...(ch.owned || {}) }, equipped: [...(ch.equipped || [])] },
+      brasas: { ...(s.brasas || {}) }, marcas: { ...(s.marcas || {}) },
     };
   } catch (e) {
     return null;
@@ -58,11 +73,16 @@ export function loadSave() {
 }
 
 export function writeSave(save) {
+  try {
+    const prev = localStorage.getItem(KEY);
+    // A cópia só é trocada se o save atual está íntegro.
+    if (prev) { JSON.parse(prev); localStorage.setItem(KEY + '_bak', prev); }
+  } catch (e) { /* save anterior inválido: mantém a cópia antiga */ }
   try { localStorage.setItem(KEY, JSON.stringify(save)); } catch (e) { /* armazenamento indisponível */ }
 }
 
 export function clearSave() {
-  try { localStorage.removeItem(KEY); } catch (e) { /* ok */ }
+  try { localStorage.removeItem(KEY); localStorage.removeItem(KEY + '_bak'); } catch (e) { /* ok */ }
 }
 
 const coarse = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;

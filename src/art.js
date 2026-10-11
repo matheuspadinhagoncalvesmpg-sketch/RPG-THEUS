@@ -674,3 +674,39 @@ export function drawBuildDeco(ctx, kind, x, y, t, accent) {
   }
   ctx.restore();
 }
+
+// Capa pendurada numa estaca (uma por Errante que veio antes).
+export function drawCloakPost(ctx, x, y, color, t, hollow = false) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.strokeStyle = '#5a3a22'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -34); ctx.moveTo(-6, -32); ctx.lineTo(6, -32); ctx.stroke();
+  if (!hollow) {
+    const sw = Math.sin(t * 0.04) * 1.6;
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(-6, -31); ctx.lineTo(6, -31);
+    ctx.quadraticCurveTo(8 + sw, -18, 6 + sw * 1.4, -8);
+    ctx.lineTo(2 + sw, -10); ctx.lineTo(-1 + sw, -6); ctx.lineTo(-4 + sw, -10); ctx.lineTo(-6 + sw * 1.4, -8);
+    ctx.quadraticCurveTo(-8 + sw, -18, -6, -31);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    ctx.fillRect(0, -30, 6, 22);
+  }
+  ctx.restore();
+}
+
+// O "A" entalhado por mãos pequenas.
+export function drawMarkA(ctx, x, y, t, found) {
+  ctx.save();
+  ctx.translate(x, y - 10);
+  if (!found) {
+    const g = ctx.createRadialGradient(0, 0, 1, 0, 0, 16);
+    g.addColorStop(0, `rgba(255,214,120,${0.22 + Math.sin(t * 0.06) * 0.1})`); g.addColorStop(1, 'rgba(255,214,120,0)');
+    ctx.fillStyle = g; ctx.fillRect(-16, -16, 32, 32);
+  }
+  ctx.strokeStyle = found ? 'rgba(255,230,170,0.55)' : 'rgba(255,230,170,0.95)';
+  ctx.lineWidth = 1.6; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.beginPath(); ctx.moveTo(-4.5, 5); ctx.lineTo(0, -6); ctx.lineTo(4.5, 5); ctx.moveTo(-2.5, 1); ctx.lineTo(2.5, 1); ctx.stroke();
+  ctx.restore();
+}

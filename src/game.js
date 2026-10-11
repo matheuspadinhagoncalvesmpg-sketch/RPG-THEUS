@@ -15,6 +15,7 @@ import { Particles } from './fx.js';
 import { Renderer } from './render.js';
 import { AIDirector } from './ai.js';
 import { writeSave } from './save.js';
+import { BOSS_LINES } from './story.js';
 import { overlap, sign, clamp, rand } from './util.js';
 
 const STEP = 1000 / 60;
@@ -369,7 +370,7 @@ export class Game {
       this.hitEnemy(e, this.swordDamage(), kx, ky);
       if (!enemyHit) this.ai.record(dir);
       enemyHit = true;
-      if (dir === 'down') pogo = true;
+      if (dir === 'down') { pogo = true; if (e.isBoss) this.bossLine(e, 'pogo'); }
       this.soul = Math.min(SOUL_MAX, this.soul + Math.round(SOUL_PER_HIT * (this.hasCharm('alma_faminta') ? 1.5 : 1)));
       const hx = clamp(p.cx + (dir === 'side' ? p.facing * 30 : 0), e.x, e.x + e.w);
       const hy = clamp(dir === 'up' ? p.y - 20 : dir === 'down' ? p.y + p.h + 20 : p.cy, e.y, e.y + e.h);
@@ -465,9 +466,18 @@ export class Game {
     this.raids.checkSmith();
   }
 
+  // Fala curta de um chefe (uma vez por luta): aparece como legenda.
+  bossLine(boss, key) {
+    const L = BOSS_LINES[boss.key];
+    if (!L || !L[key] || boss.spoke[key]) return;
+    boss.spoke[key] = true;
+    this.ui.toast(`${L.who}: "${L[key]}"`, 2600);
+  }
+
   spawnSmith() {
     if (this.room.id !== 'planicie_lar' || this.entities.some((e) => e.id === 'smith')) return;
     this.entities.push(new NPC(34 * TILE + TILE / 2, 13 * TILE, 'smith'));
+    this.entities.push(new NPC(30 * TILE + TILE / 2, 13 * TILE, 'oren'));
     this.particles.burst(34 * TILE + TILE / 2, 12 * TILE, 20, { color: ['#ffd27a', '#ffffff'], speed: 3, life: 40, glow: true });
   }
 
@@ -633,6 +643,7 @@ export class Game {
     p.dead = true;
     this.state = 'dead';
     this.ai.onDeath(this.room.id);
+    this.deathCount = (this.deathCount || 0) + 1;
     this.deathTimer = 110;
     this.audio.play('death');
     this.input.vibrate(200);
@@ -651,6 +662,7 @@ export class Game {
     this.ui.resetHud();
     this.ui.updateHud(this);
     if (this.save.shade) setTimeout(() => this.ui.toast('Sua lápide guarda as moedas perdidas. Volte até ela.'), 900);
+    else setTimeout(() => this.ui.toast(this.deathCount % 2 ? 'Você esquece... por um instante.' : 'Alguém lembrou.'), 900);
   }
 
   dropGeo(x, y, amount) {
@@ -769,10 +781,13 @@ export class Game {
     p.vx = p.vy = 0;
     this.masks = this.save.masksMax;
     this.save.bench = { room: this.room.id, x: p.x, y: p.y };
+    const bid = `${this.room.id}:${Math.round(bench.x)}`;
+    const lembrada = !!this.save.brasas[bid];
+    this.save.brasas[bid] = true;
     this.audio.play('bench');
     this.particles.burst(bench.x, bench.y - 20, 16, { color: ['#ffd27a', '#ffffff'], speed: 2.5, life: 40, glow: true, grav: -0.03 });
     this.persist();
-    this.ui.toast('Descansando... jornada salva');
+    this.ui.toast(lembrada ? 'A brasa ainda lembra.' : 'A brasa lembrou de você.');
     this.ui.updateHud(this);
   }
 
@@ -856,14 +871,20 @@ export class Game {
     this.audio.intense = false;
     this.persist();
     setTimeout(() => this.audio.play('door'), 900);
-    if (key === 'tide') setTimeout(() => this.acquireCharm('mare_viva'), 1700);
-    if (key === 'king') {
-      this.save.finished = true;
-      this.persist();
-      setTimeout(() => { if (this.onEnding) this.onEnding(); }, 3200);
-    } else {
-      setTimeout(() => this.ui.toast('O caminho está livre.'), 1500);
-    }
+    const L = BOSS_LINES[key];
+    const depois = () => {
+      if (key === 'tide') this.acquireCharm('mare_viva');
+      else if (key === 'king') {
+        this.save.finished = true;
+        this.persist();
+        if (this.onEnding) this.onEnding();
+      } else this.ui.toast('O caminho está livre.');
+    };
+    // Últimas palavras do chefe, depois do efeito de morte.
+    setTimeout(() => {
+      if (L && L.death && this.state === 'play') this.showDialog(L.who, L.death, depois);
+      else depois();
+    }, 1800);
   }
 
   // ───────── Menus ─────────

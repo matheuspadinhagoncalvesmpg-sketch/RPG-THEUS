@@ -1,3 +1,4 @@
+import { VISOES } from './story.js';
 // Mundo de Vésper: cada sala ocupa um retângulo numa grade global de blocos.
 // Salas vizinhas se conectam automaticamente pelas aberturas nas bordas.
 //
@@ -38,10 +39,12 @@ const DEFS = [
       b.rect(0, 0, 2, 13);
       b.rect(36, 12, 3, 1);
       b.set(3, 12, 'r').set(35, 12, 'w').set(40, 12, 'w').set(42, 12, 'r');
-      b.set(37, 11, 'L');
+      b.set(37, 11, 'L').set(8, 12, 'L').set(9, 12, 'a');
     },
     lore: [
-      'Uma placa de madeira cravada no chão:\n"Terras livres. Corte árvores, quebre pedras e construa aqui o seu lar."\n(Aperte B ou o botão de martelo para construir.)',
+      ['Uma placa de madeira cravada no chão:\n"Terras livres. Corte árvores, quebre pedras e construa aqui o seu lar."\n(Aperte B ou o botão de martelo para construir.)',
+       'Embaixo, um selo mais antigo, quase apagado:\n"Selo da Casa da Aurora. Honra à família da criança escolhida."'],
+      'Pedras de uma fundação, quase enterradas na terra. Numa delas, um "A" minúsculo, entalhado por mãos pequenas.',
     ],
   },
   {
@@ -53,11 +56,13 @@ const DEFS = [
       b.rect(11, 12, 7, 1).rect(13, 11, 3, 1);
       b.plat(20, 9, 4).set(22, 8, '$');
       b.rect(30, 12, 3, 1);
-      b.set(7, 12, 'L').set(9, 12, 'S').set(26, 12, 'c');
+      b.set(4, 12, 'L').set(7, 12, 'L').set(9, 12, 'S').set(26, 12, 'c');
       b.set(28, 12, 'w').set(34, 12, 'r');
     },
     lore: [
-      'Uma pedra antiga, gasta pelo vento:\n"VÉSPER — Quando a Coroa da Aurora voltar ao trono, o dia retornará."',
+      'Sete círculos de terra queimada, um ao lado do outro. O oitavo é o seu.',
+      ['Uma pedra antiga, gasta pelo vento. Duas palavras se sobrepõem: ALVORADA, riscada, e VÉSPER, entalhada por cima, com mão trêmula.',
+       '"VÉSPER — Quando a Coroa da Aurora voltar ao trono, o dia retornará."'],
     ],
   },
   {
@@ -68,9 +73,10 @@ const DEFS = [
       b.rect(22, 13, 3, 3, 'X');
       b.set(4, 12, 'N').set(9, 12, 'B').set(15, 12, 'N');
       b.plat(28, 9, 5).set(30, 8, '$');
-      b.set(33, 12, 'h').set(37, 12, 'c').set(19, 12, 'w');
+      b.set(33, 12, 'h').set(37, 12, 'c').set(19, 12, 'w').set(11, 12, 'v');
     },
     npcs: ['oren', 'mira'],
+    cape: 'vermelha',
   },
   {
     id: 'campos_moinho', name: 'Penhasco do Moinho', area: 'campos',
@@ -97,7 +103,7 @@ const DEFS = [
       b.rect(12, 13, 4, 1, '^');
       b.rect(20, 10, 4, 3);
       b.plat(27, 8, 4).plat(32, 5, 4);
-      b.set(34, 4, 'M');
+      b.set(34, 4, 'M').set(35, 4, 'a');
       b.set(21, 9, 'p').set(8, 12, 'c').set(30, 12, 'c').set(17, 6, 'f');
       b.set(5, 12, 'w').set(25, 12, 'w');
     },
@@ -116,11 +122,12 @@ const DEFS = [
       b.rect(4, 21, 2, 4, 'X');
       b.set(2, 24, 'A');
       b.plat(13, 16, 4).plat(20, 19, 4).plat(16, 22, 4);
-      b.set(7, 12, 'N');
+      b.set(7, 12, 'N').set(4, 12, 'B').set(2, 12, 'v');
       b.set(18, 8, 'f').set(14, 24, 'h').set(26, 24, 'p');
     },
     npcs: ['eco'],
     ability: 'spell',
+    cape: 'verde',
   },
   {
     id: 'bosque_arena', name: 'Clareira do Cavaleiro', area: 'bosque',
@@ -131,9 +138,10 @@ const DEFS = [
       b.rect(0, 13, 32, 3);
       b.rect(1, 9, 1, 4, 'D').rect(30, 9, 1, 4, 'D');
       b.plat(6, 9, 4).plat(22, 9, 4);
-      b.set(24, 12, 'K');
+      b.set(24, 12, 'K').set(4, 12, 'L');
     },
     boss: 'moss',
+    lore: ['Uma espada de madeira, minúscula, fincada no chão. Alguém a deixou aqui como quem deixa um recado.'],
   },
   {
     id: 'santuario_vento', name: 'Santuário do Vento', area: 'bosque',
@@ -144,10 +152,12 @@ const DEFS = [
       b.rect(21, 0, 1, 16);
       b.rect(0, 13, 22, 3);
       b.rect(7, 11, 3, 2).set(8, 10, 'A');
-      b.set(15, 12, 'B').set(18, 12, 'L');
+      b.set(15, 12, 'B').set(18, 12, 'L').set(13, 12, 'v');
     },
     ability: 'dash',
-    lore: ['Gravado no altar:\n"Quem corre com o vento jamais cai no abismo. Siga para o alto, além do moinho."'],
+    cape: 'roxa',
+    lore: [['Gravado no altar:\n"Quem corre com o vento jamais cai no abismo. Siga para o alto, além do moinho."',
+            'Em letra pequenina, no rodapé:\n"Guardado por Brandão, Capitão. Que ninguém o toque até que a centelha volte."']],
   },
 
   // ───────────── RUÍNAS SUSPENSAS ─────────────
@@ -165,7 +175,23 @@ const DEFS = [
       b.plat(34, 9, 5);
       b.set(3, 13, '$').set(28, 8, 'f').set(39, 13, 'g');
       b.set(26, 13, 'r').set(42, 13, 'o');
+      b.set(4, 13, 'L').set(12, 13, 'L').set(28, 13, 'L').set(44, 13, 'L');
     },
+    lore: [
+      ['Uma estátua quebrada. Na base:\n"Aurélia. A que cantava para o Sol. 121 anos de Coroa."',
+       '"Solano. Ergueu a primeira ponte. 118 anos de Coroa."',
+       '"Dalva. Amava as manhãs mais que o povo. 112 anos de Coroa."'],
+      ['"Hélio. Mandou plantar jardins no alto. 105 anos de Coroa."',
+       '"Cecília. Pediu à Marinheira que encurtasse a primeira noite. 99 anos de Coroa."',
+       '"Rúben. Pôs o Dízimo por escrito. 92 anos de Coroa."'],
+      ['"Lídia. Criou a Guarda da Alvorada. 85 anos de Coroa."',
+       '"Tadeu. Mandou forjar a Coroa nova. 77 anos de Coroa."',
+       '"Marta. Não deixou ninguém vê-la envelhecer. 69 anos de Coroa."'],
+      ['"Iago. Chamou o Dízimo de Dever. 61 anos de Coroa."',
+       '"Sibila. A última a ver o sol nascer sem pressa. 54 anos de Coroa."',
+       'A última estátua está sem placa. Alguém riscou os olhos dela com um prego.',
+       'Mais adiante, um pedestal vazio, com um vão em forma de máscara.'],
+    ],
   },
   {
     id: 'ruinas_torre', name: 'Torre dos Ventos', area: 'ruinas',
@@ -190,10 +216,13 @@ const DEFS = [
       b.rect(0, 12, 30, 2);
       b.rect(24, 10, 3, 2).set(25, 9, 'A');
       b.plat(12, 8, 4).set(13, 7, '$');
-      b.set(5, 11, 'B').set(10, 11, 'L').set(17, 11, 'g').set(21, 11, 'o');
+      b.set(5, 11, 'B').set(10, 11, 'L').set(17, 11, 'g').set(21, 11, 'o').set(7, 11, 'v');
     },
     ability: 'wallJump',
-    lore: ['Arranhões profundos na pedra:\n"Os antigos escaladores subiam a Torre sem degraus. As paredes eram seu caminho."'],
+    cape: 'laranja',
+    lore: [['Arranhões profundos na pedra:\n"Os antigos escaladores subiam a Torre sem degraus. As paredes eram seu caminho."',
+            'Mais fundo na pedra, outra mão arranhou uma carta:\n"Eu cortei os degraus. Ele pediu e eu cortei. Não por medo da Coroa: por medo de que uma criança subisse e o Trono a aceitasse."',
+            '"Deixei as garras aqui. Para quem vier pelo coração, e não pela coroa. — Íris, que subiu todas as paredes menos esta."']],
   },
   {
     id: 'ruinas_pico', name: 'Pico das Nuvens', area: 'ruinas',
@@ -205,7 +234,10 @@ const DEFS = [
       b.plat(4, 11, 4).plat(8, 8, 3).set(9, 7, 'M');
       b.rect(22, 13, 4, 1, '^');
       b.set(20, 8, 'f').set(28, 6, 'f').set(29, 13, 'g').set(32, 13, 'o');
+      b.set(3, 13, 'L').set(5, 13, 'v').set(7, 13, 'B').set(10, 7, 'a');
     },
+    cape: 'preta',
+    lore: ['Um cobertor de criança, dobrado com cuidado sobre uma pedra. Alguém vinha aqui para ficar a sós.'],
   },
   {
     id: 'trono', name: 'Trono do Crepúsculo', area: 'ruinas',
@@ -217,7 +249,7 @@ const DEFS = [
       b.rect(0, 16, 34, 2);
       b.rect(1, 11, 1, 5, 'D');
       b.plat(6, 12, 5).plat(23, 12, 5);
-      b.set(26, 15, 'K');
+      b.set(26, 15, 'K').set(8, 15, 'V');
     },
     boss: 'king',
   },
@@ -234,8 +266,9 @@ const DEFS = [
       b.rect(0, 24, 20, 2);
       b.plat(4, 21, 4).plat(10, 18, 4).plat(4, 15, 4);
       b.plat(10, 12, 4).plat(4, 9, 4).plat(9, 6, 4).plat(8, 3, 3);
-      b.set(6, 23, 'B').set(13, 23, 'c').set(14, 10, 'f').set(15, 23, 'k');
+      b.set(6, 23, 'B').set(8, 23, 'v').set(13, 23, 'c').set(14, 10, 'f').set(15, 23, 'k');
     },
+    cape: 'rosa',
   },
   {
     id: 'cristal_galeria', name: 'Galeria Cintilante', area: 'cristal',
@@ -261,11 +294,14 @@ const DEFS = [
       b.rect(0, 10, 24, 6);
       b.rect(19, 10, 2, 6, '.'); // poço para os Jardins Submersos
       b.rect(14, 8, 4, 2).set(15, 7, 'A');
-      b.plat(19, 5, 3).set(20, 4, 'M');
-      b.set(6, 9, 'L').set(12, 9, 'k').set(21, 9, 'k');
+      b.plat(19, 5, 3).set(20, 4, 'M').set(21, 4, 'a');
+      b.set(6, 9, 'L').set(9, 9, 'L').set(12, 9, 'k').set(21, 9, 'k');
     },
     ability: 'doubleJump',
-    lore: ['Uma inscrição brilha no cristal:\n"Das cinzas do último pôr do sol nasceram asas. Quem as veste toca o céu duas vezes."'],
+    lore: [
+      'Uma inscrição brilha no cristal:\n"Das cinzas do último pôr do sol nasceram asas. Quem as veste toca o céu duas vezes."',
+      { lines: VISOES, flag: 'visoes' },
+    ],
   },
 
   // ───────────── JARDINS SUBMERSOS ─────────────
@@ -295,7 +331,7 @@ const DEFS = [
       b.rect(10, 11, 2, 5).rect(22, 8, 2, 8).rect(33, 12, 3, 4);
       b.rect(25, 5, 4, 1).set(27, 4, 'C');
       b.set(6, 6, 'q').set(16, 10, 'q').set(29, 9, 'q').set(36, 6, 'q');
-      b.set(14, 15, 'k').set(30, 15, 'o');
+      b.set(14, 15, 'k').set(30, 15, 'o').set(5, 15, 'a');
     },
     charm: 'vento_longo',
   },
@@ -309,9 +345,10 @@ const DEFS = [
       b.rect(1, 13, 32, 2, '~');
       b.rect(28, 12, 5, 3);
       b.plat(6, 9, 4).plat(20, 9, 4);
-      b.set(22, 14, 'K').set(30, 11, 'B');
+      b.set(22, 14, 'K').set(30, 11, 'B').set(28, 11, 'v');
     },
     boss: 'tide',
+    cape: 'bege',
   },
   {
     id: 'desafio_espinhos', name: 'Prova das Lâminas', area: 'jardins',
@@ -322,8 +359,9 @@ const DEFS = [
       b.rect(1, 14, 18, 1, '^');
       b.plat(17, 13, 2).plat(12, 11, 2).plat(7, 9, 2);
       b.rect(1, 7, 4, 1);
-      b.set(2, 6, 'C').set(24, 14, 'T');
+      b.set(2, 6, 'C').set(24, 14, 'T').set(4, 6, 'a').set(19, 14, 'L');
     },
+    lore: ['PROVA DO ALVA\nQuem passar em 18 segundos ganha uma medalha.\n(O Brandão fez em 19.)'],
     charm: 'lamina_rapida',
     challenge: { seconds: 18, reward: 120 },
   },

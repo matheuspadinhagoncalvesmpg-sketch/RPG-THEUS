@@ -36,16 +36,21 @@ class PollTransport {
     const r = await fetch('api/mp/connect', { method: 'POST' });
     if (!r.ok) throw new Error('poll');
     const { sid, secret } = await r.json();
-    this.sid = sid; this.secret = secret; this.out = []; this.closed = false;
+    this.sid = sid; this.secret = secret; this.out = []; this.closed = false; this.fails = 0;
     const tick = async () => {
       if (this.closed) return;
       const msgs = this.out; this.out = [];
       try {
         const res = await fetch('api/mp/poll', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sid, secret, msgs }) });
         if (res.status === 410) { this.closed = true; return onClose(); }
+        if (!res.ok) throw new Error('http');
         const data = await res.json();
         for (const m of data.msgs || []) onMsg(m);
-      } catch (e) { /* rede instável: tenta de novo */ }
+        this.fails = 0;
+      } catch (e) {
+        // Rede instável: tenta de novo, mas ~7 s seguidos sem resposta = conexão perdida.
+        if (++this.fails >= 45) { this.closed = true; return onClose(); }
+      }
       setTimeout(tick, 90);
     };
     tick();
@@ -121,6 +126,8 @@ export class Net {
 
   async connect({ create, code }) {
     if (this.online) this.disconnect();
+    this.manualLeave = false;
+    clearInterval(this.keepAlive);
     const g = this.game;
     const handlers = [(m) => this.onMessage(m), () => this.lost()];
     try {
@@ -141,6 +148,8 @@ export class Net {
   }
 
   disconnect() {
+    this.manualLeave = true;
+    clearInterval(this.keepAlive);
     if (!this.online && !this.transport) return;
     try { this.transport && this.transport.close(); } catch (e) { /* ok */ }
     this.transport = null;
@@ -149,8 +158,25 @@ export class Net {
 
   lost() {
     if (!this.online) return;
+    const code = this.code;
+    clearInterval(this.keepAlive);
     this.left();
-    this.game.ui.toast('Conexão com o mundo perdida. Voltando ao modo solo.', 4000);
+    this.game.ui.toast('Conexão perdida. Tentando voltar ao mundo...', 3500);
+    this.reconnect(code, 0);
+  }
+
+  // Volta sozinho ao mesmo mundo (4 tentativas): trocar de Wi-Fi para 4G não deve expulsar ninguém.
+  async reconnect(code, n) {
+    if (!code || n >= 4 || this.online || this.manualLeave) return;
+    await new Promise((r) => setTimeout(r, 1500 + n * 1500));
+    if (this.online || this.manualLeave) return;
+    try {
+      await this.connect({ code });
+      this.game.ui.toast(`Reconectado ao mundo ${code}`);
+    } catch (e) {
+      if (n >= 3) this.game.ui.toast('Não foi possível voltar ao mundo. Jogando solo.', 4000);
+      else this.reconnect(code, n + 1);
+    }
   }
 
   left() {
@@ -184,6 +210,9 @@ export class Net {
         g.applyWorldBuilds(m.builds || {});
         this.sendState(true);
         if (this.pending) { this.pending.resolve(m.code); this.pending = null; }
+        // Redes móveis derrubam conexões paradas (menu aberto, tela de diálogo): um "oi" a cada 20 s evita.
+        clearInterval(this.keepAlive);
+        this.keepAlive = setInterval(() => this.send({ t: 'ping' }), 20000);
         if (this.onChange) this.onChange();
         break;
       case 'error':

@@ -11,12 +11,20 @@ class Boss extends Enemy {
     this.state = 'intro';
     this.timer = 70;
     this.facing = -1;
+    this.spoke = {};
   }
   get phase2() { return this.hp <= this.maxHp / 2; }
   hurt(game, dmg) {
     if (this.state === 'intro' || this.dead) return;
     const before = this.phase2;
+    const f0 = this.hp / this.maxHp;
     this.hp -= dmg;
+    const f1 = this.hp / this.maxHp;
+    if (this.hp > 0) {
+      if (f0 > 0.75 && f1 <= 0.75) game.bossLine(this, 'q3');
+      if (f0 > 0.5 && f1 <= 0.5) game.bossLine(this, 'mid');
+      if (f0 > 0.25 && f1 <= 0.25) game.bossLine(this, 'low');
+    }
     game.damageText(this.cx, this.y, dmg, true);
     game.zoomPunch(0.025);
     this.flash = 5;
@@ -72,7 +80,7 @@ export class MossKnight extends Boss {
     switch (this.state) {
       case 'intro':
         this.face(game);
-        if (this.timer === 70) game.audio.play('roar');
+        if (this.timer === 70) { game.audio.play('roar'); game.bossLine(this, 'intro'); }
         if (--this.timer <= 0) this.idle(40, game);
         break;
       case 'idle': {
@@ -228,7 +236,7 @@ export class HollowKing extends Boss {
     switch (this.state) {
       case 'intro':
         this.face(game);
-        if (this.timer === 70) game.audio.play('roar');
+        if (this.timer === 70) { game.audio.play('roar'); game.bossLine(this, 'intro'); }
         if (--this.timer <= 0) this.idle(40, game);
         break;
       case 'idle': {
@@ -424,7 +432,7 @@ export class TideQueen extends Boss {
       case 'intro':
         this.face(game);
         this.glide(room.pxW * 0.62, homeY, 2.6);
-        if (this.timer === 70) game.audio.play('roar');
+        if (this.timer === 70) { game.audio.play('roar'); game.bossLine(this, 'intro'); }
         if (--this.timer <= 0) this.idle(40, game);
         break;
       case 'idle':
