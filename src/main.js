@@ -226,7 +226,7 @@ function previewLoop() {
   ctx.beginPath(); ctx.ellipse(0, 1, 12, 2.5, 0, 0, Math.PI * 2); ctx.fill();
   const phase = Math.floor(t / 150) % 3;
   const state = phase === 1 ? 'run' : 'idle';
-  drawHero(ctx, 0, 0, { profile, facing: 1, state, t });
+  drawHero(ctx, 0, 0, { profile, classe: profile.classe, facing: 1, state, t });
   previewRaf = requestAnimationFrame(previewLoop);
 }
 
