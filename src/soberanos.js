@@ -1,8 +1,10 @@
 // Os Soberanos: reis e rainhas de Alvorada, presos pelo Regente e libertados ao serem derrotados.
 // Ver docs/historia/10-revisao-reis-e-reinos.md §2. Cada um reaproveita o corpo de um chefe existente
-// (voo, investida, golem...) com nome, visual e um ataque próprio.
+// (voo, investida, golem...) com nome, visual e uma mecânica própria:
+// Dalva canta (só se fere no silêncio), Rúben marca dívidas no chão, Lídia chama a Guarda,
+// Marta deixa reflexos que repetem o ataque, Sibila varre o salão com o Olhar.
 import { TILE } from './config.js';
-import { Projectile } from './enemies.js';
+import { Projectile, Crawler } from './enemies.js';
 import { rand, clamp } from './util.js';
 import { MossKnight } from './bosses.js';
 import { BesouroRei, GolemRachado, VespaRainha } from './minibosses.js';
@@ -89,56 +91,135 @@ function desenharColunas(ctx, boss, room) {
 function pronto(boss) { return boss.state !== 'intro' && !boss.dead; }
 
 // ───────────── DALVA, a Cantora do Amanhecer ─────────────
+// Mecânica: o Canto. Enquanto canta ela é invulnerável e solta anéis de som; no silêncio, fica exposta.
 export class Dalva extends VespaRainha {
   constructor(x, y) {
     super(x, y);
     this.key = 'sob_dalva'; this.title = 'Dalva, a Cantora do Amanhecer'; this.subtitle = 'III Soberana de Alvorada';
     this.hp = this.maxHp = 30; this.geo = 110; this.bloodColor = '#ffe9a8';
-    this.ring = 150; this.canto = 330;
+    this.cantando = false; this.ciclo = 120; this.coluna = 330;
+  }
+  hurt(game, dmg) {
+    if (this.cantando && pronto(this)) {
+      game.particles.ring(this.cx, this.cy, '#ffe9a8', 8, 4, 18);
+      game.audio.play('deny');
+      return;
+    }
+    super.hurt(game, dmg);
+  }
+  anel(game) {
+    const n = this.phase2 ? 10 : 7, off = rand(0, 6.28);
+    for (let i = 0; i < n; i++) { const a = off + (i / n) * 6.28; game.spawnProjectile(new Projectile(this.cx, this.cy, Math.cos(a) * 2.3, Math.sin(a) * 2.3, { kind: 'orb', r: 6, life: 150 })); }
+    game.audio.play('orb');
   }
   update(game) {
     super.update(game);
     this.rm = game.room;
     if (!pronto(this)) return;
     atualizarColunas(game, this);
-    if (--this.ring <= 0) {
-      const n = this.phase2 ? 10 : 7, off = rand(0, 6.28);
-      for (let i = 0; i < n; i++) { const a = off + (i / n) * 6.28; game.spawnProjectile(new Projectile(this.cx, this.cy, Math.cos(a) * 2.3, Math.sin(a) * 2.3, { kind: 'orb', r: 6, life: 150 })); }
-      game.audio.play('orb'); this.ring = this.phase2 ? 120 : 180;
+    if (--this.ciclo <= 0) {
+      this.cantando = !this.cantando;
+      this.ciclo = this.cantando ? (this.phase2 ? 100 : 90) : (this.phase2 ? 130 : 170);
+      if (this.cantando) { this.anel(game); this.meio = Math.floor(this.ciclo / 2); }
     }
-    if (--this.canto <= 0) { const px = game.player.cx; colunas(game, this, [px - 90, px, px + 90]); this.canto = this.phase2 ? 220 : 320; game.audio.play('tele'); }
+    if (this.cantando && this.meio && --this.meio === 0) this.anel(game);
+    if (--this.coluna <= 0) { const px = game.player.cx; colunas(game, this, [px - 90, px, px + 90]); this.coluna = this.phase2 ? 220 : 320; game.audio.play('tele'); }
   }
-  draw(ctx) { drawSoberano(ctx, this, { cor: '#f6d98a', coroa: 'raios', item: 'harpa', olho: 'rgba(255,214,120,0.95)' }); if (this.rm) desenharColunas(ctx, this, this.rm); }
+  draw(ctx) {
+    drawSoberano(ctx, this, { cor: '#f6d98a', coroa: 'raios', item: 'harpa', olho: 'rgba(255,214,120,0.95)' });
+    if (this.cantando) {
+      ctx.save(); ctx.globalCompositeOperation = 'lighter';
+      ctx.strokeStyle = 'rgba(255,233,168,0.7)'; ctx.lineWidth = 2;
+      for (let k = 0; k < 3; k++) { ctx.beginPath(); ctx.arc(this.cx, this.cy, 34 + ((this.t * 0.8 + k * 16) % 48), 0, 6.28); ctx.stroke(); }
+      ctx.restore();
+    }
+    if (this.rm) desenharColunas(ctx, this, this.rm);
+  }
 }
 
 // ───────────── RÚBEN, o Escrivão do Dízimo ─────────────
+// Mecânica: as Dívidas. Ele marca o chão com selos que explodem; é preciso sair deles a tempo.
 export class Ruben extends GolemRachado {
   constructor(x, y) {
     super(x, y);
     this.key = 'sob_ruben'; this.title = 'Rúben, o Escrivão do Dízimo'; this.subtitle = 'VI Soberano de Alvorada';
     this.hp = this.maxHp = 38; this.geo = 120; this.bloodColor = '#e0b873';
-    this.moedas = 130;
+    this.proximaDivida = 120; this.dividas = []; this.moedas = 170;
   }
   update(game) {
     super.update(game);
     if (!pronto(this)) return;
-    if (--this.moedas <= 0) {
+    const chao = this.y + this.h;
+    for (const d of this.dividas) {
+      d.t++;
+      if (d.t >= d.aviso && d.t < d.aviso + 20) game.hostileBox({ x: d.x - 32, y: chao - 84, w: 64, h: 84 });
+    }
+    this.dividas = this.dividas.filter((d) => d.t < d.aviso + 20);
+    if (--this.proximaDivida <= 0) {
+      const p = game.player, room = game.room;
+      const alvos = this.phase2 ? [-130, 0, 130] : [0, 120];
+      for (const dx of alvos) this.dividas.push({ x: clamp(p.cx + dx, 3 * TILE, room.pxW - 3 * TILE), t: 0, aviso: 62 });
+      game.audio.play('tele');
+      this.proximaDivida = this.phase2 ? 110 : 150;
+    }
+    if (this.phase2 && --this.moedas <= 0) {
       const p = game.player;
-      for (let i = -2; i <= 2; i++) game.spawnProjectile(new Projectile(p.cx + i * 46 + rand(-12, 12), 2 * TILE, 0, rand(1, 2.2), { kind: 'orb', r: 6, grav: 0.18, life: 200 }));
-      game.audio.play('shock');
-      this.moedas = this.phase2 ? 100 : 160;
+      for (let i = -1; i <= 1; i++) game.spawnProjectile(new Projectile(p.cx + i * 60 + rand(-12, 12), 2 * TILE, 0, rand(1, 2.2), { kind: 'orb', r: 6, grav: 0.18, life: 200 }));
+      this.moedas = 180;
     }
   }
-  draw(ctx) { drawSoberano(ctx, this, { cor: '#9a6a3a', coroa: 'livro', item: 'livro', chao: true, olho: 'rgba(255,200,100,0.95)' }); }
+  draw(ctx) {
+    drawSoberano(ctx, this, { cor: '#9a6a3a', coroa: 'livro', item: 'livro', chao: true, olho: 'rgba(255,200,100,0.95)' });
+    const chao = this.y + this.h;
+    for (const d of this.dividas) {
+      const vivo = d.t >= d.aviso, k = Math.min(1, d.t / d.aviso);
+      ctx.save(); ctx.globalCompositeOperation = 'lighter';
+      ctx.strokeStyle = vivo ? 'rgba(255,200,90,0.95)' : `rgba(255,200,90,${0.2 + k * 0.4})`; ctx.lineWidth = vivo ? 4 : 2;
+      ctx.beginPath(); ctx.ellipse(d.x, chao - 3, 32 * (vivo ? 1 : 0.4 + k * 0.6), 7, 0, 0, 6.28); ctx.stroke();
+      if (vivo) { ctx.fillStyle = 'rgba(255,220,120,0.55)'; ctx.fillRect(d.x - 32, chao - 84, 64, 84); }
+      ctx.restore();
+    }
+  }
 }
 
 // ───────────── LÍDIA, a Capitã da Guarda ─────────────
+// Mecânica: a Formação. Aos 66% e 33% da vida ela chama dois guardas e, enquanto eles vivem, quase não sofre dano.
 export class Lidia extends BesouroRei {
   constructor(x, y) {
     super(x, y);
     this.key = 'sob_lidia'; this.title = 'Lídia, a Capitã da Guarda'; this.subtitle = 'VII Soberana de Alvorada';
     this.hp = this.maxHp = 36; this.geo = 120; this.bloodColor = '#ffb0a0';
-    this.lanca = 170;
+    this.lanca = 170; this.guardas = []; this.marcos = [0.66, 0.33];
+  }
+  get protegida() { return this.guardas.some((g) => !g.dead); }
+  hurt(game, dmg) {
+    if (this.protegida && pronto(this)) {
+      game.particles.burst(this.cx, this.cy, 6, { color: ['#ffd36e', '#fff2b0'], speed: 3, life: 14 });
+      if (!this.avisou) { this.avisou = true; game.ui.toast('A Guarda protege a Capitã! Derrube os guardas.', 2600); }
+      dmg *= 0.25;
+    }
+    super.hurt(game, dmg);
+    if (this.dead || !this.marcos.length || this.hp / this.maxHp > this.marcos[0]) return;
+    this.marcos.shift();
+    this.chamarGuarda(game);
+  }
+  chamarGuarda(game) {
+    const room = game.room, chao = this.y + this.h;
+    this.avisou = false;
+    for (const lado of [-1, 1]) {
+      const g = new Crawler(clamp(this.cx + lado * 150, 3 * TILE, room.pxW - 3 * TILE), chao);
+      g.eid = 'g' + game.invSeq++;
+      g.inv = true; // não conta como guardião de baú nem volta ao descansar
+      this.guardas.push(g);
+      game.enemies.push(g);
+      game.particles.burst(g.cx, g.cy, 12, { color: ['#ffd36e', '#b8433f'], speed: 3, life: 24, glow: true });
+    }
+    game.audio.play('roar');
+    game.ui.toast('Em guarda! A Guarda não recua!', 2200);
+  }
+  die(game) {
+    for (const g of this.guardas) g.dead = true;
+    super.die(game);
   }
   update(game) {
     super.update(game);
@@ -150,62 +231,114 @@ export class Lidia extends BesouroRei {
       this.lanca = this.phase2 ? 110 : 170;
     }
   }
-  draw(ctx) { drawSoberano(ctx, this, { cor: '#8a2f3a', coroa: 'elmo', item: 'lanca', chao: true, escala: 1.15, olho: 'rgba(255,150,120,0.95)' }); }
+  draw(ctx) {
+    drawSoberano(ctx, this, { cor: '#8a2f3a', coroa: 'elmo', item: 'lanca', chao: true, escala: 1.15, olho: 'rgba(255,150,120,0.95)' });
+    if (this.protegida) {
+      ctx.save(); ctx.globalCompositeOperation = 'lighter';
+      ctx.strokeStyle = `rgba(255,211,110,${0.45 + Math.sin(this.t * 0.2) * 0.2})`; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(this.cx, this.cy, 44, 0, 6.28); ctx.stroke();
+      ctx.restore();
+    }
+  }
 }
 
 // ───────────── MARTA, a que Não Envelhecia ─────────────
+// Mecânica: os Reflexos. Cada vez que ela some, o lugar de onde saiu repete o ataque um instante depois.
 export class Marta extends VespaRainha {
   constructor(x, y) {
     super(x, y);
     this.key = 'sob_marta'; this.title = 'Marta, a que Não Envelhecia'; this.subtitle = 'IX Soberana de Alvorada';
     this.hp = this.maxHp = 32; this.geo = 120; this.bloodColor = '#bfe9ff';
-    this.piscar = 160;
+    this.piscar = 160; this.reflexos = [];
+  }
+  disparar(game, x, y) {
+    const p = game.player;
+    for (const a of [-0.35, 0, 0.35]) { const b = Math.atan2(p.cy - y, p.cx - x) + a; game.spawnProjectile(new Projectile(x, y, Math.cos(b) * 4, Math.sin(b) * 4, { kind: 'shard', r: 5, life: 130 })); }
   }
   update(game) {
     super.update(game);
-    if (!pronto(this) || this.state === 'dive' || this.state === 'diveWind') return;
+    if (!pronto(this)) return;
+    for (const r of this.reflexos) if (++r.t === r.espera) { this.disparar(game, r.x, r.y); game.particles.burst(r.x, r.y, 10, { color: ['#e8f4ff', '#bfe9ff'], speed: 3, life: 20, glow: true }); }
+    this.reflexos = this.reflexos.filter((r) => r.t <= r.espera + 10);
+    if (this.state === 'dive' || this.state === 'diveWind') return;
     if (--this.piscar <= 0) {
-      // teleporta para perto do herói e deixa um reflexo que atira
       const p = game.player, room = game.room;
       const nx = clamp(p.cx + (Math.random() < 0.5 ? -1 : 1) * rand(120, 200), 3 * TILE, room.pxW - 3 * TILE);
+      this.reflexos.push({ x: this.cx, y: this.cy, t: 0, espera: this.phase2 ? 50 : 70 });
       game.particles.burst(this.cx, this.cy, 14, { color: ['#e8f4ff', '#bfe9ff'], speed: 4, life: 24, glow: true });
       this.x = nx - this.w / 2;
       game.particles.burst(this.cx, this.cy, 14, { color: ['#e8f4ff', '#bfe9ff'], speed: 4, life: 24, glow: true });
       game.audio.play('tele');
-      for (const a of [-0.35, 0, 0.35]) { const b = Math.atan2(p.cy - this.cy, p.cx - this.cx) + a; game.spawnProjectile(new Projectile(this.cx, this.cy, Math.cos(b) * 4, Math.sin(b) * 4, { kind: 'shard', r: 5, life: 130 })); }
+      this.disparar(game, this.cx, this.cy);
       this.piscar = this.phase2 ? 100 : 160;
     }
   }
   draw(ctx) {
-    ctx.save(); ctx.globalAlpha *= 0.28;
-    for (const dx of [-46, 46]) { ctx.save(); ctx.translate(dx, 0); drawSoberano(ctx, this, { cor: '#bfe9ff', coroa: 'espelhos', item: 'espelho' }); ctx.restore(); }
-    ctx.restore();
+    for (const r of this.reflexos) {
+      if (r.t > r.espera) continue;
+      ctx.save(); ctx.globalAlpha *= 0.15 + 0.35 * (r.t / r.espera);
+      ctx.translate(r.x - this.cx, r.y - this.cy);
+      drawSoberano(ctx, this, { cor: '#bfe9ff', coroa: 'espelhos', item: 'espelho' });
+      ctx.restore();
+    }
     drawSoberano(ctx, this, { cor: '#bfe9ff', coroa: 'espelhos', item: 'espelho', olho: 'rgba(200,240,255,0.95)' });
   }
 }
 
 // ───────────── SIBILA, a Última Vigia ─────────────
+// Mecânica: o Olhar. Um feixe de luz trava no herói e varre o salão devagar; é preciso pular ou se esconder sob uma plataforma.
 export class Sibila extends VespaRainha {
   constructor(x, y) {
     super(x, y);
     this.key = 'sob_sibila'; this.title = 'Sibila, a Última Vigia'; this.subtitle = 'XI Soberana de Alvorada';
     this.hp = this.maxHp = 34; this.geo = 130; this.bloodColor = '#fff2b0';
-    this.luz = 180;
+    this.proximoOlhar = 150; this.olhar = null; this.luz = 200;
+  }
+  angulo(o) {
+    const k = Math.max(0, (o.t - o.aviso) / 46);
+    return o.a0 + o.dir * (-0.4 + 0.8 * Math.min(1, k));
   }
   update(game) {
     super.update(game);
     this.rm = game.room;
     if (!pronto(this)) return;
     atualizarColunas(game, this);
-    if (--this.luz <= 0) {
-      const room = game.room, p = game.player;
-      const n = this.phase2 ? 4 : 3;
-      colunas(game, this, Array.from({ length: n }, (_, i) => clamp(p.cx + (i - (n - 1) / 2) * 110 + rand(-24, 24), 2 * TILE, room.pxW - 2 * TILE)), 50);
+    const o = this.olhar;
+    if (o) {
+      o.t++;
+      if (o.t >= o.aviso && o.t < o.aviso + 46) {
+        const a = this.angulo(o);
+        for (let d = 30; d < 900; d += 22) {
+          const x = this.cx + Math.cos(a) * d, y = this.cy + Math.sin(a) * d;
+          if (x < 0 || x > game.room.pxW || y < 0 || y > game.room.pxH) break;
+          game.hostileBox({ x: x - 9, y: y - 9, w: 18, h: 18 });
+        }
+      } else if (o.t >= o.aviso + 46) this.olhar = null;
+    } else if (--this.proximoOlhar <= 0) {
+      const p = game.player;
+      this.olhar = { t: 0, aviso: this.phase2 ? 42 : 58, a0: Math.atan2(p.cy - this.cy, p.cx - this.cx), dir: Math.random() < 0.5 ? -1 : 1 };
       game.audio.play('tele');
-      this.luz = this.phase2 ? 170 : 240;
+      this.proximoOlhar = this.phase2 ? 150 : 230;
+    }
+    if (this.phase2 && --this.luz <= 0) {
+      const room = game.room, p = game.player;
+      colunas(game, this, [clamp(p.cx - 100, 2 * TILE, room.pxW - 2 * TILE), clamp(p.cx + 100, 2 * TILE, room.pxW - 2 * TILE)], 50);
+      this.luz = 260;
     }
   }
-  draw(ctx) { drawSoberano(ctx, this, { cor: '#f4eec8', coroa: 'olho', item: 'luneta', olho: 'rgba(255,255,200,0.95)' }); if (this.rm) desenharColunas(ctx, this, this.rm); }
+  draw(ctx) {
+    drawSoberano(ctx, this, { cor: '#f4eec8', coroa: 'olho', item: 'luneta', olho: 'rgba(255,255,200,0.95)' });
+    const o = this.olhar;
+    if (o) {
+      const vivo = o.t >= o.aviso, a = vivo ? this.angulo(o) : o.a0;
+      ctx.save(); ctx.globalCompositeOperation = 'lighter';
+      ctx.strokeStyle = vivo ? 'rgba(255,245,180,0.9)' : 'rgba(255,240,170,0.28)';
+      ctx.lineWidth = vivo ? 14 : 2; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(this.cx, this.cy); ctx.lineTo(this.cx + Math.cos(a) * 900, this.cy + Math.sin(a) * 900); ctx.stroke();
+      ctx.restore();
+    }
+    if (this.rm) desenharColunas(ctx, this, this.rm);
+  }
 }
 
 // ───────────── ELIAR, o Rei Verdadeiro ─────────────
