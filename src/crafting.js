@@ -121,6 +121,18 @@ export class CraftUI {
     });
   }
 
+  // ── Viagem rápida entre fogueiras já visitadas ──
+  openTravel() {
+    const g = this.game;
+    this.open('Viajar', 'As brasas se lembram umas das outras. Escolha uma fogueira onde você já descansou.', () => {
+      this.list.innerHTML = '';
+      const dest = Object.keys(g.save.brasas).map((k) => ({ k, b: g.benchFromKey(k) })).filter((d) => d.b && d.b.room.id !== g.room.id)
+        .sort((a, b) => (a.b.room.x - b.b.room.x) || (a.b.room.y - b.b.room.y));
+      for (const d of dest) this.item(d.b.room.name, AREAS[d.b.room.area].name, 'Viajar', () => { this.close(); g.travelTo(d.k); });
+      if (!dest.length) { const p = document.createElement('p'); p.className = 'si-desc'; p.textContent = 'Nenhuma outra fogueira conhecida ainda.'; this.list.appendChild(p); }
+    });
+  }
+
   // ── Oren vende mapas das regiões ──
   openMaps() {
     const g = this.game;

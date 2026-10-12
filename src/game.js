@@ -5,7 +5,7 @@ import { Player } from './player.js';
 import { ENEMY_TYPES, Projectile } from './enemies.js';
 import { BOSS_TYPES } from './bosses.js';
 import { MINI_TYPES } from './minibosses.js';
-import { spawnRoomEntities, GeoCoin, Tombstone, ItemDrop } from './entities.js';
+import { spawnRoomEntities, GeoCoin, Tombstone, ItemDrop, Campfire } from './entities.js';
 import { BuildMode } from './build.js';
 import { CraftUI } from './crafting.js';
 import { Raids } from './raids.js';
@@ -891,6 +891,29 @@ export class Game {
     }
   }
 
+  // Fogueira de uma chave "sala:x" guardada em save.brasas (ou null se não existe mais).
+  benchFromKey(key) {
+    const [roomId, bx] = key.split(':');
+    const r = this.world.byId[roomId];
+    if (!r) return null;
+    const e = r.entities.find((q) => q.ch === 'B' && Math.abs(q.tx * TILE + TILE / 2 - Number(bx)) < 2);
+    return e ? { room: r, ent: e } : null;
+  }
+
+  // Viagem rápida entre fogueiras já visitadas: chega sentado na fogueira de destino.
+  travelTo(key) {
+    const b = this.benchFromKey(key);
+    if (!b) return;
+    const p = this.player;
+    const x = b.ent.tx * TILE + TILE / 2, y = (b.ent.ty + 1) * TILE;
+    this.audio.play('tele');
+    this.state = 'play';
+    this.enterRoom(b.room.id, x - p.w / 2 - 20, y - p.h);
+    const camp = this.entities.find((q) => q instanceof Campfire && Math.abs(q.x - x) < 4);
+    if (camp) this.restAtBench(camp);
+    this.updateCamera(true);
+  }
+
   restAtBench(bench) {
     const p = this.player;
     p.sitting = true;
@@ -1029,6 +1052,9 @@ export class Game {
       document.querySelector('.pause-main').classList.remove('hidden');
       document.querySelector('.pause-opts').classList.add('hidden');
       document.querySelector('#pause-title').textContent = 'Pausado';
+      // Viagem rápida: só descansando numa fogueira (e com pelo menos outra fogueira conhecida).
+      const outras = Object.keys(this.save.brasas).filter((k) => this.benchFromKey(k) && k.split(':')[0] !== this.room.id).length;
+      document.querySelector('#btn-travel').classList.toggle('hidden', !(this.player.sitting && outras));
       this.ui.show(document.querySelector('#pause-screen'));
     }
   }

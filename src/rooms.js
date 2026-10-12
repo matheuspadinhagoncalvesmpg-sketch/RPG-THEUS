@@ -411,10 +411,10 @@ const DEFS = [
     x: 18, y: 44, w: 32, h: 16,
     build: (b) => {
       b.rect(0, 0, 32, 2).rect(0, 2, 1, 9).rect(31, 2, 1, 9);
-      b.rect(0, 14, 32, 2);
+      b.rect(0, 14, 32, 2).rect(20, 14, 3, 2, '.').plat(21, 15, 2); // buraco para o Veio Fundo
       b.plat(5, 10, 4).plat(11, 8, 4).plat(17, 10, 4);
       b.rect(12, 13, 3, 1, '^');
-      b.set(26, 13, 'B').set(8, 13, 'c').set(22, 13, 'h').set(4, 13, 'k').set(29, 13, 't').set(19, 9, 'f').set(13, 7, 'o');
+      b.set(26, 13, 'B').set(8, 13, 'c').set(25, 13, 'h').set(4, 13, 'k').set(29, 13, 't').set(19, 9, 'f').set(13, 7, 'o');
     },
   },
   {
@@ -558,7 +558,7 @@ const DEFS = [
     build: (b) => {
       b.rect(0, 0, 36, 2).rect(31, 0, 3, 2, '.');
       b.rect(0, 2, 1, 11).rect(35, 2, 1, 7).rect(35, 13, 1, 3);
-      b.rect(0, 13, 36, 3);
+      b.rect(0, 13, 36, 3).rect(8, 13, 3, 3, 'X').plat(9, 15, 2); // buraco secreto para a Catacumba
       b.plat(26, 11, 4).plat(30, 9, 4).plat(25, 7, 4).plat(30, 5, 4).plat(26, 3, 4).plat(31, 1, 3);
       b.set(20, 12, 'B').set(6, 12, 't').set(10, 12, 'g').set(14, 12, 'h').set(4, 12, 'k').set(16, 12, 'k').set(33, 12, 'k').set(12, 6, 'f');
     },
@@ -645,9 +645,9 @@ const DEFS = [
     id: 'jardins_coral', name: 'Recife Profundo', area: 'jardins',
     x: 254, y: 70, w: 34, h: 18,
     build: (b) => {
-      b.rect(0, 0, 34, 2).rect(0, 2, 1, 6).rect(0, 12, 1, 4).rect(33, 2, 1, 14);
+      b.rect(0, 0, 34, 2).rect(0, 2, 1, 6).rect(0, 12, 1, 4).rect(33, 2, 1, 6).rect(33, 12, 1, 4);
       b.rect(0, 16, 34, 2);
-      b.rect(1, 2, 32, 14, '~').rect(0, 8, 1, 4, '~');
+      b.rect(1, 2, 32, 14, '~').rect(0, 8, 1, 4, '~').rect(33, 8, 1, 4, '~').rect(10, 16, 3, 2, '~');
       b.rect(20, 2, 8, 3, '.').rect(21, 5, 7, 1).set(20, 4, '~');
       b.rect(8, 11, 3, 5).rect(14, 8, 3, 8).rect(24, 12, 3, 4);
       b.set(24, 4, 'B').set(15, 7, 't').set(5, 15, 'k').set(12, 15, 'o').set(19, 10, 'q').set(29, 9, 'q').set(30, 15, 'k');
@@ -752,6 +752,75 @@ const DEFS = [
       b.rect(1, 8, 38, 6, '~').rect(0, 9, 1, 3, '~');
       b.plat(8, 6, 4).plat(26, 6, 5);
       b.set(10, 5, 'B').set(28, 5, 't').set(10, 11, 'q').set(20, 10, 'q').set(30, 12, 'q').set(6, 13, 'k').set(24, 13, 'k').set(34, 13, 'o');
+    },
+  },
+
+  // ───────────── EXPANSÃO 4: CRISTAL E JARDINS ─────────────
+  {
+    id: 'cristal_catacumba', name: 'Catacumba dos Buscadores', area: 'cristal',
+    x: 60, y: 80, w: 36, h: 16,
+    build: (b) => {
+      b.rect(0, 0, 36, 2).rect(8, 0, 3, 2, '.');
+      b.rect(0, 2, 1, 10).rect(35, 2, 1, 6);
+      b.rect(0, 12, 36, 4);
+      b.plat(13, 10, 4).plat(8, 8, 4).plat(13, 6, 4).plat(8, 4, 4).plat(9, 3, 3).plat(8, 1, 3);
+      b.set(30, 11, 'B').set(3, 11, 't').set(22, 11, 'g').set(18, 11, 'c').set(26, 11, 'c').set(20, 11, 'L').set(33, 11, 'k');
+    },
+    lore: ['Nichos de pedra, cada um com uma lanterna apagada e um nome gravado: dezenas de Buscadores. No fundo, um nicho vazio, com a inscrição:\n"Reservado a quem trouxer a criança de volta."'],
+  },
+  {
+    id: 'cristal_ossario', name: 'Ossário de Cristal', area: 'cristal',
+    x: 96, y: 88, w: 24, h: 16,
+    build: (b) => {
+      b.rect(0, 0, 24, 1).rect(0, 4, 8, 12).rect(8, 12, 16, 4).rect(23, 1, 1, 11);
+      b.plat(9, 10, 3).plat(12, 8, 3).plat(9, 6, 3);
+      b.set(18, 11, 't').set(14, 11, 'B').set(20, 11, 'g').set(11, 11, 'o').set(16, 11, 'k');
+    },
+  },
+  {
+    id: 'cristal_veio_fundo', name: 'Veio Fundo', area: 'cristal',
+    x: 18, y: 60, w: 32, h: 16,
+    build: (b) => {
+      b.rect(0, 0, 32, 2).rect(20, 0, 3, 2, '.');
+      b.rect(0, 2, 1, 10).rect(31, 2, 1, 10);
+      b.rect(0, 12, 32, 4);
+      b.plat(15, 10, 4).plat(21, 8, 4).plat(15, 6, 4).plat(21, 4, 4).plat(20, 3, 3).plat(20, 1, 3);
+      b.set(3, 11, 'M').set(28, 11, 't').set(10, 11, 'g').set(25, 11, 'c').set(6, 11, 'k').set(13, 11, 'k');
+    },
+  },
+  {
+    id: 'jardins_costa', name: 'Costa Rasa', area: 'jardins',
+    x: 288, y: 70, w: 36, h: 18,
+    build: (b) => {
+      b.rect(0, 0, 36, 2).rect(35, 0, 1, 18).rect(0, 2, 1, 6).rect(0, 12, 1, 4);
+      b.rect(0, 16, 36, 2);
+      b.rect(1, 8, 34, 8, '~').rect(0, 8, 1, 4, '~').rect(20, 16, 3, 2, '~');
+      b.plat(6, 6, 5).plat(20, 5, 6).plat(28, 6, 4);
+      b.set(22, 4, 'B').set(30, 5, 't').set(10, 12, 'q').set(26, 11, 'q').set(5, 15, 'k').set(14, 15, 'o').set(32, 15, 'k');
+    },
+  },
+  {
+    id: 'jardins_trincheira', name: 'Trincheira Azul', area: 'jardins',
+    x: 254, y: 88, w: 34, h: 16,
+    build: (b) => {
+      b.rect(0, 0, 34, 2).rect(10, 0, 3, 2, '~');
+      b.rect(0, 0, 1, 16).rect(33, 2, 1, 6).rect(33, 12, 1, 4);
+      b.rect(0, 14, 34, 2);
+      b.rect(1, 2, 32, 12, '~').rect(33, 8, 1, 4, '~').rect(10, 0, 3, 2, '~');
+      b.set(7, 13, 't').set(14, 9, 'q').set(24, 6, 'q').set(28, 12, 'q').set(18, 13, 'k').set(30, 13, 'o');
+    },
+  },
+  {
+    id: 'jardins_abissal', name: 'Fundo Abissal', area: 'jardins',
+    x: 288, y: 88, w: 36, h: 16,
+    build: (b) => {
+      b.rect(0, 0, 36, 2).rect(20, 0, 3, 2, '~');
+      b.rect(0, 0, 1, 8).rect(0, 12, 1, 4).rect(35, 0, 1, 16);
+      b.rect(0, 14, 36, 2);
+      b.rect(1, 2, 34, 12, '~').rect(0, 8, 1, 4, '~').rect(20, 0, 3, 2, '~');
+      b.rect(2, 2, 6, 3, '.').rect(3, 5, 5, 1);
+      b.rect(28, 10, 6, 4);
+      b.set(5, 4, 'B').set(30, 9, 'M').set(10, 13, 't').set(16, 8, 'q').set(24, 11, 'q').set(14, 13, 'k');
     },
   },
 ];

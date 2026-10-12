@@ -26,4 +26,10 @@ export const LOOT = {
   bosque_dossel: [{ geo: 70, res: { wood: 5 } }],
   bosque_ninho_alto: [{ geo: 130, res: { crystal: 3, ore: 3 } }],
   bosque_lago: [{ geo: 100, res: { ore: 3, stone: 3 } }],
+  cristal_catacumba: [{ geo: 120, res: { crystal: 4 } }],
+  cristal_ossario: [{ armor: 'cristal', geo: 150 }],
+  cristal_veio_fundo: [{ geo: 90, res: { stone: 5, ore: 2 } }],
+  jardins_costa: [{ geo: 100, res: { ore: 3 } }],
+  jardins_trincheira: [{ geo: 110, res: { crystal: 3 } }],
+  jardins_abissal: [{ geo: 180, res: { crystal: 5, ore: 5 } }],
 };
