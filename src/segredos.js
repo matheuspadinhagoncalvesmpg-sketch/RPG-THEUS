@@ -44,7 +44,14 @@ export function aplicarCamaras(defs) {
     const host = defs.find((d) => d.id === c.host);
     const antes = host.build;
     const esq = c.lado === 'L';
-    host.build = (b) => { antes(b); b.rect(esq ? 0 : b.w - 1, c.piso - 3, 1, 3, 'X'); };
+    host.build = (b) => {
+      antes(b);
+      const borda = esq ? 0 : b.w - 1, dentro = esq ? 1 : b.w - 2;
+      for (let y = c.piso - 3; y < c.piso; y++) {
+        b.set(borda, y, 'X');
+        if (b.g[y][dentro] === '#') b.set(dentro, y, 'X'); // paredes de 2 blocos de espessura
+      }
+    };
     novas.push({
       id: c.id, name: c.name, area: host.area, secreta: true,
       x: esq ? host.x - W : host.x + host.w, y: host.y + c.piso - PISO, w: W, h: H,
