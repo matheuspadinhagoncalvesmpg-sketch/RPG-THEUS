@@ -56,7 +56,7 @@ const hitsSpike = (p) => touchesSpikes({ x: p.x, y: p.y, w: p.w, h: p.h }, gr);
 function macros(ab) {
   const list = [];
   for (const dir of [-1, 1]) list.push({ walk: true, dir });
-  for (const dir of [-1, 0, 1]) for (const swim of [6, 10, 15]) for (const hold of dir ? [30, 50, 70, 90, 110, 130, 150, 170, 190, 210, 240, 270, 99999] : [99999]) list.push({ swim, dir, hold });
+  for (const dir of [-1, 0, 1]) for (const swim of [6, 10, 15]) for (const hold of dir ? [40, 90, 160, 99999] : [99999]) list.push({ swim, dir, hold });
   for (const dir of [-1, 0, 1]) list.push({ drop: true, dir });
   for (const dir of [-1, 0, 1]) for (const rel of [5, 99]) {
     const dbls = ab.doubleJump ? [0, 12, 26] : [0];

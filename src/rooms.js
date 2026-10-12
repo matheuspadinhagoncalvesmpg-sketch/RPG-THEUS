@@ -350,7 +350,8 @@ const DEFS = [
     id: 'jardins_templo', name: 'Templo da Maré', area: 'jardins',
     x: 180, y: 70, w: 34, h: 18,
     build: (b) => {
-      b.rect(0, 0, 34, 2).rect(33, 0, 1, 18).rect(0, 15, 34, 3);
+      b.rect(0, 0, 34, 2).rect(33, 0, 1, 8).rect(33, 12, 1, 6).rect(0, 15, 34, 3);
+      b.rect(32, 8, 1, 4, 'D'); // portão leste: abre depois que a Rainha cai
       b.rect(0, 2, 1, 4).rect(0, 12, 1, 3);
       b.rect(1, 6, 1, 6, 'D');
       b.rect(1, 13, 32, 2, '~');
@@ -428,7 +429,8 @@ const DEFS = [
     id: 'mirante_ventos', name: 'Mirante dos Ventos', area: 'bosque',
     x: 228, y: 30, w: 36, h: 16,
     build: (b) => {
-      b.rect(0, 0, 36, 2).rect(0, 2, 1, 7).rect(35, 2, 1, 7);
+      b.rect(0, 0, 36, 2).rect(4, 0, 3, 2, '.').rect(0, 2, 1, 7).rect(35, 2, 1, 7);
+      b.plat(2, 11, 3).plat(5, 9, 3).plat(2, 7, 3).plat(5, 5, 3).plat(2, 3, 3).plat(4, 1, 3); // subida para o Cume dos Ventos
       b.rect(0, 13, 36, 3);
       b.rect(10, 13, 6, 3, '.').rect(10, 15, 6, 1).rect(10, 14, 6, 1, '^');
       b.plat(19, 9, 4).plat(25, 6, 3);
@@ -478,7 +480,7 @@ const DEFS = [
     id: 'campos_brejo', name: 'Brejo dos Cogumelos', area: 'campos',
     x: -84, y: 18, w: 40, h: 16, sky: true,
     build: (b) => {
-      b.rect(0, 13, 40, 3).rect(0, 0, 2, 13).rect(38, 0, 2, 9);
+      b.rect(0, 13, 40, 3).rect(0, 0, 2, 9).rect(38, 0, 2, 9);
       b.rect(12, 13, 3, 1, '^');
       b.rect(24, 13, 3, 3, 'X').plat(25, 15, 2); // buraco secreto para a Cripta Rasa
       b.plat(6, 11, 4).plat(30, 11, 4);
@@ -524,7 +526,8 @@ const DEFS = [
     x: 176, y: -6, w: 34, h: 14,
     build: (b) => {
       b.rect(0, 0, 34, 1).rect(14, 0, 3, 1, '.');
-      b.rect(0, 1, 1, 7).rect(33, 1, 1, 11);
+      b.rect(0, 1, 1, 7).rect(33, 1, 1, 7); // abertura leste (linhas 8-11) para a Ponte do Vento
+      b.rect(33, 12, 1, 2);
       b.rect(0, 12, 34, 2);
       b.plat(18, 10, 4).plat(12, 8, 4).plat(18, 6, 4).plat(12, 4, 4).plat(14, 3, 3).plat(14, 1, 3);
       b.set(10, 11, 'g').set(26, 11, 'g').set(30, 11, 't').set(22, 11, 'o').set(5, 11, 'o');
@@ -564,6 +567,85 @@ const DEFS = [
       b.rect(1, 8, 22, 8, '~').rect(23, 12, 1, 4, '~');
       b.plat(8, 8, 3).plat(16, 6, 6);
       b.set(9, 7, 't').set(19, 5, 'B').set(12, 12, 'q').set(18, 11, 'q').set(6, 15, 'k').set(14, 15, 'k');
+    },
+  },
+
+  // ───────────── EXPANSÃO 2: ERMO, MARCO, CUME, PONTE DO VENTO, SALÃO E CORAL ─────────────
+  {
+    id: 'campos_ermo', name: 'Ermo das Cinzas', area: 'campos',
+    x: -124, y: 18, w: 40, h: 16, sky: true,
+    build: (b) => {
+      b.rect(0, 13, 40, 3).rect(0, 0, 2, 9).rect(38, 0, 2, 9);
+      b.rect(16, 13, 3, 2, '.').rect(16, 14, 3, 1, '^');
+      b.rect(27, 13, 3, 1, '^');
+      b.plat(8, 11, 4).plat(32, 10, 4);
+      b.set(21, 12, 'B').set(36, 12, 't').set(6, 12, 'c').set(12, 12, 'h').set(24, 12, 'c').set(33, 9, 'f').set(3, 12, 'w').set(10, 12, 'r').set(34, 12, 'k');
+    },
+  },
+  {
+    id: 'campos_marco', name: 'Marco dos Errantes', area: 'campos',
+    x: -164, y: 18, w: 40, h: 16, sky: true,
+    build: (b) => {
+      b.rect(0, 13, 40, 3).rect(0, 0, 2, 13).rect(38, 0, 2, 9);
+      b.rect(22, 13, 3, 1, '^');
+      b.plat(8, 11, 4).plat(12, 9, 4).plat(16, 7, 4).plat(10, 5, 3);
+      b.set(11, 4, 'M').set(18, 6, 't').set(5, 12, 'L').set(31, 12, 'B').set(28, 12, 'g').set(15, 12, 'c').set(35, 12, 'o');
+    },
+    lore: ['Um marco de pedra cercado por sete montes de cinzas. Num deles, uma capa dobrada. No marco, riscado com a ponta de uma espada:\n"Aqui terminam os que se cansaram. Que a próxima criança não pare."'],
+  },
+  {
+    id: 'bosque_cume', name: 'Cume dos Ventos', area: 'bosque',
+    x: 228, y: 14, w: 36, h: 16, sky: true,
+    build: (b) => {
+      b.rect(0, 13, 36, 3).rect(4, 13, 3, 3, '.').plat(4, 15, 3);
+      b.rect(0, 0, 1, 13).rect(35, 0, 1, 13);
+      b.plat(12, 9, 5).plat(20, 6, 5);
+      b.set(20, 12, 'B').set(30, 12, 't').set(10, 12, 'L').set(14, 5, 'f').set(26, 4, 'f').set(24, 12, 'c');
+    },
+    lore: ['Daqui se vê o Trono, longe, no alto das Ruínas. O vento sopra daquele lado. Alguém deixou uma lanterna apagada no parapeito:\n"Para quando você voltar a ter dúvidas."'],
+  },
+  {
+    id: 'ruinas_ponte_vento', name: 'Ponte do Vento', area: 'ruinas',
+    x: 210, y: -6, w: 40, h: 14, sky: true,
+    build: (b) => {
+      b.rect(0, 12, 40, 2).rect(0, 0, 1, 8).rect(39, 0, 1, 8);
+      b.rect(12, 12, 4, 1, '.').rect(12, 13, 4, 1, '^');
+      b.rect(24, 12, 5, 1, '.').rect(24, 13, 5, 1, '^');
+      b.plat(18, 8, 4);
+      b.set(7, 11, 'g').set(20, 7, 'f').set(33, 11, 'g').set(3, 11, 'o').set(36, 11, 'k');
+    },
+  },
+  {
+    id: 'ruinas_mirante_leste', name: 'Mirante Esquecido', area: 'ruinas',
+    x: 250, y: -6, w: 34, h: 14, sky: true,
+    build: (b) => {
+      b.rect(0, 12, 34, 2).rect(0, 0, 1, 8).rect(33, 0, 1, 12);
+      b.plat(8, 10, 4).plat(14, 8, 4).plat(20, 6, 4).plat(26, 4, 4);
+      b.set(27, 3, 't').set(5, 11, 'B').set(12, 11, 'L').set(22, 11, 'g').set(30, 11, 'k');
+    },
+    lore: ['Uma estátua sem rosto olha para o oeste, para a Torre. Na base:\n"A quem subiu sem degraus: o vento ainda guarda o seu nome."'],
+  },
+  {
+    id: 'jardins_salao', name: 'Salão Submerso', area: 'jardins',
+    x: 214, y: 70, w: 40, h: 18,
+    build: (b) => {
+      b.rect(0, 0, 40, 2).rect(0, 2, 1, 6).rect(0, 12, 6, 4).rect(39, 2, 1, 6).rect(39, 12, 1, 4);
+      b.rect(0, 16, 40, 2);
+      b.rect(6, 6, 33, 10, '~').rect(39, 8, 1, 4, '~');
+      b.plat(12, 8, 4).plat(22, 6, 4).plat(30, 9, 4);
+      b.set(24, 5, 't').set(16, 12, 'q').set(26, 11, 'q').set(33, 8, 'q').set(10, 15, 'k').set(20, 15, 'o').set(34, 15, 'k');
+    },
+  },
+  {
+    id: 'jardins_coral', name: 'Recife Profundo', area: 'jardins',
+    x: 254, y: 70, w: 34, h: 18,
+    build: (b) => {
+      b.rect(0, 0, 34, 2).rect(0, 2, 1, 6).rect(0, 12, 1, 4).rect(33, 2, 1, 14);
+      b.rect(0, 16, 34, 2);
+      b.rect(1, 2, 32, 14, '~').rect(0, 8, 1, 4, '~');
+      b.rect(20, 2, 8, 3, '.').rect(21, 5, 7, 1).set(20, 4, '~');
+      b.rect(8, 11, 3, 5).rect(14, 8, 3, 8).rect(24, 12, 3, 4);
+      b.set(24, 4, 'B').set(15, 7, 't').set(5, 15, 'k').set(12, 15, 'o').set(19, 10, 'q').set(29, 9, 'q').set(30, 15, 'k');
     },
   },
 ];
