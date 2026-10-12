@@ -188,7 +188,35 @@ export class Game {
       return;
     }
     const goingUp = p.cy < 0;
-    this.transition = { t: 0, phase: 'out', next, gx: room.x * TILE + p.x, gy: room.y * TILE + p.y, goingUp };
+    const vertical = p.cy < 0 || p.cy >= room.pxH;
+    this.transition = { t: 0, phase: 'out', next, gx: room.x * TILE + p.x, gy: room.y * TILE + p.y, goingUp, vertical };
+  }
+
+  // Acha o chão firme mais próximo da abertura por onde o herói entrou e o leva até lá com um pulinho.
+  hopToLedge(up) {
+    const r = this.room, p = this.player;
+    const tx = Math.floor(p.cx / TILE), ty = Math.min(r.h - 1, Math.max(0, Math.floor((p.y + p.h / 2) / TILE)));
+    let best = null, bd = Infinity;
+    for (let dy = 0; dy <= 10; dy++) {
+      const row = up ? ty - dy : ty + dy;
+      if (row < 1 || row >= r.h - 1) continue;
+      for (let dx = -6; dx <= 6; dx++) {
+        const col = tx + dx;
+        if (col < 1 || col >= r.w - 1) continue;
+        const below = r.tile(col, row + 1);
+        if (r.tile(col, row) !== T.EMPTY || r.tile(col, row - 1) !== T.EMPTY || (below !== T.SOLID && below !== T.ONEWAY)) continue;
+        const d = dy * 1.5 + Math.abs(dx);
+        if (d < bd) { bd = d; best = [col, row]; }
+      }
+    }
+    if (!best) return false;
+    p.x = best[0] * TILE + TILE / 2 - p.w / 2;
+    p.y = (best[1] + 1) * TILE - p.h;
+    p.vx = 0; p.vy = up ? -6 : -3; p.jumpHeld = false; p.airDash = true; p.canDouble = true;
+    p.invuln = Math.max(p.invuln, 24);
+    this.particles.dust(p.cx, p.y + p.h, 0, 7);
+    this.audio.play('jump');
+    return true;
   }
 
   updateTransition() {
@@ -198,8 +226,9 @@ export class Game {
       const { next } = tr;
       this.transitionKeep = true;
       this.enterRoom(next.id, tr.gx - next.x * TILE, tr.gy - next.y * TILE);
-      // Impulso para subir pela abertura de baixo, como no Hollow Knight.
-      if (tr.goingUp) { this.player.vy = Math.min(this.player.vy, -11.5); this.player.jumpHeld = false; }
+      // Ao trocar de área na vertical, o herói pula sozinho para a borda mais próxima da área nova.
+      if (tr.vertical && this.hopToLedge(tr.goingUp)) { /* pousou na borda */ }
+      else if (tr.goingUp) { this.player.vy = Math.min(this.player.vy, -11.5); this.player.jumpHeld = false; }
       tr.phase = 'in';
       tr.t = 0;
     } else if (tr.phase === 'in' && tr.t >= 14) this.transition = null;

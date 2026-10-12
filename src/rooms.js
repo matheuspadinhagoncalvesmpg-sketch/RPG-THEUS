@@ -37,7 +37,7 @@ const DEFS = [
     x: -44, y: 18, w: 44, h: 16, sky: true, zone: [4, 2, 30, 11],
     build: (b) => {
       b.rect(0, 13, 44, 3);
-      b.rect(0, 0, 2, 13);
+      b.rect(0, 0, 2, 9); // abertura oeste (linhas 9-12) para o Brejo dos Cogumelos
       b.rect(36, 12, 3, 1);
       b.set(3, 12, 'r').set(35, 12, 'w').set(40, 12, 'w').set(42, 12, 'r');
       b.set(37, 11, 'L').set(8, 12, 'L').set(9, 12, 'a');
@@ -56,6 +56,7 @@ const DEFS = [
       b.rect(0, 0, 3, 8).rect(3, 0, 2, 4);
       b.rect(11, 12, 7, 1).rect(13, 11, 3, 1);
       b.plat(20, 9, 4).set(22, 8, '$');
+      b.plat(25, 7, 4).plat(30, 5, 4).plat(25, 3, 4).plat(30, 1, 4); // subida para as Colinas Altas
       b.rect(30, 12, 3, 1);
       b.set(4, 12, 'L').set(7, 12, 'L').set(9, 12, 'S').set(26, 12, 'c');
       b.set(28, 12, 'w').set(34, 12, 'r');
@@ -102,7 +103,7 @@ const DEFS = [
       b.rect(0, 0, 2, 8).rect(38, 0, 2, 8);
       b.rect(0, 13, 40, 3);
       b.rect(12, 13, 3, 1, '^');
-      b.rect(16, 13, 3, 2, 'X').plat(17, 15, 2); // buraco secreto para a Gruta Sob as Raízes
+      b.rect(16, 13, 3, 2, 'X').plat(17, 15, 2).set(16, 15, '.'); // buraco secreto para a Gruta Sob as Raízes
       b.set(10, 12, 'B');
       b.rect(20, 11, 4, 2);
       b.plat(27, 8, 4).plat(32, 5, 4);
@@ -153,7 +154,7 @@ const DEFS = [
       b.rect(0, 0, 22, 2);
       b.rect(0, 2, 1, 7);
       b.rect(21, 0, 1, 9); // abertura leste (linhas 9-12) para o Mirante dos Ventos
-      b.rect(0, 13, 22, 3);
+      b.rect(0, 13, 22, 3).rect(4, 13, 3, 3, 'X').plat(5, 15, 2); // buraco secreto para a Cisterna do Bosque
       b.rect(7, 11, 3, 2); // altar vazio: o Manto do Vento agora vem do Cavaleiro de Musgo
       b.set(15, 12, 'B').set(18, 12, 'L').set(13, 12, 'v');
     },
@@ -214,7 +215,8 @@ const DEFS = [
     build: (b) => {
       b.rect(0, 0, 30, 2);
       b.rect(0, 2, 1, 7);
-      b.rect(29, 0, 1, 14);
+      b.rect(29, 0, 1, 8); // abertura leste (linhas 8-11) para o Arsenal
+      b.rect(29, 12, 1, 2);
       b.rect(0, 12, 30, 2);
       b.rect(24, 10, 3, 2).set(25, 9, 'A');
       b.plat(12, 8, 4).set(13, 7, '$');
@@ -283,6 +285,8 @@ const DEFS = [
       b.rect(14, 10, 6, 2, '.');
       b.rect(14, 12, 6, 1, '^');
       b.plat(26, 6, 4);
+      b.rect(21, 11, 3, 5, '.').rect(21, 10, 3, 1, 'X'); // túnel secreto sob a tampa quebrável
+      b.plat(21, 15, 2).plat(22, 13, 2).plat(21, 11, 2);
       b.set(6, 9, 'c').set(10, 9, '$').set(24, 9, 'h').set(31, 9, 'p').set(35, 9, 'c');
       b.set(3, 9, 'k').set(28, 9, 'k').set(37, 9, 'o');
     },
@@ -316,6 +320,7 @@ const DEFS = [
       b.rect(0, 0, 2, 26).rect(18, 0, 2, 17).rect(18, 22, 2, 4);
       b.rect(0, 24, 20, 2);
       b.rect(2, 10, 16, 14, '~').rect(18, 17, 2, 5, '~');
+      b.rect(0, 18, 2, 4, '~'); // passagem oeste para a Nascente
       b.rect(6, 19, 3, 5);
       b.plat(3, 9, 4).plat(8, 7, 3).plat(12, 5, 3).plat(9, 3, 3);
       b.set(13, 15, 'q').set(4, 13, 'q').set(15, 23, 'o');
@@ -466,6 +471,100 @@ const DEFS = [
       b.set(22, 12, 'K');
     },
     boss: 'mini_lampreia',
+  },
+
+  // ───────────── EXPANSÃO: BREJO, COLINAS, CISTERNAS, ARSENAL E NASCENTE ─────────────
+  {
+    id: 'campos_brejo', name: 'Brejo dos Cogumelos', area: 'campos',
+    x: -84, y: 18, w: 40, h: 16, sky: true,
+    build: (b) => {
+      b.rect(0, 13, 40, 3).rect(0, 0, 2, 13).rect(38, 0, 2, 9);
+      b.rect(12, 13, 3, 1, '^');
+      b.rect(24, 13, 3, 3, 'X').plat(25, 15, 2); // buraco secreto para a Cripta Rasa
+      b.plat(6, 11, 4).plat(30, 11, 4);
+      b.set(34, 12, 'B').set(4, 12, 't').set(8, 12, 'h').set(18, 12, 'h').set(22, 12, 'p').set(30, 12, 'c');
+      b.set(32, 10, '$').set(10, 12, 'w').set(36, 12, 'r');
+    },
+  },
+  {
+    id: 'campos_cripta', name: 'Cripta Rasa', area: 'campos',
+    x: -84, y: 34, w: 40, h: 16,
+    build: (b) => {
+      b.rect(0, 0, 40, 2).rect(24, 0, 3, 2, '.');
+      b.rect(0, 2, 1, 10).rect(39, 2, 1, 10);
+      b.rect(0, 12, 40, 4);
+      b.plat(28, 10, 4).plat(22, 8, 4).plat(27, 6, 4).plat(21, 4, 4).plat(23, 3, 3).plat(24, 1, 3); // degraus de até 2 blocos
+      b.set(6, 11, 'B').set(35, 11, 't').set(12, 11, 'c').set(18, 11, 'c').set(31, 11, 'g').set(3, 11, 'k').set(38, 11, 'o');
+    },
+  },
+  {
+    id: 'campos_alto', name: 'Colinas Altas', area: 'campos',
+    x: 0, y: 2, w: 40, h: 16, sky: true,
+    build: (b) => {
+      b.rect(0, 13, 40, 3).rect(27, 13, 7, 3, '.').plat(28, 15, 3);
+      b.rect(0, 0, 2, 13).rect(38, 0, 2, 13);
+      b.plat(5, 10, 4).plat(10, 7, 4).plat(18, 9, 5);
+      b.set(11, 6, 'M').set(8, 12, 'B').set(14, 4, 'f').set(23, 6, 'f').set(4, 12, 'w').set(36, 12, 'w').set(13, 12, 'r').set(22, 12, 'r').set(19, 8, '$');
+    },
+  },
+  {
+    id: 'bosque_cisterna', name: 'Cisterna do Bosque', area: 'bosque',
+    x: 200, y: 46, w: 36, h: 16,
+    build: (b) => {
+      b.rect(0, 0, 36, 2).rect(10, 0, 3, 2, '.');
+      b.rect(0, 2, 1, 10).rect(35, 2, 1, 10);
+      b.rect(0, 12, 36, 4);
+      b.rect(22, 9, 13, 3, '~');
+      b.plat(14, 10, 4).plat(8, 8, 4).plat(14, 6, 4).plat(8, 4, 4).plat(10, 3, 3).plat(10, 1, 3);
+      b.set(18, 11, 't').set(4, 11, 'k').set(20, 11, 'k').set(27, 10, 'q').set(31, 10, 'q').set(6, 11, 'c');
+    },
+  },
+  {
+    id: 'ruinas_arsenal', name: 'Arsenal Esquecido', area: 'ruinas',
+    x: 176, y: -6, w: 34, h: 14,
+    build: (b) => {
+      b.rect(0, 0, 34, 1).rect(14, 0, 3, 1, '.');
+      b.rect(0, 1, 1, 7).rect(33, 1, 1, 11);
+      b.rect(0, 12, 34, 2);
+      b.plat(18, 10, 4).plat(12, 8, 4).plat(18, 6, 4).plat(12, 4, 4).plat(14, 3, 3).plat(14, 1, 3);
+      b.set(10, 11, 'g').set(26, 11, 'g').set(30, 11, 't').set(22, 11, 'o').set(5, 11, 'o');
+    },
+  },
+  {
+    id: 'ruinas_observatorio', name: 'Observatório Quebrado', area: 'ruinas',
+    x: 176, y: -30, w: 34, h: 24,
+    build: (b) => {
+      b.rect(0, 0, 34, 1);
+      b.rect(0, 1, 1, 20).rect(33, 1, 1, 20);
+      b.rect(0, 21, 34, 3).rect(14, 21, 3, 3, '.').plat(14, 23, 3);
+      // degraus de 2 blocos, em zigue-zague, até o topo
+      b.plat(4, 19, 4).plat(10, 17, 4).plat(16, 15, 4).plat(22, 13, 4).plat(28, 11, 4);
+      b.plat(24, 9, 4).plat(18, 7, 4).plat(12, 5, 4);
+      b.set(6, 20, 'B').set(20, 20, 'L').set(29, 10, 'M').set(13, 4, 't').set(10, 12, 'f').set(26, 5, 'f');
+    },
+    lore: ['Um telescópio quebrado aponta para a única estrela do céu: Vésper. Alguém riscou a lente com o dedo:\n"Ela está olhando. Ela sempre esteve."'],
+  },
+  {
+    id: 'cristal_abismo', name: 'Abismo de Cristal', area: 'cristal',
+    x: 60, y: 64, w: 36, h: 16,
+    build: (b) => {
+      b.rect(0, 0, 36, 2).rect(31, 0, 3, 2, '.');
+      b.rect(0, 2, 1, 11).rect(35, 2, 1, 7).rect(35, 13, 1, 3);
+      b.rect(0, 13, 36, 3);
+      b.plat(26, 11, 4).plat(30, 9, 4).plat(25, 7, 4).plat(30, 5, 4).plat(26, 3, 4).plat(31, 1, 3);
+      b.set(20, 12, 'B').set(6, 12, 't').set(10, 12, 'g').set(14, 12, 'h').set(4, 12, 'k').set(16, 12, 'k').set(33, 12, 'k').set(12, 6, 'f');
+    },
+  },
+  {
+    id: 'jardins_nascente', name: 'Nascente Escondida', area: 'jardins',
+    x: 96, y: 70, w: 24, h: 18,
+    build: (b) => {
+      b.rect(0, 0, 24, 2).rect(0, 2, 1, 1).rect(0, 7, 1, 11).rect(23, 2, 1, 10);
+      b.rect(0, 16, 24, 2).rect(0, 7, 5, 1);
+      b.rect(1, 8, 22, 8, '~').rect(23, 12, 1, 4, '~');
+      b.plat(8, 8, 3).plat(16, 6, 6);
+      b.set(9, 7, 't').set(19, 5, 'B').set(12, 12, 'q').set(18, 11, 'q').set(6, 15, 'k').set(14, 15, 'k');
+    },
   },
 ];
 

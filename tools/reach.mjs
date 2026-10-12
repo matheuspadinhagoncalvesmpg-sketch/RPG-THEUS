@@ -3,6 +3,8 @@
 //   • lugares inalcançáveis (itens, fogueiras, chefes, salas)
 //   • armadilhas: lugares onde dá para chegar mas não dá para voltar a nenhuma fogueira
 //   • fogueiras dentro de arenas de chefe e outros erros de projeto.
+// Limite conhecido: nado longo (cavernas alagadas) não é totalmente modelado; as salas alagadas foram conferidas
+// por um robô de nado no jogo (ver histórico). Armadilhas em jardins_gruta/jardins_covil no modo --estrito são desse limite.
 // Uso: node tools/reach.mjs [--margem=0.9] [--quiet]
 import { World } from '../src/world.js';
 import { T, TILE, PHYS } from '../src/config.js';
@@ -54,7 +56,7 @@ const hitsSpike = (p) => touchesSpikes({ x: p.x, y: p.y, w: p.w, h: p.h }, gr);
 function macros(ab) {
   const list = [];
   for (const dir of [-1, 1]) list.push({ walk: true, dir });
-  for (const dir of [-1, 0, 1]) for (const swim of [6, 10, 15]) list.push({ swim, dir });
+  for (const dir of [-1, 0, 1]) for (const swim of [6, 10, 15]) for (const hold of dir ? [30, 50, 70, 90, 110, 130, 150, 170, 190, 210, 240, 270, 99999] : [99999]) list.push({ swim, dir, hold });
   for (const dir of [-1, 0, 1]) list.push({ drop: true, dir });
   for (const dir of [-1, 0, 1]) for (const rel of [5, 99]) {
     const dbls = ab.doubleJump ? [0, 12, 26] : [0];
@@ -65,17 +67,41 @@ function macros(ab) {
   return list;
 }
 
+// Mesmo "pulinho" do jogo ao trocar de área na vertical (Game.hopToLedge): leva o herói ao chão firme mais próximo.
+function hop(rm, up) {
+  const gx = pl.x + pl.w / 2;
+  const tx = Math.floor(gx / TILE) - (rm.x + ox);
+  const ty = Math.min(rm.h - 1, Math.max(0, Math.floor((pl.y + pl.h / 2) / TILE) - (rm.y + oy)));
+  let best = null, bd = Infinity;
+  for (let dy = 0; dy <= 10; dy++) {
+    const row = up ? ty - dy : ty + dy;
+    if (row < 1 || row >= rm.h - 1) continue;
+    for (let dx = -6; dx <= 6; dx++) {
+      const col = tx + dx;
+      if (col < 1 || col >= rm.w - 1) continue;
+      const below = rm.tile(col, row + 1);
+      if (rm.tile(col, row) !== T.EMPTY || rm.tile(col, row - 1) !== T.EMPTY || (below !== T.SOLID && below !== T.ONEWAY)) continue;
+      const d = dy * 1.5 + Math.abs(dx);
+      if (d < bd) { bd = d; best = [col, row]; }
+    }
+  }
+  if (!best) return null;
+  return { x: (rm.x + ox + best[0]) * TILE + TILE / 2 - pl.w / 2, y: (rm.y + oy + best[1] + 1) * TILE - pl.h };
+}
+const roomOf = (p) => world.roomAtGlobal(Math.floor((p.x + p.w / 2) / TILE) - ox, Math.floor((p.y + p.h / 2) / TILE) - oy);
+
 // Executa um movimento a partir de (x, y) e devolve os pontos de pouso.
 function run(from, m, ab) {
   game.save.abilities = ab;
   pl.reset(from.x, from.y);
   pl.onGround = true; pl.coyote = PHYS.coyote;
   const out = [];
-  let air = false, last = keyOf(pl);
+  let air = false, last = keyOf(pl), prevRoom = roomOf(pl);
   const maxF = m.walk ? 150 : 420;
   for (let f = 0; f < maxF; f++) {
     input.pressed = {}; input.released = {};
-    input.held = { left: m.dir < 0, right: m.dir > 0, jump: false };
+    const dirOn = !m.hold || f < m.hold;
+    input.held = { left: dirOn && m.dir < 0, right: dirOn && m.dir > 0, jump: false };
     if (m.drop) {
       input.held.down = true;
       if (f === 0) input.pressed.jump = true;
@@ -94,6 +120,18 @@ function run(from, m, ab) {
     }
     pl.update(game);
     if (hitsSpike(pl)) break;
+    {
+      const rm = roomOf(pl);
+      if (rm && prevRoom && rm !== prevRoom) {
+        const ty = Math.floor((pl.y + pl.h / 2) / TILE) - oy;
+        const up = ty < prevRoom.y, down = ty >= prevRoom.y + prevRoom.h;
+        if (up || down) {
+          const h = hop(rm, up);
+          if (h) { pl.x = h.x; pl.y = h.y; out.push({ x: h.x, y: h.y }); break; }
+        }
+      }
+      if (rm) prevRoom = rm;
+    }
     if (pl.y > H * TILE) break;
     if (!pl.onGround) air = true;
     if (pl.onGround && (air || m.walk || m.swim)) {
@@ -171,9 +209,9 @@ for (const r of world.rooms) {
 }
 
 // 3) Armadilhas: estados alcançáveis de onde nenhuma fogueira/início é alcançável
-function trapReport(res, label) {
+function trapReport(res, label, mainOnly = false) {
   const hubs = new Set();
-  for (const e of ents) if (e.ch === 'B' || e.ch === 'S') {
+  for (const e of ents) if ((e.ch === 'B' && (!mainOnly || e.room === 'campos_abrigo')) || e.ch === 'S') {
     for (const [k, s] of res.states) if (Math.abs(s.x + 8 - e.gx) <= 80 && Math.abs(s.y + 14 - e.gy) <= 80) hubs.add(k);
   }
   const rev = new Map();
@@ -195,6 +233,10 @@ function trapReport(res, label) {
     const xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1]);
     warn(`ARMADILHA (${label}): ${pts.length} pontos sem volta em ${id}  x ${Math.min(...xs)}-${Math.max(...xs)}, y ${Math.min(...ys)}-${Math.max(...ys)}`);
   }
+}
+if (argv.includes('--estrito')) {
+  // Estrito: só vale voltar à fogueira do Abrigo (nenhuma fogueira de câmara secreta conta).
+  for (const r of results) trapReport(r, 'estrito: ' + r.ab.name, true);
 }
 trapReport(full, 'todas as habilidades');
 trapReport(results[0], 'sem habilidades');

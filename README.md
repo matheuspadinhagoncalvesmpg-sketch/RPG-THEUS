@@ -69,8 +69,8 @@ O jogo tem um **Manual dos controles** completo na pausa e na tela inicial. No c
 
 ---
 
-### Classes
-Escolhidas ao criar o herói (e não mudam depois): **Guerreiro** (equilibrado), **Guardião** (escudo, muita vida, lento e forte), **Ladino** (adaga veloz, dash ágil, pouca vida), **Arqueiro** (flechas; a magia vira chuva de flechas) e **Mago** (orbes; magia mais barata e forte). Arqueiro e Mago atacam à distância; o golpe para baixo continua sendo uma pancada que serve de pogo.
+### Armas, baús e inventário (estilo Terraria)
+O herói começa com a Lâmina do Errante e acha outras armas em **baús de tesouro** espalhados pelo mundo ou as fabrica na forja: Adaga de Osso (rápida), Lança do Caçador (alcance longo), Machado de Pedra (pesado), Espada de Minério, Espada de Cristal, **Arco do Caçador** (flechas) e **Cajado da Névoa** (orbes). Cada arma tem raridade, dano e recarga próprios. Abra o **Inventário** com **Q** (ou pelo botão da mochila no celular) para equipar armas, ver armadura, materiais e itens. Os baús também dão moedas, materiais e armaduras.
 
 ### Mini-chefes
 Quatro câmaras opcionais (Gruta Sob as Raízes → Covil do Besouro-Rei, Veio de Cristal → Geodo do Golem, Mirante dos Ventos → Ninho da Vespa Rainha, Gruta das Marés → Covil da Lampreia). Cada mini-chefe dá um **Fragmento de Vida** (+1 coração). A fogueira fica sempre *antes* da arena, nunca dentro dela.
@@ -83,7 +83,7 @@ De tempos em tempos (a cada ~8–13 min de jogo, depois de vencer o Cavaleiro de
 node tools/check-world.mjs      # salas sobrepostas e aberturas sem saída
 node tools/check-entities.mjs   # entidades dentro de blocos/flutuando, arenas sem portão
 node tools/reach.mjs            # usa a física REAL do herói para achar lugares inalcançáveis e armadilhas sem volta
-node tools/reach.mjs --classe=guardiao --margem=0.9
+node tools/reach.mjs --margem=0.9 --estrito   # estrito: só vale voltar à fogueira do Abrigo
 ```
 
 ## 🌐 Multijogador e nuvem
