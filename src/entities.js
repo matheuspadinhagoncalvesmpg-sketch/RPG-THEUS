@@ -5,7 +5,7 @@ import { rand } from './util.js';
 import { NPCS } from './dialog.js';
 import {
   drawNPC, drawLoreStone, drawOrb, drawGeoRock, drawGeo, drawCampfire, drawTombstone,
-  drawLifeCrystal, drawResourceNode, drawResourceIcon, drawBuildDeco, drawCloakPost, drawMarkA, drawTreasure,
+  drawLifeCrystal, drawResourceNode, drawResourceIcon, drawBuildDeco, drawCloakPost, drawMarkA, drawTreasure, drawMemoria,
 } from './art.js';
 import { LOOT } from './loot.js';
 import { WEAPONS, RARITY, giveWeapon } from './config.js';
@@ -32,23 +32,39 @@ export class Campfire extends Entity {
 }
 
 export class NPC extends Entity {
-  constructor(x, y, id) { super(x, y); this.id = id; this.data = NPCS[id]; this.label = 'Conversar'; }
+  constructor(x, y, id) {
+    super(x, y);
+    this.id = id; this.data = NPCS[id]; this.label = 'Conversar';
+    this.home = x; this.dir = Math.random() < 0.5 ? -1 : 1; this.pausa = 30 + Math.floor(rand(0, 90));
+  }
   interact(game) { game.talkTo(this); }
   box() { return { x: this.x - 12, y: this.y - 44, w: 24, h: 44 }; }
-  draw(ctx, game) { drawNPC(ctx, this.id, this.x, this.y, this.t, game.player.cx < this.x ? -1 : 1); }
+  // Alguns NPCs andam devagar perto do seu ponto; param quando você está perto ou conversando.
+  update(game) {
+    this.t++;
+    const w = this.data.wander;
+    if (!w || game.state !== 'play') return;
+    if (Math.abs(game.player.cx - this.x) < 70) return; // espera o herói chegar
+    if (this.pausa > 0) { this.pausa--; return; }
+    const nx = this.x + this.dir * 0.4;
+    const room = game.room, tx = Math.floor(nx / TILE);
+    const chao = game.world.isSolid(room, tx, Math.floor(this.y / TILE)) || room.tile(tx, Math.floor(this.y / TILE)) === 3;
+    const parede = game.world.isSolid(room, tx, Math.floor((this.y - 8) / TILE));
+    if (!chao || parede || Math.abs(nx - this.home) > w * TILE) { this.dir *= -1; this.pausa = 60 + Math.floor(rand(0, 140)); return; }
+    this.x = nx;
+    if (Math.random() < 0.004) this.pausa = 80 + Math.floor(rand(0, 160));
+  }
+  draw(ctx, game) {
+    const perto = Math.abs(game.player.cx - this.x) < 150 || !this.data.wander;
+    drawNPC(ctx, this.id, this.x, this.y, this.t, perto ? (game.player.cx < this.x ? -1 : 1) : this.dir);
+  }
 }
 
-// Pedra, placa ou inscrição. A entrada pode ser texto, lista de falas, ou { lines, flag }
-// (a "flag" marca no save que o jogador viu aquilo, e a história passa a depender disso).
+// Memória do mundo (diário, carta, eco, inscrição ou fresco): o texto vem de memorias.js.
 export class LoreStone extends Entity {
-  constructor(x, y, entry) { super(x, y); this.entry = entry; this.label = 'Ler'; }
-  interact(game) {
-    const t = this.entry;
-    const lines = typeof t === 'string' ? [t] : Array.isArray(t) ? t : t.lines;
-    const flag = t && t.flag;
-    game.showDialog(null, lines, flag ? () => { game.save.talked[flag] = true; game.persist(); } : null);
-  }
-  draw(ctx, game) { drawLoreStone(ctx, this.x, this.y, this.t, AREAS[game.room.area]); }
+  constructor(x, y, id) { super(x, y); this.id = id; this.label = 'Ler'; }
+  interact(game) { game.lerMemoria(this.id); }
+  draw(ctx, game) { drawMemoria(ctx, this.x, this.y, this.id, this.t, !!game.save.memorias[this.id]); }
 }
 
 // A capa de um Errante que veio antes, ao lado de uma fogueira (com um bilhete no bolso).
@@ -90,10 +106,16 @@ export class MarkA extends Entity {
 // Baú de tesouro do mundo: abre uma vez e guarda o que for (arma, moedas, materiais).
 export class TreasureChest extends Entity {
   constructor(x, y, id, loot, done) { super(x, y); this.id = id; this.loot = loot; this.label = 'Abrir'; this.done = !!done; }
-  isOpen() { return this.done; }
+  // Selado enquanto houver guardiões (inimigos ou chefe) vivos na sala.
+  sealed(game) { return game.enemies.some((e) => !e.dead && !e.inv); }
   near(p) { return !this.done && Math.abs(p.cx - this.x) < 36 && Math.abs(p.y + p.h - this.y) < 40; }
+  update(game) {
+    this.t++;
+    this.label = this.sealed(game) ? 'Selado' : 'Abrir';
+  }
   interact(game) {
     if (this.done) return;
+    if (this.sealed(game)) { game.ui.toast('Selado: derrote os guardiões desta sala.', 2600); game.audio.play('deny'); return; }
     this.done = true;
     game.save.opened[this.id] = true;
     game.audio.play('pickup');
@@ -102,7 +124,7 @@ export class TreasureChest extends Entity {
   }
   draw(ctx, game) {
     const w = this.loot.weapon && WEAPONS[this.loot.weapon];
-    drawTreasure(ctx, this.x, this.y, this.done, this.t, w ? RARITY[w.rarity].color : '#ffd27a');
+    drawTreasure(ctx, this.x, this.y, this.done, this.t, this.label === 'Selado' ? '#ff5a4a' : w ? RARITY[w.rarity].color : '#ffd27a');
   }
 }
 
@@ -181,7 +203,7 @@ export class GeoRock extends Entity {
     game.audio.play('rock');
     game.dropGeo(this.x, this.y - 14, this.hp > 0 ? 2 : 6);
     game.particles.burst(this.x, this.y - 12, 6, { color: ['#f5c542', '#3a3340'], speed: 3, grav: 0.2, life: 20 });
-    if (this.hp <= 0) { this.dead = true; game.save.collected[this.id] = true; }
+    if (this.hp <= 0) { this.dead = true; game.spent.nodes.add(this.id); }
   }
   update() { this.t++; if (this.flash > 0) this.flash--; }
   draw(ctx) { drawGeoRock(ctx, this.x, this.y, this.hp, this.flash > 0); }
@@ -189,7 +211,7 @@ export class GeoRock extends Entity {
 
 // Árvore, rocha, minério ou cristal: golpeie para coletar. Volta ao reentrar na sala.
 export class ResourceNode extends Entity {
-  constructor(x, y, kind) { super(x, y); this.kind = kind; this.hp = 3; this.flash = 0; }
+  constructor(x, y, kind, id) { super(x, y); this.kind = kind; this.id = id; this.hp = 3; this.flash = 0; }
   box() {
     return this.kind === 'wood' ? { x: this.x - 8, y: this.y - 48, w: 16, h: 48 } : { x: this.x - 14, y: this.y - 22, w: 28, h: 22 };
   }
@@ -202,6 +224,7 @@ export class ResourceNode extends Entity {
     game.dropResource(this.x, this.y - 18, this.kind, 1);
     if (this.hp <= 0) {
       this.dead = true;
+      game.spent.nodes.add(this.id); // volta ao descansar numa fogueira
       game.dropResource(this.x, this.y - 18, this.kind, this.kind === 'wood' ? 3 : 2);
     }
   }
@@ -284,7 +307,7 @@ export function makeBuilt(room, idx, id) {
 }
 
 // Cria as entidades de uma sala a partir dos marcadores do mapa e das construções.
-export function spawnRoomEntities(room, save) {
+export function spawnRoomEntities(room, save, spent = { nodes: new Set() }) {
   const list = [];
   const at = (e) => ({ x: e.tx * TILE + TILE / 2, y: (e.ty + 1) * TILE });
   for (const e of room.entities) {
@@ -306,9 +329,9 @@ export function spawnRoomEntities(room, save) {
       case 'M': if (!save.collected[e.id]) list.push(new LifeCrystal(x, y, e.id)); break;
       case 'C': if (!save.charms.owned[room.charm]) list.push(new CharmPickup(x, y, room.charm, !!room.challenge)); break;
       case 'T': if (room.challenge && !save.collected['challenge:' + room.id]) list.push(new ChallengeSeal(x, y)); break;
-      case '$': if (!save.collected[e.id]) list.push(new GeoRock(x, y, e.id)); break;
+      case '$': if (!spent.nodes.has(e.id)) list.push(new GeoRock(x, y, e.id)); break;
       default:
-        if (NODE_CHARS[e.ch]) list.push(new ResourceNode(x, y, NODE_CHARS[e.ch]));
+        if (NODE_CHARS[e.ch] && !spent.nodes.has(e.id)) list.push(new ResourceNode(x, y, NODE_CHARS[e.ch], e.id));
     }
   }
   if (room.id === 'planicie_lar' && save.base && save.base.smith) {

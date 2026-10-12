@@ -24,6 +24,14 @@ export const PHYS = {
   pogo: -9.6,
 };
 
+// Zona segura: perto de uma fogueira não aparecem monstros (nem invasões).
+export const SAFE_RADIUS = 10;
+export const nearBench = (room, tx, ty) =>
+  room.entities.some((e) => e.ch === 'B' && Math.abs(e.tx - tx) <= SAFE_RADIUS && Math.abs(e.ty - ty) <= 6);
+
+// Fragmentos de Vida: a cada FRAGMENTS_PER_HEART o herói ganha um coração.
+export const FRAGMENTS_PER_HEART = 5;
+
 export const SOUL_MAX = 99;
 export const SOUL_COST = 33;
 export const SOUL_PER_HIT = 11;

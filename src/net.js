@@ -8,6 +8,7 @@ import { ENEMY_TYPES, Projectile } from './enemies.js';
 import './enemies2.js';
 import { BOSS_TYPES } from './bosses.js';
 import { MINI_TYPES } from './minibosses.js';
+import { SOBERANOS } from './soberanos.js';
 import { drawHero, drawSlash } from './art.js';
 import { WEAPONS, ARMORS } from './config.js';
 
@@ -265,6 +266,10 @@ export class Net {
         g.projectiles.push(pr);
         break;
       }
+      case 'rest':
+        // Alguém descansou numa fogueira: os monstros e recursos voltam para todo mundo.
+        if (g.respawnWorld()) g.ui.toast(`${m.name || 'Um jogador'} descansou: o mundo se renovou.`, 3000);
+        break;
       case 'chat':
         if (this.onChat) this.onChat(m.name, m.text, m.id === this.id);
         break;
@@ -322,7 +327,7 @@ export class Net {
       let e = g.enemies.find((q) => q.eid === eid);
       if (!e) {
         if (String(code).startsWith('B:')) {
-          const B = BOSS_TYPES[code.slice(2)] || MINI_TYPES[code.slice(2)];
+          const B = BOSS_TYPES[code.slice(2)] || MINI_TYPES[code.slice(2)] || SOBERANOS[code.slice(2)];
           if (!B) continue;
           e = new B(0, 0);
           g.bossPending = null;
@@ -335,6 +340,7 @@ export class Net {
           e = new E(0, 0);
         }
         e.eid = eid;
+        if (/^[a-z]\d+$/.test(String(eid)) && ENEMY_TYPES[String(eid)[0]]) e.sid = `${g.room.id}:${eid}`; // inimigo da sala: registra a morte
         e.x = x; e.y = y;
         g.enemies.push(e);
       }
@@ -368,6 +374,7 @@ export class Net {
 
   sendHit(e, dmg, kx, ky) { this.send({ t: 'hit', eid: e.eid, dmg, kx, ky }); }
   sendBuild(room, idx, id) { this.send({ t: 'build', room, idx, id }); }
+  sendRest() { this.send({ t: 'rest' }); }
   sendChat(text) { this.send({ t: 'chat', text }); }
 
   drawPlayers(ctx) {

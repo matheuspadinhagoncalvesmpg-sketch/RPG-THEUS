@@ -1,11 +1,12 @@
 // Núcleo do jogo: salas, transições, combate, câmera e estados.
-import { TILE, T, AREAS, ABILITIES, PHYS, SOUL_MAX, SOUL_PER_HIT, SOUL_COST, RESOURCES, WEAPONS, CHARMS, RARITY, ARMORS, giveWeapon, equipArmor } from './config.js';
+import { TILE, T, AREAS, ABILITIES, PHYS, SOUL_MAX, SOUL_PER_HIT, SOUL_COST, RESOURCES, WEAPONS, CHARMS, RARITY, ARMORS, giveWeapon, equipArmor, nearBench, FRAGMENTS_PER_HEART } from './config.js';
 import { World } from './world.js';
 import { Player } from './player.js';
 import { ENEMY_TYPES, Projectile } from './enemies.js';
 import './enemies2.js';
 import { BOSS_TYPES } from './bosses.js';
 import { MINI_TYPES } from './minibosses.js';
+import { SOBERANOS } from './soberanos.js';
 import { spawnRoomEntities, GeoCoin, Tombstone, ItemDrop, Campfire } from './entities.js';
 import { BuildMode } from './build.js';
 import { CraftUI } from './crafting.js';
@@ -19,6 +20,8 @@ import { Renderer } from './render.js';
 import { AIDirector } from './ai.js';
 import { writeSave } from './save.js';
 import { BOSS_LINES } from './story.js';
+import { MEMORIAS, TIPOS, REINOS, MEMORIAS_POR_REINO } from './memorias.js';
+import { Cutscene } from './cutscene.js';
 import { overlap, sign, clamp, rand } from './util.js';
 
 const STEP = 1000 / 60;
@@ -38,7 +41,10 @@ export class Game {
     this.craft = new CraftUI(this);
     this.raids = new Raids(this);
     this.invasions = new Invasions(this);
+    this.cutscene = new Cutscene(this);
     this.invSeq = 0;
+    // O que já foi derrotado/colhido desde o último descanso: volta ao sentar numa fogueira ou ao morrer.
+    this.spent = { enemies: new Set(), nodes: new Set() };
     this.net = new Net(this);
     this.raidSeq = 0;
     this.speed = 1;
@@ -110,9 +116,10 @@ export class Game {
       if (first && !this.save.visitedIntro) {
         this.save.visitedIntro = true;
         this.player.y -= 4 * TILE;
-        setTimeout(() => this.ui.toast(this.input.touchMode
+        // Abertura: cena curta e, depois dela, a dica dos controles.
+        setTimeout(() => this.playCutscene('abertura', () => this.ui.toast(this.input.touchMode
           ? 'Joystick: mover  ·  ▲ pular  ·  ⚔ atacar  ·  segure ✦ para curar'
-          : 'A D mover · Espaço pular · clique para atacar · segure o botão direito para curar · Esc → manual', 6500), 1800);
+          : 'A D mover · Espaço pular · clique para atacar · segure o botão direito para curar · Esc → manual', 6500)), 400);
       }
     }
   }
@@ -128,21 +135,25 @@ export class Game {
     this.room = room;
     this.renderer.setRoom(room);
     room.doorsClosed = false;
-    this.entities = spawnRoomEntities(room, this.save);
+    this.entities = spawnRoomEntities(room, this.save, this.spent);
     this.enemies = [];
-    let eid = 0;
     for (const e of room.entities) {
       const E = ENEMY_TYPES[e.ch];
-      if (!E) continue;
+      if (!E || nearBench(room, e.tx, e.ty)) continue; // zona segura ao redor das fogueiras
+      const sid = `${room.id}:${e.ch}${e.index}`;
+      if (this.spent.enemies.has(sid)) continue;
       const en = new E(e.tx * TILE + TILE / 2, (e.ty + 1) * TILE);
-      en.eid = eid++;
+      en.eid = e.ch + e.index; // identificador estável: igual para todos os jogadores
+      en.sid = sid;
       this.enemies.push(en);
     }
     this.boss = null;
     this.bossPending = null;
-    if (room.boss && !this.save.bosses[room.boss]) {
+    // Algumas salas têm um chefe antes do chefe (o Trono: Eliar antes de Alvar).
+    const alvo = room.preBoss && !this.save.bosses[room.preBoss] ? room.preBoss : room.boss;
+    if (alvo && !this.save.bosses[alvo]) {
       const k = room.entities.find((e) => e.ch === 'K');
-      this.bossPending = { type: room.boss, x: k.tx * TILE + TILE / 2, y: (k.ty + 1) * TILE };
+      this.bossPending = { type: alvo, x: k.tx * TILE + TILE / 2, y: (k.ty + 1) * TILE };
     }
     const sh = this.save.shade;
     if (sh && sh.room === id) this.entities.push(new Tombstone(sh.x, sh.y, sh.geo));
@@ -170,7 +181,7 @@ export class Game {
     if (room.area !== this.lastArea) {
       this.lastArea = room.area;
       const a = AREAS[room.area];
-      this.ui.areaTitle(a.name, a.subtitle);
+      this.ui.areaTitle(a.name, `${REINOS[room.area].nome} · ${a.subtitle}`);
     }
     this.audio.setMusic(room.area, false);
     this.audio.intense = false;
@@ -292,6 +303,10 @@ export class Game {
         if (inp.pressed.inv) return this.craft.openInventory();
         if (inp.pressed.build) this.build.toggle();
         this.updatePlay();
+        break;
+      case 'cutscene':
+        this.cutscene.update(inp);
+        this.ambientStep();
         break;
       case 'dialog':
         this.ui.updateDialog(this.audio);
@@ -776,6 +791,7 @@ export class Game {
   }
 
   finishDeath() {
+    if (!this.net.online) this.respawnWorld(); // no multijogador a morte de um não renova o mundo de todos
     this.masks = this.save.masksMax;
     this.soul = 0;
     this.respawn();
@@ -915,6 +931,14 @@ export class Game {
     this.updateCamera(true);
   }
 
+  // Descansar (ou morrer) faz os monstros e os recursos voltarem.
+  respawnWorld() {
+    const had = this.spent.enemies.size + this.spent.nodes.size;
+    this.spent.enemies.clear();
+    this.spent.nodes.clear();
+    return had;
+  }
+
   restAtBench(bench) {
     const p = this.player;
     p.sitting = true;
@@ -923,6 +947,8 @@ export class Game {
     p.y = bench.y - p.h;
     p.vx = p.vy = 0;
     this.masks = this.save.masksMax;
+    this.respawnWorld();
+    this.net.sendRest();
     this.save.bench = { room: this.room.id, x: p.x, y: p.y };
     const bid = `${this.room.id}:${Math.round(bench.x)}`;
     const lembrada = !!this.save.brasas[bid];
@@ -943,17 +969,53 @@ export class Game {
       else if (npc.data.shop) this.openShop();
       else if (npc.data.trade) this.craft.openSmith();
       else if (npc.data.maps) this.craft.openMaps();
+      else if (npc.data.loja) this.craft.openNpcShop(npc.data.loja);
     });
   }
 
-  showDialog(speaker, lines, onDone) {
+  showDialog(speaker, lines, onDone, tone) {
     this.state = 'dialog';
     this.ui.setInteract(null);
+    this.ui.setDialogTone(tone);
     this.ui.openDialog(speaker, lines, () => {
       if (this.state === 'dialog') this.state = 'play';
+      this.ui.setDialogTone(null);
       if (onDone) onDone();
     });
   }
+
+  // ── Memórias: pedaços da história, cada um com a forma de quem o deixou ──
+  lerMemoria(id) {
+    const m = MEMORIAS[id];
+    if (!m) return;
+    const t = TIPOS[m.tipo];
+    this.showDialog(`${t.nome} · ${m.titulo}`, m.linhas, () => this.registrarMemoria(id), t.cor);
+  }
+
+  // Primeira leitura: moedas, e a cada 5 Memórias um Fragmento de Vida; completar um reino rende mais.
+  registrarMemoria(id) {
+    const s = this.save, m = MEMORIAS[id];
+    if (m.flag) s.talked[m.flag] = true;
+    if (s.memorias[id]) { this.persist(); return; }
+    s.memorias[id] = true;
+    s.geo += 20;
+    const total = Object.keys(s.memorias).length;
+    const doReino = Object.keys(s.memorias).filter((k) => MEMORIAS[k] && MEMORIAS[k].regiao === m.regiao).length;
+    this.ui.resetHud();
+    this.ui.updateHud(this);
+    this.audio.play('pickup_small');
+    this.persist();
+    this.ui.toast(`Memória registrada no Diário (${doReino}/${MEMORIAS_POR_REINO[m.regiao]} do ${REINOS[m.regiao].nome})`, 3200);
+    setTimeout(() => {
+      if (doReino === MEMORIAS_POR_REINO[m.regiao]) {
+        s.geo += 150;
+        this.addFragments(2);
+        this.ui.toast(`Você reuniu todas as Memórias do ${REINOS[m.regiao].nome}!`, 4500);
+      } else if (total % 6 === 0) this.addFragments(1);
+    }, 900);
+  }
+
+  playCutscene(id, onDone) { this.cutscene.play(id, onDone); }
 
   advanceDialog() { this.ui.advanceDialog(); }
 
@@ -971,12 +1033,22 @@ export class Game {
 
   collectMask(id) {
     this.save.collected[id] = true;
-    this.save.masksMax++;
-    this.masks = this.save.masksMax;
+    this.addFragments(1);
+  }
+
+  // Fragmentos de Vida: cinco completam um coração.
+  addFragments(n) {
+    const s = this.save;
+    s.fragments = (s.fragments || 0) + n;
+    let hearts = 0;
+    while (s.fragments >= FRAGMENTS_PER_HEART) { s.fragments -= FRAGMENTS_PER_HEART; s.masksMax++; hearts++; }
     this.persist();
     this.audio.play('pickup');
     this.ui.resetHud();
-    this.openBanner('♥', 'Cristal de Vida', 'Sua vida máxima aumentou em um coração.', '');
+    if (hearts) {
+      this.masks = s.masksMax;
+      this.openBanner('♥', 'Coração completo!', 'Cinco fragmentos de vida se juntaram: sua vida máxima aumentou em um coração.', '');
+    } else this.ui.toast(`Fragmento de Vida (${s.fragments}/${FRAGMENTS_PER_HEART})`, 3200);
   }
 
   openBanner(icon, title, desc, keys) {
@@ -997,8 +1069,14 @@ export class Game {
   startBoss() {
     const b = this.bossPending;
     this.bossPending = null;
-    const boss = new (BOSS_TYPES[b.type] || MINI_TYPES[b.type])(b.x, b.y);
+    const boss = new (BOSS_TYPES[b.type] || MINI_TYPES[b.type] || SOBERANOS[b.type])(b.x, b.y);
     boss.eid = 'boss';
+    if (boss.key === 'king') {
+      // Cada alma libertada enfraquece a Roda, e Alvar com ela.
+      const livres = Object.keys(this.save.livres).length;
+      if (livres) boss.maxHp = boss.hp = Math.max(30, boss.maxHp - 4 * livres);
+      this.playCutscene('alvar_sem_coroa');
+    }
     this.enemies.push(boss);
     this.boss = boss;
     this.room.doorsClosed = true;
@@ -1011,21 +1089,18 @@ export class Game {
 
   onBossDefeated(key) {
     this.save.bosses[key] = true;
-    this.room.doorsClosed = false;
+    if (key.startsWith('sob_')) this.save.livres[key] = true;
+    if (key !== 'sob_eliar') this.room.doorsClosed = false; // Eliar luta no Trono: as portas só abrem com Alvar
     this.audio.intense = false;
     this.persist();
     setTimeout(() => this.audio.play('door'), 900);
     const L = BOSS_LINES[key];
     const depois = () => {
-      if (key.startsWith('mini_')) {
-        // Mini-chefe: Fragmento de Vida (+1 coração) e a câmara se abre.
-        this.save.masksMax++;
-        this.masks = this.save.masksMax;
-        this.persist();
-        this.audio.play('pickup');
+      if (key.startsWith('sob_')) this.soberanoLivre(key);
+      else if (key.startsWith('mini_')) {
+        // Mini-chefe: um Fragmento de Vida e a câmara se abre.
         this.particles.burst(this.player.cx, this.player.cy, 30, { color: ['#ffffff', '#ffd27a'], speed: 6, life: 40, glow: true });
-        this.ui.updateHud(this);
-        this.ui.toast('Fragmento de Vida! +1 coração', 3500);
+        this.addFragments(1);
         if (key === 'mini_mariposa') this.acquireAbility('glide');
       } else if (key === 'tide') this.acquireCharm('mare_viva');
       else if (key === 'moss') { this.ui.toast('O Cavaleiro cai... e o vento obedece a você.', 3000); this.acquireAbility('dash'); }
@@ -1040,6 +1115,27 @@ export class Game {
       if (L && L.death && this.state === 'play') this.showDialog(L.who, L.death, depois);
       else depois();
     }, 1800);
+  }
+
+  // A alma de um Soberano se solta: cena, recompensa e, no Trono, Eliar abre caminho para Alvar.
+  soberanoLivre(key) {
+    const n = Object.keys(this.save.livres).length;
+    const fim = () => {
+      this.particles.burst(this.player.cx, this.player.cy, 30, { color: ['#ffffff', '#fff2b0'], speed: 6, life: 44, glow: true });
+      this.addFragments(2);
+      this.ui.toast(`Uma alma a menos na Roda (${n}/6)`, 3600);
+      if (n === 6) { this.save.rodaDescansa = true; this.persist(); setTimeout(() => this.playCutscene('roda_descansa'), 2200); }
+    };
+    if (key === 'sob_eliar') {
+      this.playCutscene('eliar', () => {
+        const k = this.room.entities.find((e) => e.ch === 'K');
+        this.bossPending = { type: 'king', x: k.tx * TILE + TILE / 2, y: (k.ty + 1) * TILE };
+        this.boss = null;
+        this.room.doorsClosed = true;
+        fim();
+      });
+    } else if (n === 1) this.playCutscene('soberano_livre', fim);
+    else fim();
   }
 
   // ───────── Menus ─────────
@@ -1087,7 +1183,7 @@ export class Game {
     document.body.classList.add('menu-open');
     this.ui.openChat(npc, this.ai.histories[npc.id] || [], {
       send: (text) => this.ai.npcReply(npc.id, text),
-      shop: npc.data.shop ? () => { this.closeChat(); this.openShop(); } : npc.data.trade ? () => { this.closeChat(); this.craft.openSmith(); } : npc.data.maps ? () => { this.closeChat(); this.craft.openMaps(); } : null,
+      shop: npc.data.shop ? () => { this.closeChat(); this.openShop(); } : npc.data.trade ? () => { this.closeChat(); this.craft.openSmith(); } : npc.data.maps ? () => { this.closeChat(); this.craft.openMaps(); } : npc.data.loja ? () => { this.closeChat(); this.craft.openNpcShop(npc.data.loja); } : null,
       close: () => this.closeChat(),
       sound: () => this.audio.play('talk'),
     });

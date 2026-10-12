@@ -1,5 +1,6 @@
 // Arte vetorial do herói, personagens e objetos (desenhada em tempo real no canvas).
 import { shade, rgba } from './util.js';
+import { MEMORIAS } from './memorias.js';
 
 export const EYE_COLORS = {
   hetero: ['#ff3b4f', '#3ba7ff'],
@@ -567,6 +568,45 @@ export function drawNPC(ctx, kind, x, y, t, facing = 1) {
     ctx.strokeStyle = '#5a3a22'; ctx.lineWidth = 2.4;
     ctx.beginPath(); ctx.moveTo(10, -6); ctx.lineTo(13, -24 + b); ctx.stroke();
     ctx.fillStyle = '#7c8291'; ctx.fillRect(9, -28 + b, 9, 6);
+  } else if (kind === 'tome') {
+    // Tomé, o Lanterneiro: capuz verde, vara com lanterna acesa
+    ctx.fillStyle = '#2f5a45'; ctx.beginPath(); ctx.moveTo(-9, 0); ctx.lineTo(-7, -26 + b); ctx.lineTo(7, -26 + b); ctx.lineTo(10, 0); ctx.fill();
+    ctx.fillStyle = '#d9b48a'; ellipse(ctx, 0, -31 + b, 6.5, 6);
+    ctx.fillStyle = '#3e7a5c'; ctx.beginPath(); ctx.moveTo(-9, -29 + b); ctx.quadraticCurveTo(0, -46 + b, 9, -29 + b); ctx.lineTo(5, -29 + b); ctx.quadraticCurveTo(0, -36 + b, -5, -29 + b); ctx.fill();
+    ctx.fillStyle = '#14121c'; ctx.fillRect(1, -32 + b, 2, 2); ctx.fillRect(-4, -32 + b, 2, 2);
+    ctx.strokeStyle = '#6b4a32'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(12, 0); ctx.lineTo(13, -42); ctx.stroke();
+    const gl = ctx.createRadialGradient(13, -44, 1, 13, -44, 20); gl.addColorStop(0, 'rgba(255,200,110,0.6)'); gl.addColorStop(1, 'rgba(255,200,110,0)');
+    ctx.fillStyle = gl; ctx.fillRect(-8, -64, 42, 42);
+    ctx.fillStyle = '#ffd27a'; ctx.fillRect(10, -48, 6, 7);
+  } else if (kind === 'selene') {
+    // Selene, a Cronista: túnica azul-noite, óculos e um rolo de pergaminho
+    ctx.fillStyle = '#34396b'; ctx.beginPath(); ctx.moveTo(-9, 0); ctx.lineTo(-7, -26 + b); ctx.lineTo(7, -26 + b); ctx.lineTo(10, 0); ctx.fill();
+    ctx.fillStyle = '#e9d2b6'; ellipse(ctx, 0, -31 + b, 6.5, 6);
+    ctx.fillStyle = '#f2f2f6'; ctx.beginPath(); ctx.moveTo(-7, -33 + b); ctx.quadraticCurveTo(0, -42 + b, 7, -33 + b); ctx.lineTo(6, -28 + b); ctx.lineTo(-6, -28 + b); ctx.fill();
+    ctx.strokeStyle = '#c9a64e'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(-2.4, -31 + b, 2.6, 0, Math.PI * 2); ctx.arc(2.8, -31 + b, 2.6, 0, Math.PI * 2); ctx.moveTo(0.2, -31 + b); ctx.lineTo(0.2, -31 + b); ctx.stroke();
+    ctx.fillStyle = '#14121c'; ctx.fillRect(1, -32 + b, 1.6, 2); ctx.fillRect(-4, -32 + b, 1.6, 2);
+    ctx.fillStyle = '#efe3c8'; ctx.fillRect(7, -18 + b, 9, 12); ctx.fillStyle = '#b89a6a'; ctx.fillRect(7, -18 + b, 9, 2); ctx.fillRect(7, -8 + b, 9, 2);
+  } else if (kind === 'brum') {
+    // Brum, o Mineiro: capacete com lamparina de cristal e picareta
+    ctx.fillStyle = '#6b4a32'; ctx.beginPath(); ctx.moveTo(-10, 0); ctx.lineTo(-8, -24 + b); ctx.lineTo(8, -24 + b); ctx.lineTo(11, 0); ctx.fill();
+    ctx.fillStyle = '#2a2230'; ctx.fillRect(-8, -6, 5, 6); ctx.fillRect(3, -6, 5, 6);
+    ctx.fillStyle = '#d9a37a'; ellipse(ctx, 0, -30 + b, 7, 6.5);
+    ctx.fillStyle = '#6a4a2a'; ctx.beginPath(); ctx.moveTo(-6, -29 + b); ctx.quadraticCurveTo(0, -17 + b, 6, -29 + b); ctx.fill();
+    ctx.fillStyle = '#c9932f'; ctx.beginPath(); ctx.arc(0, -34 + b, 8, Math.PI, 0); ctx.fill(); ctx.fillRect(-9, -35 + b, 18, 2);
+    ctx.fillStyle = '#7ef0ff'; ctx.beginPath(); ctx.arc(0, -40 + b, 2.8, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#14121c'; ctx.fillRect(1, -32 + b, 2, 2); ctx.fillRect(-4, -32 + b, 2, 2);
+    ctx.strokeStyle = '#5a3a22'; ctx.lineWidth = 2.4; ctx.beginPath(); ctx.moveTo(10, -4); ctx.lineTo(14, -30 + b); ctx.stroke();
+    ctx.strokeStyle = '#9aa7b4'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(8, -34 + b); ctx.lineTo(20, -30 + b); ctx.stroke();
+  } else if (kind === 'nami') {
+    // Nami, a Pescadora: chapéu de palha, vestido azul-mar e uma rede nas costas
+    ctx.fillStyle = '#2a7a8a'; ctx.beginPath(); ctx.moveTo(-9, 0); ctx.lineTo(-7, -25 + b); ctx.lineTo(7, -25 + b); ctx.lineTo(10, 0); ctx.fill();
+    ctx.fillStyle = '#e2b98f'; ellipse(ctx, 0, -30 + b, 6.5, 6);
+    ctx.fillStyle = '#2b1a24'; ctx.beginPath(); ctx.moveTo(-7, -30 + b); ctx.quadraticCurveTo(-9, -19 + b, -5, -17 + b); ctx.lineTo(-4, -28 + b); ctx.fill();
+    ctx.fillStyle = '#e8d49a'; ctx.beginPath(); ctx.ellipse(0, -35 + b, 13, 3, 0, 0, Math.PI * 2); ctx.fill(); ctx.beginPath(); ctx.arc(0, -36 + b, 6, Math.PI, 0); ctx.fill();
+    ctx.fillStyle = '#14121c'; ctx.fillRect(1, -31 + b, 1.6, 2); ctx.fillRect(-4, -31 + b, 1.6, 2);
+    ctx.strokeStyle = 'rgba(200,230,240,0.8)'; ctx.lineWidth = 1;
+    for (let i = 0; i < 4; i++) { ctx.beginPath(); ctx.moveTo(-14 + i * 2, -22 + b); ctx.lineTo(-18 + i * 2, -2); ctx.stroke(); }
+    ctx.beginPath(); ctx.moveTo(-18, -12); ctx.lineTo(-10, -12); ctx.moveTo(-17, -6); ctx.lineTo(-11, -6); ctx.stroke();
   } else if (kind === 'eco') {
     // Espírito translúcido
     const fl = Math.sin(t * 0.04) * 4;
@@ -914,6 +954,55 @@ export function drawTreasure(ctx, x, y, open, t, glowColor = '#ffd27a') {
     ctx.fillStyle = '#5a3a22'; ctx.beginPath(); ctx.moveTo(-13, -14); ctx.quadraticCurveTo(0, -26, 13, -14); ctx.fill();
     ctx.fillStyle = '#c9932f'; ctx.fillRect(-3, -17, 6, 6);
     ctx.fillStyle = '#1a1208'; ctx.fillRect(-1, -15, 2, 3);
+  }
+  ctx.restore();
+}
+
+// Memória do mundo: a forma depende do tipo (livro, carta, brilho, pedra, pintura). Já lida = mais apagada.
+export function drawMemoria(ctx, x, y, id, t, lida) {
+  const tipo = (MEMORIAS[id] && MEMORIAS[id].tipo) || 'inscricao';
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.globalAlpha *= lida ? 0.65 : 1;
+  const glow = (c, r = 20) => {
+    if (lida) return;
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    const g = ctx.createRadialGradient(0, -12, 1, 0, -12, r + Math.sin(t * 0.07) * 2);
+    g.addColorStop(0, c + '66'); g.addColorStop(1, c + '00');
+    ctx.fillStyle = g; ctx.fillRect(-r - 4, -r - 14, r * 2 + 8, r * 2 + 8);
+    ctx.restore();
+  };
+  if (tipo === 'diario') {
+    glow('#ffcf7a');
+    ctx.fillStyle = '#5a3a22'; ctx.fillRect(-9, -9, 18, 9);
+    ctx.fillStyle = '#e9dcc0'; ctx.fillRect(-8, -12, 8, 10); ctx.fillRect(0, -12, 8, 10);
+    ctx.fillStyle = '#8a6a44'; ctx.fillRect(-0.5, -12, 1, 10);
+    ctx.fillStyle = 'rgba(60,40,20,0.5)'; for (let i = 0; i < 3; i++) { ctx.fillRect(-7, -10 + i * 3, 6, 0.8); ctx.fillRect(1, -10 + i * 3, 6, 0.8); }
+  } else if (tipo === 'carta') {
+    glow('#f0b6a0');
+    ctx.fillStyle = '#efe3c8'; ctx.beginPath(); ctx.moveTo(-9, 0); ctx.lineTo(-9, -12); ctx.lineTo(9, -12); ctx.lineTo(9, 0); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = '#b89a6a'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-9, -12); ctx.lineTo(0, -5); ctx.lineTo(9, -12); ctx.stroke();
+    ctx.fillStyle = '#b8433f'; ctx.beginPath(); ctx.arc(0, -5, 2.2, 0, Math.PI * 2); ctx.fill();
+  } else if (tipo === 'eco') {
+    glow('#9fe3ff', 26);
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    for (let i = 0; i < 3; i++) {
+      const a = t * 0.05 + i * 2.1;
+      ctx.fillStyle = `rgba(159,227,255,${0.55 - i * 0.12})`;
+      ctx.beginPath(); ctx.arc(Math.cos(a) * 5, -12 + Math.sin(a * 1.3) * 5, 3 - i * 0.6, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+  } else if (tipo === 'fresco') {
+    glow('#c9b8ff');
+    ctx.fillStyle = '#3a3346'; ctx.fillRect(-10, -20, 20, 20);
+    ctx.fillStyle = '#c9a7ff'; ctx.beginPath(); ctx.arc(-3, -13, 3.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ffcf7a'; ctx.fillRect(2, -16, 5, 9);
+    ctx.fillStyle = '#7ec0ff'; ctx.fillRect(-8, -6, 16, 3);
+  } else {
+    glow('#d9d2c5');
+    ctx.fillStyle = '#6a6578'; ctx.beginPath(); ctx.moveTo(-9, 0); ctx.lineTo(-9, -16); ctx.quadraticCurveTo(0, -24, 9, -16); ctx.lineTo(9, 0); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#8f8aa0'; ctx.fillRect(-9, -16, 3, 16);
+    ctx.fillStyle = 'rgba(255,255,255,0.45)'; for (let i = 0; i < 3; i++) ctx.fillRect(-5, -14 + i * 4, 10 - (i % 2) * 3, 1);
   }
   ctx.restore();
 }

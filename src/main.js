@@ -440,6 +440,8 @@ $('#btn-pause').addEventListener('click', () => { if (game.state === 'play') gam
 $('#btn-resume').addEventListener('click', () => game.closeMenu());
 $('#btn-charms').addEventListener('click', () => { game.closeMenu(); game.craft.openCharms(); });
 $('#btn-travel').addEventListener('click', () => { game.closeMenu(); game.craft.openTravel(); });
+$('#btn-diario').addEventListener('click', () => { game.closeMenu(); game.craft.openDiario(); });
+$('#cutscene').addEventListener('pointerdown', () => game.cutscene.advance());
 $('#btn-inventory').addEventListener('click', () => { game.closeMenu(); game.craft.openInventory(); });
 $('#btn-inv').addEventListener('click', () => { if (game.state === 'play') game.craft.openInventory(); });
 $('#btn-open-options').addEventListener('click', () => { $('.pause-main').classList.add('hidden'); $('.pause-opts').classList.remove('hidden'); $('#pause-title').textContent = 'Opções'; });

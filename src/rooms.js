@@ -1,4 +1,4 @@
-import { VISOES } from './story.js';
+import { LORE_SALAS } from './memorias.js';
 // Mundo de Vésper: cada sala ocupa um retângulo numa grade global de blocos.
 // Salas vizinhas se conectam automaticamente pelas aberturas nas bordas.
 //
@@ -42,11 +42,6 @@ const DEFS = [
       b.set(3, 12, 'r').set(35, 12, 'w').set(40, 12, 'w').set(42, 12, 'r');
       b.set(37, 11, 'L').set(8, 12, 'L').set(9, 12, 'a');
     },
-    lore: [
-      ['Uma placa de madeira cravada no chão:\n"Terras livres. Corte árvores, quebre pedras e construa aqui o seu lar."\n(Aperte B ou o botão de martelo para construir.)',
-       'Embaixo, um selo mais antigo, quase apagado:\n"Selo da Casa da Aurora. Honra à família da criança escolhida."'],
-      'Pedras de uma fundação, quase enterradas na terra. Numa delas, um "A" minúsculo, entalhado por mãos pequenas.',
-    ],
   },
   {
     id: 'campos_inicio', name: 'Colina do Despertar', area: 'campos',
@@ -61,11 +56,6 @@ const DEFS = [
       b.set(4, 12, 'L').set(7, 12, 'L').set(9, 12, 'S').set(26, 12, 'c');
       b.set(28, 12, 'w').set(34, 12, 'r');
     },
-    lore: [
-      'Sete círculos de terra queimada, um ao lado do outro. O oitavo é o seu.',
-      ['Uma pedra antiga, gasta pelo vento. Duas palavras se sobrepõem: ALVORADA, riscada, e VÉSPER, entalhada por cima, com mão trêmula.',
-       '"VÉSPER — Quando a Coroa da Aurora voltar ao trono, o dia retornará."'],
-    ],
   },
   {
     id: 'campos_abrigo', name: 'Abrigo dos Andarilhos', area: 'campos',
@@ -106,7 +96,7 @@ const DEFS = [
       b.rect(0, 13, 40, 3);
       b.rect(12, 13, 3, 1, '^');
       b.rect(16, 13, 3, 2, 'X').plat(17, 15, 2).set(16, 15, '.'); // buraco secreto para a Gruta Sob as Raízes
-      b.set(10, 12, 'B');
+      b;
       b.rect(20, 11, 4, 2);
       b.plat(27, 8, 4).plat(32, 5, 4);
       b.set(34, 4, 'M').set(35, 4, 'a');
@@ -147,7 +137,6 @@ const DEFS = [
       b.set(24, 12, 'K').set(4, 12, 'L');
     },
     boss: 'moss',
-    lore: ['Uma espada de madeira, minúscula, fincada no chão. Alguém a deixou aqui como quem deixa um recado.'],
   },
   {
     id: 'santuario_vento', name: 'Santuário do Vento', area: 'bosque',
@@ -161,8 +150,6 @@ const DEFS = [
       b.set(15, 12, 'B').set(18, 12, 'L').set(13, 12, 'v');
     },
     cape: 'roxa',
-    lore: [['Gravado no altar:\n"Quem corre com o vento jamais cai no abismo. Siga para o alto, além do moinho."',
-            'Em letra pequenina, no rodapé:\n"Guardado por Brandão, Capitão. Que ninguém o toque até que a centelha volte."']],
   },
 
   // ───────────── RUÍNAS SUSPENSAS ─────────────
@@ -173,31 +160,16 @@ const DEFS = [
       b.rect(0, 14, 18, 2);
       b.rect(6, 14, 4, 2, '.');
       b.rect(18, 15, 6, 1, '^');
-      b.rect(24, 14, 22, 2);
+      b.rect(24, 14, 22, 2).rect(40, 14, 3, 2, '.').plat(41, 15, 2); // passagem para o Dossel das Lanternas
       b.rect(0, 0, 2, 14);
       b.rect(44, 0, 2, 11);
       b.rect(30, 12, 2, 2);
       b.plat(34, 9, 5);
       b.plat(30, 7, 4).plat(35, 5, 4).plat(30, 3, 4).plat(35, 1, 4); // subida para o Aqueduto Alto
       b.set(3, 13, '$').set(28, 8, 'f').set(39, 13, 'g');
-      b.set(26, 13, 'r').set(42, 13, 'o');
+      b.set(26, 13, 'r').set(44, 13, 'o');
       b.set(4, 13, 'L').set(12, 13, 'L').set(28, 13, 'L').set(44, 13, 'L');
     },
-    lore: [
-      ['Uma estátua quebrada. Na base:\n"Aurélia. A que cantava para o Sol. 121 anos de Coroa."',
-       '"Solano. Ergueu a primeira ponte. 118 anos de Coroa."',
-       '"Dalva. Amava as manhãs mais que o povo. 112 anos de Coroa."'],
-      ['"Hélio. Mandou plantar jardins no alto. 105 anos de Coroa."',
-       '"Cecília. Pediu à Marinheira que encurtasse a primeira noite. 99 anos de Coroa."',
-       '"Rúben. Pôs o Dízimo por escrito. 92 anos de Coroa."'],
-      ['"Lídia. Criou a Guarda da Alvorada. 85 anos de Coroa."',
-       '"Tadeu. Mandou forjar a Coroa nova. 77 anos de Coroa."',
-       '"Marta. Não deixou ninguém vê-la envelhecer. 69 anos de Coroa."'],
-      ['"Iago. Chamou o Dízimo de Dever. 61 anos de Coroa."',
-       '"Sibila. A última a ver o sol nascer sem pressa. 54 anos de Coroa."',
-       'A última estátua está sem placa. Alguém riscou os olhos dela com um prego.',
-       'Mais adiante, um pedestal vazio, com um vão em forma de máscara.'],
-    ],
   },
   {
     id: 'ruinas_torre', name: 'Torre dos Ventos', area: 'ruinas',
@@ -207,7 +179,7 @@ const DEFS = [
       b.plat(6, 0, 4);
       b.rect(0, 0, 2, 43).rect(16, 0, 2, 43);
       b.rect(0, 19, 2, 4, '.'); // passagem oeste para o Aqueduto Alto
-      b.rect(0, 46, 18, 2);
+      b.rect(0, 46, 18, 2).rect(12, 46, 3, 2, '.').plat(13, 47, 2); // passagem para o Dossel das Lanternas
       // degraus de 4 blocos: cabem no pulo duplo com folga
       for (let i = 0; i < 11; i++) b.plat(i % 2 ? 10 : 2, 43 - i * 4, 6);
       b.set(9, 29, 'f').set(8, 13, 'f');
@@ -228,9 +200,6 @@ const DEFS = [
     },
     ability: 'wallJump',
     cape: 'laranja',
-    lore: [['Arranhões profundos na pedra:\n"Os antigos escaladores subiam a Torre sem degraus. As paredes eram seu caminho."',
-            'Mais fundo na pedra, outra mão arranhou uma carta:\n"Eu cortei os degraus. Ele pediu e eu cortei. Não por medo da Coroa: por medo de que uma criança subisse e o Trono a aceitasse."',
-            '"Deixei as garras aqui. Para quem vier pelo coração, e não pela coroa. — Íris, que subiu todas as paredes menos esta."']],
   },
   {
     id: 'ruinas_pico', name: 'Pico das Nuvens', area: 'ruinas',
@@ -238,14 +207,13 @@ const DEFS = [
     build: (b) => {
       b.rect(0, 14, 34, 2);
       b.rect(14, 14, 4, 2, '.');
-      b.rect(0, 0, 2, 14);
+      b.rect(0, 0, 2, 10); // abertura oeste (linhas 10-13) para o Salão de Rúben
       b.plat(4, 11, 4).plat(8, 8, 3).set(9, 7, 'M');
       b.rect(22, 13, 4, 1, '^');
       b.set(20, 8, 'f').set(28, 6, 'f').set(29, 13, 'g').set(32, 13, 'o');
       b.set(3, 13, 'L').set(5, 13, 'v').set(7, 13, 'B').set(10, 7, 'a');
     },
     cape: 'preta',
-    lore: ['Um cobertor de criança, dobrado com cuidado sobre uma pedra. Alguém vinha aqui para ficar a sós.'],
   },
   {
     id: 'trono', name: 'Trono do Crepúsculo', area: 'ruinas',
@@ -259,7 +227,7 @@ const DEFS = [
       b.plat(6, 12, 5).plat(23, 12, 5);
       b.set(26, 15, 'K').set(8, 15, 'V');
     },
-    boss: 'king',
+    boss: 'king', preBoss: 'sob_eliar',
   },
 
   // ───────────── CAVERNAS DE CRISTAL ─────────────
@@ -283,12 +251,12 @@ const DEFS = [
     id: 'cristal_galeria', name: 'Galeria Cintilante', area: 'cristal',
     x: 70, y: 48, w: 40, h: 16,
     build: (b) => {
-      b.rect(0, 0, 40, 2);
+      b.rect(0, 0, 40, 2).rect(36, 0, 3, 2, '.');
       b.rect(0, 2, 1, 4).rect(39, 2, 1, 4);
       b.rect(0, 10, 40, 6);
       b.rect(14, 10, 6, 2, '.');
       b.rect(14, 12, 6, 1, '^');
-      b.plat(26, 6, 4);
+      b.plat(26, 6, 4).plat(32, 8, 4).plat(36, 6, 3).plat(32, 4, 4).plat(35, 3, 3).plat(36, 1, 3); // subida para a Gruta Sob as Raízes
       b.rect(21, 11, 3, 5, '.').rect(21, 10, 3, 1, 'X'); // túnel secreto sob a tampa quebrável
       b.plat(21, 15, 2).plat(22, 13, 2).plat(21, 11, 2);
       b.set(6, 9, 'c').set(10, 9, '$').set(24, 9, 'h').set(31, 9, 'p').set(35, 9, 'c');
@@ -309,10 +277,6 @@ const DEFS = [
       b.set(6, 9, 'L').set(9, 9, 'L').set(12, 9, 'k').set(21, 9, 'k');
     },
     ability: 'doubleJump',
-    lore: [
-      'Uma inscrição brilha no cristal:\n"Das cinzas do último pôr do sol nasceram asas. Quem as veste toca o céu duas vezes."',
-      { lines: VISOES, flag: 'visoes' },
-    ],
   },
 
   // ───────────── JARDINS SUBMERSOS ─────────────
@@ -377,7 +341,6 @@ const DEFS = [
       b.rect(1, 7, 4, 1);
       b.set(2, 6, 'C').set(24, 14, 'T').set(4, 6, 'a').set(19, 14, 'L');
     },
-    lore: ['PROVA DO ALVA\nQuem passar em 18 segundos ganha uma medalha.\n(O Brandão fez em 19.)'],
     charm: 'lamina_rapida',
     challenge: { seconds: 18, reward: 120 },
   },
@@ -389,9 +352,9 @@ const DEFS = [
     build: (b) => {
       b.rect(0, 0, 40, 1).rect(16, 0, 3, 1, '.');
       b.rect(0, 1, 1, 5).rect(39, 1, 1, 10);
-      b.rect(0, 11, 40, 3);
+      b.rect(0, 11, 40, 3).rect(2, 11, 3, 3, '.').plat(3, 13, 2); // passagem para a Galeria Cintilante
       b.plat(9, 9, 4).plat(14, 7, 4).plat(9, 5, 4).plat(14, 3, 4).plat(16, 1, 3);
-      b.set(34, 10, 'B').set(22, 10, 'c').set(27, 10, 'c').set(30, 10, 'h').set(5, 10, 'k').set(36, 10, 'k').set(3, 10, 't');
+      b.set(34, 10, 'B').set(22, 10, 'c').set(27, 10, 'c').set(30, 10, 'h').set(5, 10, 'k').set(36, 10, 'k').set(24, 10, 't');
     },
   },
   {
@@ -407,7 +370,7 @@ const DEFS = [
     boss: 'mini_besouro', bossSide: 'right',
   },
   {
-    id: 'cristal_veio', name: 'Veio de Cristal', area: 'cristal',
+    id: 'cristal_veio', name: 'Veio de Cristal', area: 'cristal', npcs: ['brum'],
     x: 18, y: 44, w: 32, h: 16,
     build: (b) => {
       b.rect(0, 0, 32, 2).rect(0, 2, 1, 9).rect(31, 2, 1, 9);
@@ -435,10 +398,10 @@ const DEFS = [
     build: (b) => {
       b.rect(0, 0, 36, 2).rect(4, 0, 3, 2, '.').rect(0, 2, 1, 7).rect(35, 2, 1, 7);
       b.plat(2, 11, 3).plat(5, 9, 3).plat(2, 7, 3).plat(5, 5, 3).plat(2, 3, 3).plat(4, 1, 3); // subida para o Cume dos Ventos
-      b.rect(0, 13, 36, 3);
+      b.rect(0, 13, 36, 3).rect(3, 13, 3, 3, '.').plat(4, 15, 2); // passagem para a Cisterna do Bosque
       b.rect(10, 13, 6, 3, '.').rect(10, 15, 6, 1).rect(10, 14, 6, 1, '^');
       b.plat(19, 9, 4).plat(25, 6, 3);
-      b.set(31, 12, 'B').set(22, 12, 'c').set(14, 5, 'f').set(26, 5, 'f').set(5, 12, 'k').set(27, 5, 't');
+      b.set(31, 12, 'B').set(22, 12, 'c').set(14, 5, 'f').set(26, 5, 'f').set(7, 12, 'k').set(27, 5, 't');
     },
   },
   {
@@ -488,7 +451,7 @@ const DEFS = [
       b.rect(12, 13, 3, 1, '^');
       b.rect(24, 13, 3, 3, 'X').plat(25, 15, 2); // buraco secreto para a Cripta Rasa
       b.plat(6, 11, 4).plat(30, 11, 4);
-      b.set(34, 12, 'B').set(4, 12, 't').set(8, 12, 'h').set(18, 12, 'h').set(22, 12, 'p').set(30, 12, 'c');
+      b.set(4, 12, 't').set(8, 12, 'h').set(18, 12, 'h').set(22, 12, 'p').set(30, 12, 'c');
       b.set(32, 10, '$').set(10, 12, 'w').set(36, 12, 'r');
     },
   },
@@ -500,7 +463,7 @@ const DEFS = [
       b.rect(0, 2, 1, 10).rect(39, 2, 1, 10);
       b.rect(0, 12, 40, 4);
       b.plat(28, 10, 4).plat(22, 8, 4).plat(27, 6, 4).plat(21, 4, 4).plat(23, 3, 3).plat(24, 1, 3); // degraus de até 2 blocos
-      b.set(6, 11, 'B').set(35, 11, 't').set(12, 11, 'c').set(18, 11, 'c').set(31, 11, 'g').set(3, 11, 'k').set(38, 11, 'o');
+      b.set(35, 11, 't').set(12, 11, 'c').set(18, 11, 'c').set(31, 11, 'g').set(3, 11, 'k').set(38, 11, 'o');
     },
   },
   {
@@ -517,11 +480,12 @@ const DEFS = [
     id: 'bosque_cisterna', name: 'Cisterna do Bosque', area: 'bosque',
     x: 200, y: 46, w: 36, h: 16,
     build: (b) => {
-      b.rect(0, 0, 36, 2).rect(10, 0, 3, 2, '.');
+      b.rect(0, 0, 36, 2).rect(10, 0, 3, 2, '.').rect(31, 0, 3, 2, '.');
       b.rect(0, 2, 1, 10).rect(35, 2, 1, 7).rect(35, 12, 1, 0);
       b.rect(0, 12, 36, 4);
       b.rect(22, 9, 14, 3, '~'); // água até a borda leste
       b.plat(14, 10, 4).plat(8, 8, 4).plat(14, 6, 4).plat(8, 4, 4).plat(10, 3, 3).plat(10, 1, 3);
+      b.plat(28, 7, 3).plat(31, 5, 3).plat(28, 3, 3).plat(31, 1, 3); // subida para o Mirante dos Ventos
       b.set(18, 11, 't').set(4, 11, 'k').set(20, 11, 'k').set(27, 10, 'q').set(31, 10, 'q').set(6, 11, 'c');
     },
   },
@@ -542,15 +506,14 @@ const DEFS = [
     x: 176, y: -30, w: 34, h: 24,
     build: (b) => {
       b.rect(0, 0, 34, 1).rect(14, 0, 3, 1, '.');
-      b.rect(0, 1, 1, 20).rect(33, 1, 1, 20);
+      b.rect(0, 1, 1, 20).rect(33, 1, 1, 16); // abertura leste (linhas 17-20) para o Salão de Sibila
       b.plat(14, 3, 3).plat(14, 1, 3); // subida para o Telhado
       b.rect(0, 21, 34, 3).rect(14, 21, 3, 3, '.').plat(14, 23, 3);
       // degraus de 2 blocos, em zigue-zague, até o topo
       b.plat(4, 19, 4).plat(10, 17, 4).plat(16, 15, 4).plat(22, 13, 4).plat(28, 11, 4);
       b.plat(24, 9, 4).plat(18, 7, 4).plat(12, 5, 4);
-      b.set(6, 20, 'B').set(20, 20, 'L').set(29, 10, 'M').set(13, 4, 't').set(10, 12, 'f').set(26, 5, 'f');
+      b.set(20, 20, 'L').set(6, 20, 'B').set(29, 10, 'M').set(13, 4, 't').set(10, 12, 'f').set(26, 5, 'f');
     },
-    lore: ['Um telescópio quebrado aponta para a única estrela do céu: Vésper. Alguém riscou a lente com o dedo:\n"Ela está olhando. Ela sempre esteve."'],
   },
   {
     id: 'cristal_abismo', name: 'Abismo de Cristal', area: 'cristal',
@@ -560,18 +523,18 @@ const DEFS = [
       b.rect(0, 2, 1, 11).rect(35, 2, 1, 7).rect(35, 13, 1, 3);
       b.rect(0, 13, 36, 3).rect(8, 13, 3, 3, 'X').plat(9, 15, 2); // buraco secreto para a Catacumba
       b.plat(26, 11, 4).plat(30, 9, 4).plat(25, 7, 4).plat(30, 5, 4).plat(26, 3, 4).plat(31, 1, 3);
-      b.set(20, 12, 'B').set(6, 12, 't').set(10, 12, 'g').set(14, 12, 'h').set(4, 12, 'k').set(16, 12, 'k').set(33, 12, 'k').set(12, 6, 'f');
+      b.set(6, 12, 't').set(10, 12, 'g').set(14, 12, 'h').set(4, 12, 'k').set(16, 12, 'k').set(33, 12, 'k').set(12, 6, 'f');
     },
   },
   {
     id: 'jardins_nascente', name: 'Nascente Escondida', area: 'jardins',
     x: 96, y: 70, w: 24, h: 18,
     build: (b) => {
-      b.rect(0, 0, 24, 2).rect(0, 2, 1, 1).rect(0, 7, 1, 11).rect(23, 2, 1, 10);
+      b.rect(0, 0, 24, 2).rect(0, 2, 1, 1).rect(0, 7, 1, 6).rect(0, 16, 1, 2).rect(23, 2, 1, 10);
       b.rect(0, 16, 24, 2).rect(0, 7, 5, 1);
-      b.rect(1, 8, 22, 8, '~').rect(23, 12, 1, 4, '~');
+      b.rect(1, 8, 22, 8, '~').rect(23, 12, 1, 4, '~').rect(0, 13, 1, 3, '~'); // água também na passagem oeste
       b.plat(8, 8, 3).plat(16, 6, 6);
-      b.set(9, 7, 't').set(19, 5, 'B').set(12, 12, 'q').set(18, 11, 'q').set(6, 15, 'k').set(14, 15, 'k');
+      b.set(9, 7, 't').set(12, 12, 'q').set(18, 11, 'q').set(6, 15, 'k').set(14, 15, 'k');
     },
   },
 
@@ -594,9 +557,8 @@ const DEFS = [
       b.rect(0, 13, 40, 3).rect(0, 0, 2, 13).rect(38, 0, 2, 9);
       b.rect(22, 13, 3, 1, '^');
       b.plat(8, 11, 4).plat(12, 9, 4).plat(16, 7, 4).plat(10, 5, 3);
-      b.set(11, 4, 'M').set(18, 6, 't').set(5, 12, 'L').set(31, 12, 'B').set(28, 12, 'g').set(15, 12, 'c').set(35, 12, 'o');
+      b.set(11, 4, 'M').set(18, 6, 't').set(5, 12, 'L').set(28, 12, 'g').set(15, 12, 'c').set(35, 12, 'o');
     },
-    lore: ['Um marco de pedra cercado por sete montes de cinzas. Num deles, uma capa dobrada. No marco, riscado com a ponta de uma espada:\n"Aqui terminam os que se cansaram. Que a próxima criança não pare."'],
   },
   {
     id: 'bosque_cume', name: 'Cume dos Ventos', area: 'bosque',
@@ -605,9 +567,8 @@ const DEFS = [
       b.rect(0, 13, 36, 3).rect(4, 13, 3, 3, '.').plat(4, 15, 3);
       b.rect(0, 0, 1, 13).rect(35, 0, 1, 9); // abertura leste (linhas 9-12)
       b.plat(12, 9, 5).plat(20, 6, 5);
-      b.set(20, 12, 'B').set(30, 12, 't').set(10, 12, 'L').set(14, 5, 'f').set(26, 4, 'f').set(24, 12, 'c');
+      b.set(30, 12, 't').set(10, 12, 'L').set(14, 5, 'f').set(26, 4, 'f').set(24, 12, 'c');
     },
-    lore: ['Daqui se vê o Trono, longe, no alto das Ruínas. O vento sopra daquele lado. Alguém deixou uma lanterna apagada no parapeito:\n"Para quando você voltar a ter dúvidas."'],
   },
   {
     id: 'ruinas_ponte_vento', name: 'Ponte do Vento', area: 'ruinas',
@@ -628,7 +589,6 @@ const DEFS = [
       b.plat(8, 10, 4).plat(14, 8, 4).plat(20, 6, 4).plat(26, 4, 4);
       b.set(27, 3, 't').set(5, 11, 'B').set(12, 11, 'L').set(22, 11, 'g').set(30, 11, 'k');
     },
-    lore: ['Uma estátua sem rosto olha para o oeste, para a Torre. Na base:\n"A quem subiu sem degraus: o vento ainda guarda o seu nome."'],
   },
   {
     id: 'jardins_salao', name: 'Salão Submerso', area: 'jardins',
@@ -650,7 +610,7 @@ const DEFS = [
       b.rect(1, 2, 32, 14, '~').rect(0, 8, 1, 4, '~').rect(33, 8, 1, 4, '~').rect(10, 16, 3, 2, '~');
       b.rect(20, 2, 8, 3, '.').rect(21, 5, 7, 1).set(20, 4, '~');
       b.rect(8, 11, 3, 5).rect(14, 8, 3, 8).rect(24, 12, 3, 4);
-      b.set(24, 4, 'B').set(15, 7, 't').set(5, 15, 'k').set(12, 15, 'o').set(19, 10, 'q').set(29, 9, 'q').set(30, 15, 'k');
+      b.set(15, 7, 't').set(5, 15, 'k').set(12, 15, 'o').set(19, 10, 'q').set(29, 9, 'q').set(30, 15, 'k');
     },
   },
 
@@ -662,8 +622,9 @@ const DEFS = [
       b.rect(0, 13, 46, 3).rect(30, 13, 6, 3, '.').plat(31, 15, 4);
       b.rect(0, 0, 1, 9).rect(45, 0, 1, 3).rect(45, 7, 1, 6);
       b.plat(36, 11, 4).plat(38, 9, 3);
+      b.plat(6, 11, 4).plat(11, 9, 4).plat(6, 7, 4).plat(11, 5, 4).plat(6, 3, 4).plat(8, 1, 4); // subida para o Salão de Marta
       b.rect(40, 7, 6, 1); // borda alinhada com a passagem da Torre dos Ventos
-      b.set(4, 12, 'B').set(14, 12, 'g').set(24, 12, 'g').set(20, 6, 'f').set(9, 12, 't').set(40, 6, 'o');
+      b.set(14, 12, 'g').set(24, 12, 'g').set(20, 6, 'f').set(9, 12, 't').set(40, 6, 'o');
     },
   },
   {
@@ -677,18 +638,13 @@ const DEFS = [
     },
   },
   {
-    id: 'ruinas_biblioteca', name: 'Biblioteca Soterrada', area: 'ruinas',
+    id: 'ruinas_biblioteca', name: 'Biblioteca Soterrada', area: 'ruinas', npcs: ['selene'],
     x: -10, y: -24, w: 46, h: 16, sky: true,
     build: (b) => {
-      b.rect(0, 13, 46, 3).rect(0, 0, 1, 13).rect(45, 0, 1, 9);
+      b.rect(0, 13, 46, 3).rect(0, 0, 1, 9).rect(45, 0, 1, 9); // abertura oeste (linhas 9-12) para o Salão de Dalva
       b.plat(6, 10, 5).plat(14, 8, 5).plat(24, 10, 5).plat(32, 8, 5);
       b.set(10, 12, 'L').set(19, 12, 'L').set(40, 12, 'L').set(28, 12, 'B').set(16, 7, 'f').set(34, 7, 'f').set(4, 12, 'c').set(37, 12, 'c');
     },
-    lore: [
-      'Estantes de pedra, livros que viraram pó. Um sobrevive, preso por uma corrente:\n"Registro das Crianças da Virada. Doze Alvoradores. Doze mãos pequenas."',
-      'Uma página legível:\n"O Dízimo não era pedido. Era cobrado. A cada Alvorador, a Casa devolvia uma criança ao Sol: a mais nova que nascesse na hora certa."',
-      'No último livro, uma anotação a lápis:\n"Se houver uma décima terceira, avise a Aurora. Ela vai reconhecer os olhos."\nEmbaixo, riscado: "Ela não vai."',
-    ],
   },
   {
     id: 'ruinas_telhado', name: 'Telhado das Ruínas', area: 'ruinas',
@@ -697,15 +653,14 @@ const DEFS = [
       b.rect(0, 13, 34, 3).rect(2, 13, 3, 3, '.').plat(2, 15, 3);
       b.rect(0, 0, 1, 13).rect(33, 0, 1, 9);
       b.plat(6, 9, 5).plat(24, 9, 5);
-      b.set(9, 12, 'B').set(28, 12, 't').set(20, 12, 'L').set(10, 6, 'f').set(26, 6, 'f').set(30, 12, 'g').set(8, 8, 'k');
+      b.set(28, 12, 't').set(20, 12, 'L').set(10, 6, 'f').set(26, 6, 'f').set(30, 12, 'g').set(8, 8, 'k');
     },
-    lore: ['No telhado, uma estrutura de bronze aponta para o horizonte onde o sol deveria sair. Gravado no metal:\n"Quatrocentos e doze anos olhando para o mesmo lado."'],
   },
   {
     id: 'ruinas_torreao', name: 'Torreão do Vigia', area: 'ruinas',
     x: 222, y: -46, w: 34, h: 16, sky: true,
     build: (b) => {
-      b.rect(0, 13, 34, 3).rect(0, 0, 1, 9).rect(33, 0, 1, 13);
+      b.rect(0, 13, 34, 3).rect(0, 0, 1, 9).rect(33, 0, 1, 9); // abertura leste (linhas 9-12) para o Salão de Lídia
       b.rect(14, 13, 4, 1, '^');
       b.plat(6, 10, 4).plat(20, 10, 4).plat(26, 7, 4);
       b.set(27, 6, 't').set(4, 12, 'B').set(10, 12, 'g').set(22, 12, 'g').set(30, 12, 'o');
@@ -715,9 +670,11 @@ const DEFS = [
     id: 'bosque_dossel', name: 'Dossel das Lanternas', area: 'bosque',
     x: 104, y: 8, w: 40, h: 10,
     build: (b) => {
-      b.rect(0, 0, 40, 2).rect(0, 0, 1, 3).rect(0, 7, 1, 3).rect(39, 0, 1, 10);
+      b.rect(0, 0, 40, 2).rect(18, 0, 3, 2, '.').rect(36, 0, 3, 2, '.').rect(0, 0, 1, 3).rect(0, 7, 1, 3).rect(39, 0, 1, 10);
       b.rect(0, 7, 40, 3).rect(30, 7, 4, 3, '.').plat(30, 9, 4);
-      b.plat(8, 4, 4).plat(18, 4, 4);
+      b.plat(8, 4, 4).plat(24, 4, 4);
+      b.plat(14, 5, 4).plat(19, 3, 3).plat(18, 1, 3); // subida para a Ponte Partida
+      b.plat(31, 5, 4).plat(35, 3, 3).plat(36, 1, 3); // subida para a Torre dos Ventos
       b.set(4, 6, 't').set(12, 6, 'f').set(22, 6, 'p').set(28, 3, 'f').set(36, 6, 'h');
     },
   },
@@ -729,11 +686,11 @@ const DEFS = [
       b.rect(0, 13, 36, 3);
       b.rect(10, 13, 4, 1, '.').rect(10, 14, 4, 1, '^').rect(22, 13, 4, 1, '.').rect(22, 14, 4, 1, '^');
       b.plat(16, 9, 5);
-      b.set(30, 12, 'B').set(18, 8, 'M').set(6, 12, 'c').set(18, 12, 'h').set(28, 12, 'p').set(18, 4, 'f');
+      b.set(18, 8, 'M').set(6, 12, 'c').set(18, 12, 'h').set(28, 12, 'p').set(18, 4, 'f');
     },
   },
   {
-    id: 'bosque_ninho_alto', name: 'Ninho Alto', area: 'bosque',
+    id: 'bosque_ninho_alto', name: 'Ninho Alto', area: 'bosque', npcs: ['tome'],
     x: 300, y: 14, w: 36, h: 16,
     build: (b) => {
       b.rect(0, 0, 36, 2).rect(16, 0, 4, 2, '.').rect(0, 2, 1, 7).rect(35, 0, 1, 9); // aberturas: teto (Mariposa) e leste (Vendaval)
@@ -742,7 +699,6 @@ const DEFS = [
       b.plat(22, 4, 4).plat(17, 3, 4).plat(16, 1, 4); // subida para o Covil da Mariposa
       b.set(27, 7, 't').set(6, 12, 'B').set(12, 12, 'f').set(22, 12, 'g').set(31, 12, 'c').set(4, 12, 'L');
     },
-    lore: ['Um ninho enorme feito de lanternas quebradas. Dentro, um bilhete amarrado com fio de pavio:\n"Para o próximo que chegar aqui: o Cavaleiro de Musgo também fazia ninhos. Ele era mais gentil do que parecia."'],
   },
   {
     id: 'bosque_lago', name: 'Lago das Lanternas', area: 'bosque',
@@ -752,7 +708,7 @@ const DEFS = [
       b.rect(0, 14, 40, 2);
       b.rect(1, 8, 38, 6, '~').rect(0, 9, 1, 3, '~');
       b.plat(8, 6, 4).plat(26, 6, 5);
-      b.set(10, 5, 'B').set(28, 5, 't').set(10, 11, 'q').set(20, 10, 'q').set(30, 12, 'q').set(6, 13, 'k').set(24, 13, 'k').set(34, 13, 'o');
+      b.set(28, 5, 't').set(10, 11, 'q').set(20, 10, 'q').set(30, 12, 'q').set(6, 13, 'k').set(24, 13, 'k').set(34, 13, 'o');
     },
   },
 
@@ -762,12 +718,12 @@ const DEFS = [
     x: 60, y: 80, w: 36, h: 16,
     build: (b) => {
       b.rect(0, 0, 36, 2).rect(8, 0, 3, 2, '.');
-      b.rect(0, 2, 1, 10).rect(35, 2, 1, 6);
+      b.rect(0, 2, 1, 10).rect(35, 2, 1, 1).rect(35, 6, 1, 2); // aberturas leste: linhas 3-5 (Nascente) e 8-11 (Ossário)
       b.rect(0, 12, 36, 4);
+      b.plat(31, 10, 3).plat(33, 8, 2).plat(32, 6, 3); // subida até a abertura da Nascente
       b.plat(13, 10, 4).plat(8, 8, 4).plat(13, 6, 4).plat(8, 4, 4).plat(9, 3, 3).plat(8, 1, 3);
-      b.set(30, 11, 'B').set(3, 11, 't').set(22, 11, 'g').set(18, 11, 'c').set(26, 11, 'c').set(20, 11, 'L').set(33, 11, 'k');
+      b.set(3, 11, 't').set(22, 11, 'g').set(18, 11, 'c').set(26, 11, 'c').set(20, 11, 'L').set(33, 11, 'k').set(30, 11, 'B');
     },
-    lore: ['Nichos de pedra, cada um com uma lanterna apagada e um nome gravado: dezenas de Buscadores. No fundo, um nicho vazio, com a inscrição:\n"Reservado a quem trouxer a criança de volta."'],
   },
   {
     id: 'cristal_ossario', name: 'Ossário de Cristal', area: 'cristal',
@@ -775,7 +731,7 @@ const DEFS = [
     build: (b) => {
       b.rect(0, 0, 24, 1).rect(0, 4, 8, 12).rect(8, 12, 16, 4).rect(23, 1, 1, 11);
       b.plat(9, 10, 3).plat(12, 8, 3).plat(9, 6, 3);
-      b.set(18, 11, 't').set(14, 11, 'B').set(20, 11, 'g').set(11, 11, 'o').set(16, 11, 'k');
+      b.set(18, 11, 't').set(20, 11, 'g').set(11, 11, 'o').set(16, 11, 'k');
     },
   },
   {
@@ -790,7 +746,7 @@ const DEFS = [
     },
   },
   {
-    id: 'jardins_costa', name: 'Costa Rasa', area: 'jardins',
+    id: 'jardins_costa', name: 'Costa Rasa', area: 'jardins', npcs: ['nami'],
     x: 288, y: 70, w: 36, h: 18,
     build: (b) => {
       b.rect(0, 0, 36, 2).rect(35, 0, 1, 18).rect(0, 2, 1, 6).rect(0, 12, 1, 4);
@@ -821,7 +777,7 @@ const DEFS = [
       b.rect(1, 2, 34, 12, '~').rect(0, 8, 1, 4, '~').rect(20, 0, 3, 2, '~');
       b.rect(2, 2, 6, 3, '.').rect(3, 5, 5, 1);
       b.rect(28, 10, 6, 4);
-      b.set(5, 4, 'B').set(30, 9, 'M').set(10, 13, 't').set(16, 8, 'q').set(24, 11, 'q').set(14, 13, 'k');
+      b.set(30, 9, 'M').set(10, 13, 't').set(16, 8, 'q').set(24, 11, 'q').set(14, 13, 'k');
     },
   },
 
@@ -848,7 +804,6 @@ const DEFS = [
       b.rect(32, 9, 8, 7);
       b.set(5, 12, 'B').set(10, 4, 'L').set(36, 8, 'o');
     },
-    lore: ['Um poste de bronze rasgado pelo vento. Preso nele, um pedaço de seda dourada, ainda inteiro:\n"Só quem aprendeu a cair devagar atravessa o Vendaval."'],
   },
   {
     id: 'bosque_olho', name: 'Olho da Tempestade', area: 'bosque',
@@ -856,17 +811,78 @@ const DEFS = [
     build: (b) => {
       b.rect(0, 9, 36, 7).rect(0, 0, 1, 5).rect(35, 0, 1, 9);
       b.plat(10, 6, 5).plat(20, 4, 5);
-      b.set(24, 3, 't').set(12, 5, 'M').set(5, 8, 'B').set(30, 8, 'k').set(28, 8, 'k');
+      b.set(24, 3, 't').set(12, 5, 'M').set(30, 8, 'k').set(28, 8, 'k');
     },
+  },
+
+  // ───────────── OS SALÕES DOS SOBERANOS ─────────────
+  {
+    id: 'ruinas_salao_dalva', name: 'Salão da Aurora Cantada', area: 'ruinas',
+    x: -56, y: -24, w: 46, h: 16,
+    build: (b) => {
+      b.rect(0, 0, 46, 2).rect(0, 2, 1, 14).rect(45, 2, 1, 7);
+      b.rect(0, 13, 46, 3);
+      b.rect(44, 9, 1, 4, 'D');
+      b.plat(8, 9, 5).plat(30, 9, 5);
+      b.set(10, 12, 'K');
+    },
+    boss: 'sob_dalva', bossSide: 'right',
+  },
+  {
+    id: 'ruinas_salao_ruben', name: 'Salão dos Livros-Caixa', area: 'ruinas',
+    x: 86, y: -56, w: 34, h: 16,
+    build: (b) => {
+      b.rect(0, 0, 34, 2).rect(0, 2, 1, 12).rect(33, 2, 1, 8);
+      b.rect(0, 14, 34, 2);
+      b.rect(32, 10, 1, 4, 'D');
+      b.plat(6, 10, 5).plat(20, 10, 5);
+      b.set(8, 13, 'K');
+    },
+    boss: 'sob_ruben', bossSide: 'right',
+  },
+  {
+    id: 'ruinas_salao_sibila', name: 'Salão do Último Olhar', area: 'ruinas',
+    x: 210, y: -30, w: 34, h: 24,
+    build: (b) => {
+      b.rect(0, 0, 34, 2).rect(0, 2, 1, 15).rect(33, 2, 1, 19);
+      b.rect(0, 21, 34, 3);
+      b.rect(1, 17, 1, 4, 'D');
+      b.plat(6, 16, 5).plat(23, 16, 5).plat(14, 11, 6).plat(5, 7, 5);
+      b.set(24, 20, 'K');
+    },
+    boss: 'sob_sibila',
+  },
+  {
+    id: 'ruinas_salao_lidia', name: 'Salão dos Estandartes', area: 'ruinas',
+    x: 256, y: -46, w: 34, h: 16,
+    build: (b) => {
+      b.rect(0, 0, 34, 2).rect(0, 2, 1, 7).rect(33, 2, 1, 14);
+      b.rect(0, 13, 34, 3);
+      b.rect(1, 9, 1, 4, 'D');
+      b.plat(8, 9, 4).plat(22, 9, 4);
+      b.set(24, 12, 'K');
+    },
+    boss: 'sob_lidia',
+  },
+  {
+    id: 'ruinas_salao_marta', name: 'Salão dos Espelhos', area: 'ruinas',
+    x: 82, y: -40, w: 46, h: 16,
+    build: (b) => {
+      b.rect(0, 0, 46, 2).rect(0, 2, 1, 14).rect(45, 2, 1, 14);
+      b.rect(0, 13, 46, 3).rect(8, 13, 4, 3, '.').rect(8, 13, 4, 1, 'D').plat(8, 15, 4);
+      b.plat(20, 9, 5).plat(34, 9, 5);
+      b.set(30, 12, 'K');
+    },
+    boss: 'sob_marta',
   },
 ];
 
 // Inimigos regionais (src/enemies2.js) espalhados pelas salas: [x, y, letra].
-const EXTRA = {"campos_brejo":[[15,12,"s"],[27,12,"s"]],"campos_ermo":[[15,12,"s"],[31,12,"s"]],"campos_marco":[[13,8,"s"]],"campos_abrigo":[[27,12,"s"]],"campos_moinho":[[15,7,"s"]],"campos_alto":[[18,12,"s"]],"campos_cripta":[[25,7,"s"]],"bosque_entrada":[[7,4,"m"],[26,4,"m"]],"bosque_raizes":[[11,7,"m"],[24,5,"m"]],"bosque_dossel":[[16,5,"m"],[32,6,"m"]],"bosque_cume":[[4,9,"m"],[9,6,"m"]],"bosque_copas":[[9,5,"m"],[26,6,"m"]],"bosque_ninho_alto":[[11,6,"m"]],"bosque_gruta":[[22,5,"m"]],"mirante_ventos":[[15,10,"m"]],"ruinas_abismo":[[17,10,"n"]],"ruinas_galeria":[[8,5,"n"]],"ruinas_aqueduto":[[11,5,"n"],[32,8,"n"]],"ruinas_jardim":[[27,8,"n"]],"ruinas_biblioteca":[[8,6,"n"],[28,6,"n"]],"ruinas_telhado":[[16,6,"n"]],"ruinas_torreao":[[14,6,"n"]],"ruinas_arsenal":[[16,10,"n"]],"ruinas_observatorio":[[17,10,"n"]],"ruinas_pico":[[14,12,"n"]],"cristal_galeria":[[26,5,"x"],[28,5,"x"]],"cristal_poco":[[9,5,"x"]],"cristal_veio":[[15,13,"x"]],"cristal_veio_fundo":[[17,9,"x"],[23,3,"x"]],"cristal_catacumba":[[9,7,"x"],[13,9,"x"]],"cristal_ossario":[[9,5,"x"]],"cristal_abismo":[[26,10,"x"],[31,4,"x"]],"cristal_coracao":[[18,9,"x"]],"jardins_poco":[[5,17,"j"],[11,20,"j"]],"jardins_recife":[[11,9,"j"],[21,5,"j"]],"jardins_gruta":[[10,4,"j"]],"jardins_nascente":[[5,9,"j"]],"jardins_salao":[[9,8,"j"],[20,11,"j"]],"jardins_coral":[[5,10,"j"],[15,3,"j"]],"jardins_costa":[[19,11,"j"]],"jardins_trincheira":[[7,4,"j"],[20,4,"j"]],"jardins_abissal":[[10,3,"j"],[24,4,"j"]]};
+const EXTRA = {"bosque_olho":[[14,3,"m"],[26,6,"m"]],"campos_brejo":[[15,12,"s"],[27,12,"s"],[31,10,"M"],[20,12,"L"]],"campos_ermo":[[15,12,"s"],[31,12,"s"],[9,10,"M"],[19,12,"L"]],"campos_marco":[[13,8,"s"]],"campos_abrigo":[[27,12,"s"]],"campos_moinho":[[15,7,"s"]],"campos_alto":[[18,12,"s"]],"campos_cripta":[[25,7,"s"],[21,3,"L"]],"bosque_entrada":[[7,4,"m"],[26,4,"m"]],"bosque_raizes":[[11,7,"m"],[24,5,"m"],[13,15,"M"]],"bosque_dossel":[[16,5,"m"],[32,6,"m"],[19,6,"L"]],"bosque_cume":[[4,9,"m"],[9,6,"m"]],"bosque_copas":[[9,5,"m"],[26,6,"m"],[15,12,"L"]],"bosque_ninho_alto":[[11,6,"m"],[10,12,"N"]],"bosque_gruta":[[22,5,"m"]],"mirante_ventos":[[15,10,"m"]],"ruinas_abismo":[[17,10,"n"]],"ruinas_galeria":[[8,5,"n"]],"ruinas_aqueduto":[[11,5,"n"],[32,8,"n"]],"ruinas_jardim":[[27,8,"n"]],"ruinas_biblioteca":[[8,6,"n"],[28,6,"n"],[24,12,"N"]],"ruinas_telhado":[[16,6,"n"]],"ruinas_torreao":[[14,6,"n"],[18,12,"L"]],"ruinas_arsenal":[[16,10,"n"]],"ruinas_observatorio":[[17,10,"n"]],"ruinas_pico":[[14,12,"n"]],"cristal_galeria":[[26,5,"x"],[28,5,"x"]],"cristal_poco":[[9,5,"x"],[12,5,"M"]],"cristal_veio":[[15,13,"x"],[18,13,"L"],[24,13,"N"]],"cristal_veio_fundo":[[17,9,"x"],[23,3,"x"],[16,5,"L"]],"cristal_catacumba":[[9,7,"x"],[13,9,"x"]],"cristal_ossario":[[9,5,"x"],[8,11,"L"]],"cristal_abismo":[[26,10,"x"],[31,4,"x"]],"cristal_coracao":[[18,9,"x"]],"jardins_poco":[[5,17,"j"],[11,20,"j"]],"jardins_recife":[[11,9,"j"],[21,5,"j"]],"jardins_gruta":[[10,4,"j"]],"jardins_nascente":[[5,9,"j"]],"jardins_salao":[[9,8,"j"],[20,11,"j"],[5,11,"L"]],"jardins_coral":[[5,10,"j"],[15,3,"j"]],"jardins_costa":[[19,11,"j"],[25,4,"L"],[24,4,"N"]],"jardins_trincheira":[[7,4,"j"],[20,4,"j"]],"jardins_abissal":[[10,3,"j"],[24,4,"j"]]};
 
 export const ROOM_DEFS = DEFS.map((d) => {
   const b = new RoomBuilder(d.w, d.h);
   d.build(b);
   for (const [x, y, c] of EXTRA[d.id] || []) b.set(x, y, c);
-  return { ...d, rows: b.rows() };
+  return { ...d, rows: b.rows(), lore: LORE_SALAS[d.id] || [] };
 });

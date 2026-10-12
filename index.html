@@ -44,6 +44,9 @@
   <link rel="modulepreload" href="src/dialog.js">
   <link rel="modulepreload" href="src/story.js">
   <link rel="modulepreload" href="src/loot.js">
+  <link rel="modulepreload" href="src/memorias.js">
+  <link rel="modulepreload" href="src/cutscene.js">
+  <link rel="modulepreload" href="src/cenas.js">
   <link rel="modulepreload" href="src/enemies2.js">
   <link rel="modulepreload" href="src/invasions.js">
   <link rel="modulepreload" href="src/minibosses.js">
@@ -149,6 +152,7 @@
         <button id="btn-look" class="menu-btn">Aparência</button>
         <button id="btn-travel" class="menu-btn hidden">Viajar entre fogueiras</button>
         <button id="btn-inventory" class="menu-btn">Inventário</button>
+        <button id="btn-diario" class="menu-btn">Diário do Errante</button>
         <button id="btn-charms" class="menu-btn">Amuletos</button>
         <button class="menu-btn btn-manual">Manual dos controles</button>
         <button class="menu-btn btn-mp">Multijogador e nuvem</button>
@@ -360,6 +364,17 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <div id="cutscene" class="hidden" data-bg="vazio">
+    <div class="cs-bar"></div>
+    <div class="cs-stage">
+      <div id="cs-glifo"></div>
+      <div id="cs-quem"></div>
+      <p id="cs-texto"></p>
+    </div>
+    <div class="cs-bar"></div>
+    <div id="cs-dica">toque para continuar</div>
   </div>
 
   <div id="rotate-hint">

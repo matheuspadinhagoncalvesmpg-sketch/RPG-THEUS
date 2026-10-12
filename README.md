@@ -72,6 +72,17 @@ O jogo tem um **Manual dos controles** completo na pausa e na tela inicial. No c
 ### Armas, baús e inventário (estilo Terraria)
 O herói começa com a Lâmina do Errante e acha outras armas em **baús de tesouro** espalhados pelo mundo ou as fabrica na forja: Adaga de Osso (rápida), Lança do Caçador (alcance longo), Machado de Pedra (pesado), Espada de Minério, Espada de Cristal, **Arco do Caçador** (flechas) e **Cajado da Névoa** (orbes). Cada arma tem raridade, dano e recarga próprios. Abra o **Inventário** com **Q** (ou pelo botão da mochila no celular) para equipar armas, ver armadura, materiais e itens. Os baús também dão moedas, materiais e armaduras.
 
+### Mundo vivo (regras do mapa)
+- **Zonas seguras:** perto de cada fogueira não aparecem monstros.
+- **Respawn pelo descanso:** monstros e recursos só voltam ao sentar numa fogueira (no multijogador, o descanso de um renova para todos).
+- **Fragmentos de Vida:** cinco fragmentos = um coração; cristais, mini-chefes, Soberanos e Memórias dão fragmentos.
+- **Baús selados** até limpar os guardiões da sala.
+- **Os Soberanos:** cinco salões nas Ruínas com chefes que são os reis e rainhas antigos presos pelo Regente; Eliar luta no Trono antes de Alvar. Cada alma libertada enfraquece Alvar. Ver `docs/historia/10-revisao-reis-e-reinos.md`.
+- **Memórias e cenas:** a história vem em diários, cartas, ecos, inscrições e afrescos (Diário do Errante no menu) e em cenas nos momentos de reviravolta.
+- **NPCs com lojas:** Tomé, Selene, Brum e Nami vendem os itens achados no mapa; Oren, Tomé e Nami andam pela região.
+- **IA:** só controla chefes, eventos raros e a conversa dos NPCs; inimigos comuns têm regras fixas (sincroniza melhor no multijogador).
+- Plano completo do mapa: `docs/PLANO_DO_MAPA.md`.
+
 ### Asas de Seda e inimigos regionais
 O novo mini-chefe **Mariposa Rainha** (Covil acima do Ninho Alto, no Bosque) concede as **Asas de Seda**: segure o pulo no ar para planar e atravessar abismos largos, como o **Vendaval**, que leva ao **Olho da Tempestade**. Cada região também ganhou um inimigo próprio: Mariposa Lanterneira (Bosque), Espinhudo (Campos), Atirador de Cristal (Cristal), Fantasma (Ruínas) e Água-viva (Jardins).
 

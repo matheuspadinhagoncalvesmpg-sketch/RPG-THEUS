@@ -34,6 +34,7 @@ export class Enemy {
 
   die(game) {
     this.dead = true;
+    if (this.sid) game.spent.enemies.add(this.sid); // só volta ao descansar numa fogueira
     if (game.invasions) game.invasions.onKill(this);
     game.audio.play('kill');
     game.particles.burst(this.cx, this.cy, 16, { color: ['#ffffff', this.bloodColor || '#ff9a5c', '#2a2333'], speed: 6, life: 32, grav: 0.18, drag: 0.94 });

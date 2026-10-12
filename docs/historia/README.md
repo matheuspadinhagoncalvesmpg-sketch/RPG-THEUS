@@ -60,3 +60,10 @@ A **[tabela do propósito](06-itens-habilidades-sistemas.md#13-a-tabela-do-prop�
 - ✅ **Escrito:** toda a história, personagens, mapa, bestiário, itens, finais, textos prontos, plano.
 - 🔲 **Ainda não implementado no jogo:** nada deste material foi para o código (só o que já existia). As fases **H1 a H6** do arquivo 09 descrevem como.
 - ❓ **Decisões abertas:** 10 perguntas em `09`, §7.
+
+
+---
+
+## Revisão R1
+
+- [`10-revisao-reis-e-reinos.md`](10-revisao-reis-e-reinos.md): **o Rei que Nunca Foi Coroado**, os Doze Soberanos como chefes, os Cinco Reinos, as Memórias e as cenas. **Vale sobre os arquivos 01 a 09 onde houver contradição.**

@@ -2,7 +2,7 @@
 // com barra de progresso, capitão no final e recompensa. A IA (Gemini) decide a hora,
 // o tom e a força; sem IA, um sorteio local faz o mesmo. A IA nunca inventa mecânica:
 // ela só escolhe dentre este catálogo.
-import { TILE, T, RESOURCES } from './config.js';
+import { TILE, T, RESOURCES, nearBench } from './config.js';
 import { Crawler, Hopper, Flyer, Spitter, Guard } from './enemies.js';
 import { pick, rand } from './util.js';
 
@@ -164,7 +164,7 @@ export class Invasions {
 
   spawnPoint(far = 7) {
     const g = this.game, room = g.room;
-    const spots = this.spotsFor(room).filter(([tx]) => Math.abs(tx * TILE - g.player.cx) > far * TILE);
+    const spots = this.spotsFor(room).filter(([tx, ty]) => Math.abs(tx * TILE - g.player.cx) > far * TILE && !nearBench(room, tx, ty));
     return spots.length ? pick(spots) : null;
   }
 

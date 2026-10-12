@@ -26,6 +26,9 @@ export function newSave(profile) {
     weapons: { errante: true },
     opened: {},
     maps: {},
+    fragments: 0,
+    memorias: {},
+    livres: {},
     nail: 1,
     geo: 0,
     abilities: { dash: false, wallJump: false, doubleJump: false, spell: false, glide: false },
@@ -77,6 +80,8 @@ export function loadSave() {
       weapons: { errante: true, [s.weapon || 'errante']: true, ...(s.weapons || {}) },
       opened: { ...(s.opened || {}) },
       maps: { ...(s.maps || {}) },
+      memorias: { ...(s.memorias || {}) },
+      livres: { ...(s.livres || {}) },
       charms: { owned: { ...(ch.owned || {}) }, equipped: [...(ch.equipped || [])] },
       brasas: { ...(s.brasas || {}) }, marcas: { ...(s.marcas || {}) },
     };

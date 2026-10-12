@@ -40,7 +40,7 @@ export class AIDirector {
 
   onRoomEnter() {
     this.resetStats();
-    this.tactics = { ...this.local() };
+    this.tactics = { ...DEFAULT, source: 'fixed' };
     this.timer = 90;
     this.lastBossPhase = null;
   }
@@ -53,6 +53,12 @@ export class AIDirector {
   update() {
     const g = this.game;
     if (g.net.puppet) return; // só quem simula os inimigos planeja a tática
+    const boss = g.boss && !g.boss.dead ? g.boss : null;
+    // Inimigos comuns têm comportamento fixo (igual para todos os jogadores). A IA só dirige chefes.
+    if (!boss) {
+      if (this.tactics.source !== 'fixed') this.tactics = { ...DEFAULT, source: 'fixed' };
+      return;
+    }
     const alive = g.enemies.filter((e) => !e.dead);
     if (!alive.length) return;
     if (g.frame % 30 === 0) {
@@ -60,8 +66,7 @@ export class AIDirector {
       for (const e of alive) best = Math.min(best, Math.hypot(e.cx - g.player.cx, e.cy - g.player.cy));
       if (best < 600) { this.style.distSum += best; this.style.distN++; }
     }
-    const boss = g.boss && !g.boss.dead ? g.boss : null;
-    if (boss && boss.phase2 !== this.lastBossPhase) {
+    if (boss.phase2 !== this.lastBossPhase) {
       if (this.lastBossPhase === false) this.timer = Math.min(this.timer, 1); // mudou de fase: replaneja já
       this.lastBossPhase = boss.phase2;
     }

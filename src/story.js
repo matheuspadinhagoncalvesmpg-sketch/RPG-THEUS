@@ -25,9 +25,43 @@ export const BOSS_LINES = {
     mid: 'Você é só mais uma sombra, Errante.',
     pogo: 'Por que você tem o golpe dele?',
     low: 'Ajoelhe-se diante do crepúsculo.',
-    death: ['Não me peça a Coroa. Eu não... não posso te dar de novo.'],
+    death: ['Nunca a tive na cabeça, criança. Nem uma vez.', 'Eu só a segurei. E elas... elas me seguraram.'],
   },
 };
+
+// Os Soberanos (ver docs/historia/10-revisao-reis-e-reinos.md): presos pelo Regente, libertados ao cair.
+Object.assign(BOSS_LINES, {
+  sob_dalva: {
+    who: 'Dalva, a Cantora do Amanhecer', intro: 'Cantei para o Sol até a voz virar poeira. Venha: cante comigo ou cale-se.',
+    mid: 'Mais alto! A manhã precisa ouvir!', low: 'Eu só queria que ela dormisse...',
+    death: ['Ah... era isto. Silêncio.', 'Obrigada, criança. Diga a ela que a canção... era de amor.'],
+  },
+  sob_ruben: {
+    who: 'Rúben, o Escrivão do Dízimo', intro: 'Tudo é dívida. Você me deve o fôlego.',
+    mid: 'Pague! Pague em moeda ou em lembrança!', low: 'O livro-caixa... não fecha...',
+    death: ['Fechado o livro. Saldo: zero.', 'Zero é bom. Zero é... descanso. Eu nunca tinha escrito essa palavra.'],
+  },
+  sob_lidia: {
+    who: 'Lídia, a Capitã da Guarda', intro: 'Em guarda! A Guarda não recua!',
+    mid: 'Formação! Fechem as fileiras!', low: 'Ainda sou capitã... ainda sou...',
+    death: ['Dispensados. Todos. Podem ir para casa.', 'Eu nunca disse isso a ninguém. Era a única ordem que eu sabia dar.'],
+  },
+  sob_marta: {
+    who: 'Marta, a que Não Envelhecia', intro: 'Não me olhe. Eu não... eu não envelheci.',
+    mid: 'Quebre todos os espelhos, e ainda vai me ver!', low: 'Estou cansada de ser jovem...',
+    death: ['Que cabelo branco bonito você tem. Posso ficar com ele?', 'Eu queria ter envelhecido. Devia ter sido tão calmo.'],
+  },
+  sob_sibila: {
+    who: 'Sibila, a Última Vigia', intro: 'Eu vi o último amanhecer. Foi tão lento. Eu devia ter pedido para ficar.',
+    mid: 'Olhe para a luz. Olhe devagar.', low: 'Quase... quase lá...',
+    death: ['Lá vem ele. Devagar. Devagar.', 'Eu sempre soube que o sol era uma pessoa. Cuide dela. Ela tem sono.'],
+  },
+  sob_eliar: {
+    who: 'Eliar, o Rei Verdadeiro', intro: 'Você tem os olhos dela. Eu me neguei por isso... e ele me deu um lugar na Roda.',
+    q3: 'Não quero lutar com você. Mas a corrente quer.', mid: 'Aguente. Eu aguento mais um pouco.', low: 'Vá. Ele tem medo de você.',
+    death: ['Obrigado. Quarenta e sete anos de reinado e nenhum de liberdade.', 'Alvar nunca foi coroado, criança. Nunca. Ele só tem a nós.'],
+  },
+});
 
 // As sete capas dos Errantes que vieram antes (uma em cada fogueira; todas no corredor do Trono).
 export const CAPES = {

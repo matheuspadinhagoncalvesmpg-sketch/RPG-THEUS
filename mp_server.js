@@ -192,6 +192,11 @@ function handle(c, msg) {
       toWorld(w, { t: 'shot', id: c.id, k, x: Math.round(lim(msg.x, -100000, 100000)), y: Math.round(lim(msg.y, -100000, 100000)), vx: lim(msg.vx, -20, 20), vy: lim(msg.vy, -20, 20) }, c, c.room);
       break;
     }
+    case 'rest': {
+      if (!w) return;
+      toWorld(w, { t: 'rest', id: c.id, name: c.name }, c);
+      break;
+    }
     case 'chat': {
       if (!w) return;
       if (now - (c.lastChat || 0) < 600) return; // no máximo ~1,5 mensagem por segundo

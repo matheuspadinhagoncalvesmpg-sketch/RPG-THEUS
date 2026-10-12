@@ -16,6 +16,7 @@ function dica(s) {
   if (!a.dash) return ['Um cavaleiro coberto de musgo guarda o Bosque. Dizem que o vento obedece a quem o vencer.', 'Descanse numa fogueira antes de encontrá-lo.'];
   if (!a.doubleJump) return ['Ouvi ecos debaixo deste abrigo... como se o chão fosse oco.', 'Golpeie para baixo no ar, quem sabe?'];
   if (!a.wallJump) return ['Com asas nos pés, a Ponte Partida das Ruínas não é mais obstáculo.', 'Suba pelo Penhasco do Moinho. Dizem que os Escaladores deixaram algo na Galeria.'];
+  if (!b.king && Object.keys(s.livres || {}).length < 5) return ['Dizem que, nas Ruínas, os antigos soberanos ainda guardam salões, presos por alguém que nunca usou a Coroa.', 'Libertá-los enfraquece o Trono. Procure nas pontas das Ruínas: oeste, leste e no alto.'];
   if (!b.king) return ['A Torre dos Ventos leva ao Trono. Que a luz te acompanhe, Errante.', 'Dizem também que um poço no Coração de Cristal desce a um templo submerso... e que há um segredo no teto do recife.'];
   return [];
 }
@@ -24,6 +25,7 @@ export const NPCS = {
   oren: {
     name: 'Oren, o Andarilho',
     maps: true,
+    wander: 6,
     lines(game) {
       const s = game.save, a = s.abilities, b = s.bosses;
       if (!s.talked.oren) return ORIGEM;
@@ -96,6 +98,77 @@ export const NPCS = {
       out.push('Use-a com sabedoria. Toque rápido para lançar, segure para curar.');
       return out;
     },
+  },
+};
+
+// Quantas Memórias o herói já leu (para os NPCs comentarem o que ele descobriu).
+const lidas = (s) => Object.keys(s.memorias || {}).length;
+const livres = (s) => Object.keys(s.livres || {}).length;
+
+NPCS.tome = {
+  name: 'Tomé, o Lanterneiro',
+  loja: 'tome',
+  wander: 5,
+  lines(game) {
+    const s = game.save;
+    if (!s.talked.tome) return [
+      'Ah, você chegou até o Cume. Poucos chegam: o vento aqui não perdoa quem não aprendeu a cair.',
+      'Eu era guarda-de-trilha no Reino das Lanternas. Percorria as copas com uma vara e uma lanterna na ponta. Nunca perdi ninguém.',
+      'Hoje a trilha está vazia. Mas as lanternas ainda precisam de alguém que lembre o caminho.',
+    ];
+    if (s.bosses.mini_mariposa) return ['Você abriu as Asas de Seda. A Mariposa Rainha era a lanterna-mãe: ela acendia todas as outras.', 'Obrigado por não deixá-la sofrer.'];
+    if (s.bosses.moss) return ['O Capitão Brandão era meu chefe. Ele ficou no Santuário 412 anos esperando uma ordem que nunca veio.', 'Você deu a ele o descanso. Fico em dívida.'];
+    return ['O Reino das Lanternas dava uma lanterna acesa a cada criança nascida. Cada uma ainda queima, em algum lugar.', 'Se precisar de amuletos ou lenha, é só pedir.'];
+  },
+};
+
+NPCS.selene = {
+  name: 'Selene, a Cronista',
+  loja: 'selene',
+  lines(game) {
+    const s = game.save, n = lidas(s), l = livres(s);
+    if (!s.talked.selene) return [
+      'Shh. Não pise nas páginas: elas se esfarelam. Eu sou Selene. A última escriba dos Doze Tronos.',
+      'Copiei os nomes de todos os soberanos por quarenta anos. Só quando reli tudo de uma vez percebi que a letra era a mesma.',
+      'A letra do Regente. Ele escrevia a história dos reis. E depois a apagava.',
+    ];
+    if (s.bosses.sob_eliar) return ['Eliar... você o libertou? Copiei o rascunho dele quarenta vezes. "Se houver uma décima terceira criança, eu me nego."', 'Ele cumpriu. Nem a Casa tirou isso dele.'];
+    if (l >= 1) return [`Ouvi um canto se calar nas Ruínas. ${l} soberano${l > 1 ? 's' : ''} já descansa${l > 1 ? 'm' : ''}.`, 'A Roda ficou mais leve. Dá para sentir nas páginas.'];
+    if (n >= 5) return [`Você já leu ${n} Memórias. Então sabe: o Dízimo era cobrança, não abraço.`, 'Continue lendo. O que falta está em salões onde ninguém quer ir.'];
+    return ['Se quiser saber o que ainda não leu, eu vendo pistas. E armas que a Guarda deixou: uso nenhuma, mas gosto do brilho.'];
+  },
+};
+
+NPCS.brum = {
+  name: 'Brum, o Mineiro',
+  loja: 'brum',
+  lines(game) {
+    const s = game.save;
+    if (!s.talked.brum) return [
+      'Psiu. Fale baixo, o geodo está ouvindo. Eu sou Brum, mineiro do Reino de Cristal.',
+      'Um dia, o geodo cantou três notas. Perguntei à parede o que queria dizer. Ela me respondeu. Era voz de mulher.',
+      'Ela disse: "cansada". Eu contei ao capataz. Ele me mandou para a Casa. Voltei... diferente.',
+    ];
+    if (s.bosses.mini_golem) return ['O Golem Rachado era meu capataz. Reconheci o jeito de bater a mão na mesa.', 'Ele agora cala. A parede também, um pouco.'];
+    if (s.abilities.doubleJump) return ['Você tem as Asas de Cinza. Quem as tinha antes, passou por aqui de capa rosa. Ouviu o poço chamar e ficou com medo de responder.', 'Que bom que você respondeu.'];
+    return ['Armaduras, cristais, minério. Tudo que a terra deu e a Casa não levou.'];
+  },
+};
+
+NPCS.nami = {
+  name: 'Nami, a Pescadora',
+  loja: 'nami',
+  wander: 4,
+  lines(game) {
+    const s = game.save;
+    if (!s.talked.nami) return [
+      'Ah! Uma de olhos duplos, andando no raso. Eu sou Nami, pescadora do Reino da Maré.',
+      'Eu toco o sino do recife toda tarde, para os pescadores saberem a hora de voltar. Hoje ninguém volta, mas eu toco.',
+      'A moça do mar vem escutar. Quando eu paro, ela pede mais um.',
+    ];
+    if (s.bosses.tide) return ['Você falou com ela, não foi? Ela chorou? Sempre chora quando acha que ninguém vê.', 'Ela guarda alguém no coral do Templo. Eu nunca disse nada. Mas eu sei que alguém dorme lá. E que acorda um pouquinho cada vez que eu toco o sino.'];
+    if (s.bosses.mini_lampreia) return ['A Lampreia Anciã era a mais velha do recife. Nunca fez mal a ninguém. A Casa a enlouqueceu com a luz.', 'Obrigada por dar a ela o fundo do mar de volta.'];
+    return ['Arcos, cajados, adagas, o que as ondas trouxerem. E boas histórias de graça.'];
   },
 };
 

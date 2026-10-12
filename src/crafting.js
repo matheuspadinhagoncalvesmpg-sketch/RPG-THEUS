@@ -1,5 +1,7 @@
 // Painéis de fabricação (bancada/forja), baú e loja do ferreiro.
-import { RECIPES, RESOURCES, SMITH_STOCK, WEAPONS, ARMORS, CHARMS, CHARM_SLOTS, RARITY, ownsWeapon, MAP_PRICES, AREAS } from './config.js';
+import { MEMORIAS, TIPOS, REINOS, MEMORIAS_POR_REINO } from './memorias.js';
+import { LOJAS } from './lojas.js';
+import { RECIPES, RESOURCES, SMITH_STOCK, WEAPONS, ARMORS, CHARMS, CHARM_SLOTS, RARITY, ownsWeapon, MAP_PRICES, AREAS, FRAGMENTS_PER_HEART, giveWeapon, equipArmor } from './config.js';
 
 const $ = (s) => document.querySelector(s);
 
@@ -90,7 +92,7 @@ export class CraftUI {
     this.open('Inventário', '', () => {
       const s = g.save;
       this.list.innerHTML = '';
-      $('#craft-sub').innerHTML = this.equipped();
+      $('#craft-sub').innerHTML = this.equipped() + `<br>Fragmentos de Vida: <b>${s.fragments || 0}/${FRAGMENTS_PER_HEART}</b> · Corações: <b>${s.masksMax}</b>`;
       this.heading('Armas');
       const owned = Object.keys(WEAPONS).filter((k) => ownsWeapon(s, k));
       for (const k of owned) {
@@ -118,6 +120,83 @@ export class CraftUI {
       if (items.length) { this.heading('Itens'); for (const [n, d] of items) this.item(n, d, 'Possui', () => {}, true); }
       this.heading('Atalhos');
       this.item('Amuletos', 'Equipe até 3 (descansando numa fogueira).', 'Abrir', () => { this.close(); this.openCharms(); });
+    });
+  }
+
+  // ── Lojas dos NPCs da história ──
+  openNpcShop(id) {
+    const g = this.game, loja = LOJAS[id];
+    if (!loja) return;
+    this.open(loja.titulo, loja.sub, () => {
+      const s = g.save;
+      this.list.innerHTML = '';
+      $('#craft-sub').innerHTML = `${loja.sub}<br>Moedas: <b>${s.geo}</b>`;
+      for (const it of loja.itens) {
+        let nome, desc, tem = false, aplicar;
+        if (it.tipo === 'arma') {
+          const w = WEAPONS[it.id]; tem = ownsWeapon(s, it.id);
+          nome = `<span style="color:${RARITY[w.rarity].color}">${w.name}</span>`; desc = `${w.desc} (dano ${w.dmg}×)`;
+          aplicar = () => { giveWeapon(s, it.id); };
+        } else if (it.tipo === 'armadura') {
+          const a = ARMORS[it.id]; tem = (ARMORS[s.armor || 'none'].hearts >= a.hearts);
+          nome = a.name; desc = `+${a.hearts} coração${a.hearts > 1 ? 'ões' : ''}.`;
+          aplicar = () => { equipArmor(s, it.id); g.masks = s.masksMax; };
+        } else if (it.tipo === 'amuleto') {
+          const c = CHARMS[it.id]; tem = !!s.charms.owned[it.id];
+          nome = `<span class="charm-dot" style="background:${c.color}">${c.icon}</span>${c.name}`; desc = c.desc;
+          aplicar = () => { s.charms.owned[it.id] = true; };
+        } else if (it.tipo === 'recurso') {
+          nome = `${it.n} ${RESOURCES[it.id].name}`; desc = 'Material de construção e fabricação.';
+          aplicar = () => { s.inv[it.id] = (s.inv[it.id] || 0) + it.n; };
+        } else {
+          // Pista: aponta uma Memória do reino que o herói ainda não leu.
+          const faltam = Object.keys(MEMORIAS).filter((k) => MEMORIAS[k].regiao === it.reino && !s.memorias[k]);
+          nome = `Pista: ${REINOS[it.reino].nome}`; tem = !faltam.length;
+          desc = tem ? 'Você já leu tudo deste reino.' : `Ainda há ${faltam.length} Memória${faltam.length > 1 ? 's' : ''} por ler neste reino.`;
+          aplicar = () => {
+            const k = faltam[0];
+            const sala = g.world.rooms.find((r) => r.lore.includes(k));
+            g.ui.toast(`Procure em: ${sala ? sala.name : REINOS[it.reino].nome}`, 5000);
+          };
+        }
+        const ok = s.geo >= it.preco;
+        this.item(nome, desc, tem ? (it.tipo === 'pista' ? 'Completo' : 'Possui') : `${it.preco} moedas`, () => {
+          if (tem || !ok) return;
+          s.geo -= it.preco;
+          aplicar();
+          g.audio.play('pickup');
+          g.persist();
+          g.ui.resetHud();
+          g.ui.updateHud(g);
+          g.build.refresh();
+          this.render();
+        }, tem || !ok);
+      }
+    });
+  }
+
+  // ── Diário do Errante: todas as Memórias já lidas, por reino ──
+  openDiario() {
+    const g = this.game;
+    this.open('Diário do Errante', 'Releia o que você encontrou. Cada reino guarda um pedaço da verdade.', () => {
+      const s = g.save;
+      this.list.innerHTML = '';
+      const lidas = Object.keys(s.memorias).length, total = Object.keys(MEMORIAS).length;
+      $('#craft-sub').innerHTML = `Memórias: <b>${lidas}/${total}</b> · A cada 6, um Fragmento de Vida`;
+      for (const [reino, info] of Object.entries(REINOS)) {
+        const ids = Object.keys(MEMORIAS).filter((k) => MEMORIAS[k].regiao === reino);
+        const feitas = ids.filter((k) => s.memorias[k]);
+        const h = document.createElement('p');
+        h.className = 'inv-head';
+        h.style.color = info.cor;
+        h.textContent = `${info.nome} · ${feitas.length}/${MEMORIAS_POR_REINO[reino]}`;
+        this.list.appendChild(h);
+        for (const k of feitas) {
+          const m = MEMORIAS[k], t = TIPOS[m.tipo];
+          this.item(`<span style="color:${t.cor}">${t.nome}</span> · ${m.titulo}`, m.linhas[0].slice(0, 90) + (m.linhas[0].length > 90 ? '…' : ''), 'Reler', () => { this.close(); g.lerMemoria(k); });
+        }
+        if (!feitas.length) { const p = document.createElement('p'); p.className = 'si-desc'; p.textContent = 'Nada lido neste reino ainda.'; this.list.appendChild(p); }
+      }
     });
   }
 

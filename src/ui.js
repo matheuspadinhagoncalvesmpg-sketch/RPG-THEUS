@@ -97,6 +97,11 @@ export class UI {
   }
 
   // ───── Diálogo com efeito de máquina de escrever ─────
+  // Cor do nome de quem fala (Memórias usam a cor do tipo); null volta ao dourado.
+  setDialogTone(color) {
+    if (color) this.dialogEl.style.setProperty('--tone', color); else this.dialogEl.style.removeProperty('--tone');
+  }
+
   openDialog(speaker, lines, onDone) {
     this.dialog = { lines, i: 0, chars: 0, onDone, cooldown: 8 };
     this.dialogSpeaker.textContent = speaker || '';
