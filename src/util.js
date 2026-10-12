@@ -1,7 +1,6 @@
 // Pequenas funções utilitárias compartilhadas por todo o jogo.
 
 export const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
-export const lerp = (a, b, t) => a + (b - a) * t;
 export const approach = (v, target, step) =>
   v < target ? Math.min(v + step, target) : Math.max(v - step, target);
 export const sign = (v) => (v < 0 ? -1 : v > 0 ? 1 : 0);
@@ -30,7 +29,6 @@ export function hashStr(s) {
 }
 
 export const rand = (a, b) => a + Math.random() * (b - a);
-export const randInt = (a, b) => Math.floor(rand(a, b + 1));
 export const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
 export function shade(hex, amt) {

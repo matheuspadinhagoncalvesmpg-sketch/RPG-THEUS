@@ -627,18 +627,6 @@ export function drawNPC(ctx, kind, x, y, t, facing = 1) {
   ctx.restore();
 }
 
-export function drawLoreStone(ctx, x, y, t, pal) {
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.fillStyle = pal.groundHi;
-  ctx.beginPath();
-  ctx.moveTo(-12, 0); ctx.lineTo(-10, -30); ctx.quadraticCurveTo(0, -38, 10, -30); ctx.lineTo(12, 0);
-  ctx.fill();
-  ctx.fillStyle = rgba(pal.accent, 0.5 + Math.sin(t * 0.05) * 0.3);
-  ctx.fillRect(-5, -24, 10, 2); ctx.fillRect(-5, -18, 7, 2); ctx.fillRect(-5, -12, 9, 2);
-  ctx.restore();
-}
-
 export function drawOrb(ctx, x, y, t, color = '#bfe9ff') {
   const r = 9 + Math.sin(t * 0.08) * 1.5;
   const g = ctx.createRadialGradient(x, y, 1, x, y, r * 4);

@@ -399,9 +399,10 @@ const DEFS = [
       b.rect(0, 0, 36, 2).rect(4, 0, 3, 2, '.').rect(0, 2, 1, 7).rect(35, 2, 1, 7);
       b.plat(2, 11, 3).plat(5, 9, 3).plat(2, 7, 3).plat(5, 5, 3).plat(2, 3, 3).plat(4, 1, 3); // subida para o Cume dos Ventos
       b.rect(0, 13, 36, 3).rect(3, 13, 3, 3, '.').plat(4, 15, 2); // passagem para a Cisterna do Bosque
+      b.rect(20, 13, 3, 3, '.').plat(21, 15, 2); // passagem para o Lago das Lanternas
       b.rect(10, 13, 6, 3, '.').rect(10, 15, 6, 1).rect(10, 14, 6, 1, '^');
       b.plat(19, 9, 4).plat(25, 6, 3);
-      b.set(31, 12, 'B').set(22, 12, 'c').set(14, 5, 'f').set(26, 5, 'f').set(7, 12, 'k').set(27, 5, 't');
+      b.set(31, 12, 'B').set(25, 12, 'c').set(14, 5, 'f').set(26, 5, 'f').set(7, 12, 'k').set(27, 5, 't');
     },
   },
   {
@@ -704,10 +705,11 @@ const DEFS = [
     id: 'bosque_lago', name: 'Lago das Lanternas', area: 'bosque',
     x: 236, y: 46, w: 40, h: 16,
     build: (b) => {
-      b.rect(0, 0, 40, 2).rect(0, 2, 1, 7).rect(0, 12, 1, 4).rect(39, 2, 1, 14);
+      b.rect(0, 0, 40, 2).rect(12, 0, 3, 2, '.').rect(0, 2, 1, 7).rect(0, 12, 1, 4).rect(39, 2, 1, 14);
       b.rect(0, 14, 40, 2);
       b.rect(1, 8, 38, 6, '~').rect(0, 9, 1, 3, '~');
       b.plat(8, 6, 4).plat(26, 6, 5);
+      b.plat(12, 4, 3).plat(11, 2, 3).plat(12, 1, 3); // subida para o Mirante dos Ventos
       b.set(28, 5, 't').set(10, 11, 'q').set(20, 10, 'q').set(30, 12, 'q').set(6, 13, 'k').set(24, 13, 'k').set(34, 13, 'o');
     },
   },

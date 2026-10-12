@@ -1,14 +1,14 @@
 // Objetos das salas: fogueiras, personagens, placas, itens, recursos, moedas, lápide e construções.
-import { TILE, AREAS, NODE_CHARS, BUILD_BY_ID, CHARMS } from './config.js';
+import { TILE, NODE_CHARS, BUILD_BY_ID, CHARMS } from './config.js';
 import { moveBody } from './physics.js';
 import { rand } from './util.js';
 import { NPCS } from './dialog.js';
 import {
-  drawNPC, drawLoreStone, drawOrb, drawGeoRock, drawGeo, drawCampfire, drawTombstone,
+  drawNPC, drawOrb, drawGeoRock, drawGeo, drawCampfire, drawTombstone,
   drawLifeCrystal, drawResourceNode, drawResourceIcon, drawBuildDeco, drawCloakPost, drawMarkA, drawTreasure, drawMemoria,
 } from './art.js';
 import { LOOT } from './loot.js';
-import { WEAPONS, RARITY, giveWeapon } from './config.js';
+import { WEAPONS, RARITY } from './config.js';
 import { CAPES, CAPE_ORDER, capeNote } from './story.js';
 
 class Entity {
