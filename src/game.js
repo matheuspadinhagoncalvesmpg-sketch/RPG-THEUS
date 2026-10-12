@@ -322,6 +322,45 @@ export class Game {
         if (this.deathTimer <= 0) this.state = 'play';
         break;
     }
+    if (this.state !== 'play' && this.state !== 'off' && this.net.online) this.backgroundStep();
+  }
+
+  // O inimigo mira em quem estiver mais perto (você ou outro jogador da mesma sala).
+  updateEnemy(e) {
+    let target = this.player;
+    if (this.net.online && this.net.players.size) {
+      let best = target.dead ? Infinity : Math.hypot(e.cx - target.cx, e.cy - target.cy);
+      for (const q of this.net.players.values()) {
+        if (q.room !== this.room.id) continue;
+        const d = Math.hypot(e.cx - q.cx, e.cy - q.cy);
+        if (d < best) { best = d; target = q; }
+      }
+    }
+    if (target === this.player) { e.update(this); return; }
+    const real = this.player;
+    this.player = target;
+    try { e.update(this); } finally { this.player = real; }
+  }
+
+  // No multijogador o mundo não para quando você abre um menu, conversa ou morre:
+  // os inimigos seguem agindo, o seu estado continua sendo enviado e os outros continuam jogando.
+  backgroundStep() {
+    const p = this.player;
+    p.invuln = Math.max(p.invuln, 3); // menu aberto não leva dano
+    this.hostileBoxes.length = 0;
+    if (this.net.puppet && this.net.remoteBoxes) this.hostileBoxes.push(...this.net.remoteBoxes);
+    const puppet = this.net.puppet;
+    for (const e of this.enemies) if (!e.dead) { if (puppet) e.puppetStep(); else this.updateEnemy(e); }
+    for (const c of this.coins) c.update(this);
+    for (const pr of this.projectiles) pr.update(this);
+    this.resolveProjectiles();
+    this.enemies = this.enemies.filter((e) => !e.dead);
+    this.coins = this.coins.filter((c) => !c.dead);
+    this.projectiles = this.projectiles.filter((pr) => !pr.dead);
+    this.net.update();
+    this.ai.update();
+    this.raids.update();
+    this.invasions.update();
   }
 
   ambientStep() {
@@ -354,7 +393,7 @@ export class Game {
     p.update(this);
 
     const puppet = this.net.puppet;
-    for (const e of this.enemies) if (!e.dead) { if (puppet) e.puppetStep(); else e.update(this); }
+    for (const e of this.enemies) if (!e.dead) { if (puppet) e.puppetStep(); else this.updateEnemy(e); }
     for (const e of this.entities) e.update(this);
     for (const c of this.coins) c.update(this);
     for (const pr of this.projectiles) pr.update(this);

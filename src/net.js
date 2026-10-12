@@ -6,6 +6,7 @@
 // - Progresso (habilidades, moedas, materiais) é de cada jogador; as construções são do mundo.
 import { ENEMY_TYPES, Projectile } from './enemies.js';
 import { BOSS_TYPES } from './bosses.js';
+import { MINI_TYPES } from './minibosses.js';
 import { drawHero, drawSlash } from './art.js';
 import { WEAPONS, ARMORS } from './config.js';
 
@@ -72,7 +73,11 @@ class RemotePlayer {
     this.x = 0; this.y = 0; this.nx = 0; this.ny = 0;
     this.facing = 1; this.state = 'idle'; this.t = 0; this.attack = null;
     this.w = 16; this.h = 28;
+    this.vx = 0; this.vy = 0; this.dead = false; this.onGround = true; this.invuln = 0; this.inWater = false;
   }
+  // Para os inimigos poderem mirar em quem estiver mais perto, como se fosse o herói local.
+  get cx() { return this.x + this.w / 2; }
+  get cy() { return this.y + this.h / 2; }
   apply(m) {
     const jump = this.room !== m.room || Math.hypot(m.x - this.nx, m.y - this.ny) > 200;
     this.room = m.room;
@@ -297,6 +302,7 @@ export class Net {
       x.eid, x.isBoss ? 'B:' + x.key : CODE_BY_CLASS.get(x.constructor),
       Math.round(x.x), Math.round(x.y), Math.round(x.hp * 10) / 10,
       x.isBoss ? x.facing : x.dir, x.state || '', x.alpha != null ? Math.round(x.alpha * 100) : 100, x.wind || 0,
+      x.elite ? 1 : 0, Math.round(x.maxHp * 10) / 10,
     ]);
     const pr = g.projectiles.filter((q) => q.hostile && !q.dead).map((q) => [Math.round(q.x), Math.round(q.y), +q.vx.toFixed(2), +q.vy.toFixed(2), q.kind, q.r, q.grav]);
     const hb = g.hostileBoxes.map((b) => ({ x: Math.round(b.x), y: Math.round(b.y), w: Math.round(b.w), h: Math.round(b.h) }));
@@ -310,12 +316,12 @@ export class Net {
     const fresh = this.snapRoom !== g.room.id; // primeira foto desta sala
     this.snapRoom = g.room.id;
     this.remoteBoxes = m.hb || [];
-    for (const [eid, code, x, y, hp, dir, state, alpha, wind] of m.e) {
+    for (const [eid, code, x, y, hp, dir, state, alpha, wind, elite, maxHp] of m.e) {
       seen.add(eid);
       let e = g.enemies.find((q) => q.eid === eid);
       if (!e) {
         if (String(code).startsWith('B:')) {
-          const B = BOSS_TYPES[code.slice(2)];
+          const B = BOSS_TYPES[code.slice(2)] || MINI_TYPES[code.slice(2)];
           if (!B) continue;
           e = new B(0, 0);
           g.bossPending = null;
@@ -332,6 +338,8 @@ export class Net {
         g.enemies.push(e);
       }
       e.nx = x; e.ny = y;
+      if (elite) { e.elite = true; e.contact = 2; }
+      if (maxHp) e.maxHp = maxHp;
       if (hp < e.hp) e.flash = 6;
       e.hp = hp;
       if (e.isBoss) e.facing = dir; else e.dir = dir;

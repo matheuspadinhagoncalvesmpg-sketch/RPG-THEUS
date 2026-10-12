@@ -97,6 +97,7 @@ export class Invasions {
     }
     const room = g.room;
     if (this.state === 'idle') {
+      if (g.ui.last.inv !== null) { g.ui.invBar(null); g.ui.last.inv = null; } // some a barra herdada de outro anfitrião
       if (!g.save.bosses.moss || !this.eligible(room) || g.state !== 'play') return;
       if (++this.clock >= this.next) this.begin();
       return;

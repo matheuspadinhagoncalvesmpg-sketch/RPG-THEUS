@@ -103,8 +103,9 @@ function cleanState(c, msg, room) {
 
 function cleanSnap(msg, room) {
   const e = (Array.isArray(msg.e) ? msg.e : []).slice(0, 60).filter(Array.isArray).map((a) => [
-    eidOf(a[0]), clean(a[1], 10), Math.round(lim(a[2], -100000, 100000)), Math.round(lim(a[3], -100000, 100000)),
+    eidOf(a[0]), clean(a[1], 22), Math.round(lim(a[2], -100000, 100000)), Math.round(lim(a[3], -100000, 100000)),
     lim(a[4], 0, 100000), a[5] < 0 ? -1 : 1, clean(a[6], 14), lim(a[7], 0, 100, 100), lim(a[8], 0, 200),
+    a[9] ? 1 : 0, lim(a[10], 0, 100000),
   ]);
   const p = (Array.isArray(msg.p) ? msg.p : []).slice(0, 80).filter(Array.isArray).map((a) => [
     Math.round(lim(a[0], -100000, 100000)), Math.round(lim(a[1], -100000, 100000)), lim(a[2], -40, 40), lim(a[3], -40, 40),
