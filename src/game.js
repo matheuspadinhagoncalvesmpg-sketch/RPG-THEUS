@@ -8,11 +8,8 @@ import { BOSS_TYPES } from './bosses.js';
 import { MINI_TYPES } from './minibosses.js';
 import { SOBERANOS } from './soberanos.js';
 import { spawnRoomEntities, GeoCoin, Tombstone, ItemDrop, Campfire } from './entities.js';
-import { BuildMode } from './build.js';
 import { CraftUI } from './crafting.js';
-import { Raids } from './raids.js';
 import { Invasions } from './invasions.js';
-import { NPC, makeBuilt } from './entities.js';
 import { Net } from './net.js';
 import { scheduleUpload } from './cloud.js';
 import { Particles } from './fx.js';
@@ -37,16 +34,13 @@ export class Game {
     this.player = new Player();
     this.bubbles = [];
     this.floaters = [];
-    this.build = new BuildMode(this);
     this.craft = new CraftUI(this);
-    this.raids = new Raids(this);
     this.invasions = new Invasions(this);
     this.cutscene = new Cutscene(this);
     this.invSeq = 0;
     // O que já foi derrotado/colhido desde o último descanso: volta ao sentar numa fogueira ou ao morrer.
     this.spent = { enemies: new Set(), nodes: new Set() };
     this.net = new Net(this);
-    this.raidSeq = 0;
     this.speed = 1;
     this.autoQuality = true;
     this.slowmoT = 0;
@@ -158,8 +152,6 @@ export class Game {
     const sh = this.save.shade;
     if (sh && sh.room === id) this.entities.push(new Tombstone(sh.x, sh.y, sh.geo));
     this.floaters = [];
-    this.build.onRoomEnter(room);
-    this.raids.onRoomEnter(room);
     this.invasions.onRoomEnter(room);
     this.projectiles = [];
     this.coins = [];
@@ -301,7 +293,6 @@ export class Game {
         if (inp.pressed.pause) return this.openMenu('pause');
         if (inp.pressed.map) return this.openMenu('map');
         if (inp.pressed.inv) return this.craft.openInventory();
-        if (inp.pressed.build) this.build.toggle();
         this.updatePlay();
         break;
       case 'cutscene':
@@ -321,9 +312,6 @@ export class Game {
       case 'pause':
       case 'map':
         if (inp.pressed.pause || (this.state === 'map' && (inp.pressed.map || inp.pressed.jump))) this.closeMenu();
-        break;
-      case 'shop':
-        if (inp.pressed.pause) this.closeShop();
         break;
       case 'chat':
         if (inp.pressed.pause) this.closeChat();
@@ -375,7 +363,6 @@ export class Game {
     this.projectiles = this.projectiles.filter((pr) => !pr.dead);
     this.net.update();
     this.ai.update();
-    this.raids.update();
     this.invasions.update();
   }
 
@@ -434,7 +421,6 @@ export class Game {
     for (const b of this.hostileBoxes) if (overlap(hb, b)) this.damagePlayer(1, b.x + b.w / 2);
 
     this.ai.update();
-    this.raids.update();
     this.invasions.update();
     this.updateChallenge();
     for (const b of this.bubbles) b.t--;
@@ -530,39 +516,6 @@ export class Game {
     } else e.hurt(this, dmg, kx, ky);
   }
 
-  // Base compartilhada: aplica as construções do mundo (ou volta às do save local).
-  applyWorldBuilds(builds) {
-    this.world.applyBuilds(builds);
-    if (!this.room) return;
-    this.renderer.invalidateRoom(this.room);
-    this.entities = this.entities.filter((e) => e.idx == null);
-    for (const [idx, id] of this.room.placed) {
-      const ent = makeBuilt(this.room, idx, id);
-      if (ent) this.entities.push(ent);
-    }
-    this.build.refresh();
-  }
-
-  applyRemoteBuild(roomId, idx, id) {
-    const room = this.world.byId[roomId];
-    if (!room) return;
-    const old = room.placed.get(idx);
-    if (old) {
-      room.placed.delete(idx);
-      if (room.tiles[idx] !== T.EMPTY && !id) room.tiles[idx] = T.EMPTY;
-    }
-    if (id) {
-      room.placed.set(idx, id);
-      const it = makeBuilt(room, idx, id);
-      if (!it) room.tiles[idx] = id === 'wood_plat' ? T.ONEWAY : T.SOLID;
-    }
-    if (room !== this.room) return;
-    this.renderer.invalidateRoom(room);
-    this.entities = this.entities.filter((e) => e.idx !== idx);
-    if (id) { const ent = makeBuilt(room, idx, id); if (ent) this.entities.push(ent); }
-    this.raids.checkSmith();
-  }
-
   // Fala curta de um chefe (uma vez por luta): aparece como legenda.
   bossLine(boss, key) {
     const L = BOSS_LINES[boss.key];
@@ -580,7 +533,6 @@ export class Game {
     this.persist();
     this.ui.resetHud();
     this.ui.updateHud(this);
-    this.build.refresh();
     if (loot.weapon) {
       const w = WEAPONS[loot.weapon];
       giveWeapon(s, loot.weapon);
@@ -588,13 +540,7 @@ export class Game {
       this.openBanner(w.kind === 'bow' ? '🏹' : w.kind === 'staff' ? '✦' : '⚔', w.name, w.desc, `${RARITY[w.rarity].name} · já equipada (troque no Inventário: Q)`);
       if (parts.length) this.ui.toast('Também: ' + parts.join(', '), 3500);
     } else this.ui.toast('Você achou: ' + parts.join(', '), 3500);
-  }
-
-  spawnSmith() {
-    if (this.room.id !== 'planicie_lar' || this.entities.some((e) => e.id === 'smith')) return;
-    this.entities.push(new NPC(34 * TILE + TILE / 2, 13 * TILE, 'smith'));
-    this.entities.push(new NPC(30 * TILE + TILE / 2, 13 * TILE, 'oren'));
-    this.particles.burst(34 * TILE + TILE / 2, 12 * TILE, 20, { color: ['#ffd27a', '#ffffff'], speed: 3, life: 40, glow: true });
+    if (loot.memoria) setTimeout(() => this.lerMemoria(loot.memoria), 900);
   }
 
   // ── Amuletos ──
@@ -819,7 +765,6 @@ export class Game {
     this.save.inv[kind] = (this.save.inv[kind] || 0) + n;
     this.audio.play('pickup_small');
     this.floatText(x, y - 10, `+${n} ${RESOURCES[kind].name}`, RESOURCES[kind].color);
-    this.build.refresh();
   }
 
   damageText(x, y, n, big = false) {
@@ -895,7 +840,7 @@ export class Game {
     const p = this.player;
     let target = null;
     if (p.onGround && !p.sitting && p.attackTimer <= 0) {
-      // O objeto interativo mais próximo vence (bancada, baú e forja podem ficar lado a lado).
+      // O objeto interativo mais próximo vence (fogueira, personagem e placa podem ficar lado a lado).
       let best = Infinity;
       for (const e of this.entities)
         if (e.interact && e.near(p) && Math.abs(e.x - p.cx) < best) { target = e; best = Math.abs(e.x - p.cx); }
@@ -966,9 +911,6 @@ export class Game {
       this.save.talked[npc.id] = true;
       this.persist();
       if (this.ai.enabled) this.openChat(npc);
-      else if (npc.data.shop) this.openShop();
-      else if (npc.data.trade) this.craft.openSmith();
-      else if (npc.data.maps) this.craft.openMaps();
       else if (npc.data.loja) this.craft.openNpcShop(npc.data.loja);
     });
   }
@@ -1165,25 +1107,13 @@ export class Game {
     this.input.consume('jump');
   }
 
-  openShop() {
-    this.state = 'shop';
-    document.body.classList.add('menu-open');
-    this.ui.openShop(this);
-  }
-
-  closeShop() {
-    this.ui.show(this.ui.shopScreen, false);
-    document.body.classList.remove('menu-open');
-    this.state = 'play';
-  }
-
   // ───────── Conversa livre (Gemini) ─────────
   openChat(npc) {
     this.state = 'chat';
     document.body.classList.add('menu-open');
     this.ui.openChat(npc, this.ai.histories[npc.id] || [], {
       send: (text) => this.ai.npcReply(npc.id, text),
-      shop: npc.data.shop ? () => { this.closeChat(); this.openShop(); } : npc.data.trade ? () => { this.closeChat(); this.craft.openSmith(); } : npc.data.maps ? () => { this.closeChat(); this.craft.openMaps(); } : npc.data.loja ? () => { this.closeChat(); this.craft.openNpcShop(npc.data.loja); } : null,
+      shop: npc.data.loja ? () => { this.closeChat(); this.craft.openNpcShop(npc.data.loja); } : null,
       close: () => this.closeChat(),
       sound: () => this.audio.play('talk'),
     });
@@ -1276,7 +1206,6 @@ export class Game {
     ctx.setTransform(s, 0, 0, s, -camX * s, -camY * s);
     this.drawLights(ctx);
     this.drawFloaters(ctx);
-    if (this.build.active) this.build.draw(ctx);
     this.applyZoom();
 
     // Escurecimento (transição, espinhos, morte)
@@ -1293,7 +1222,7 @@ export class Game {
 
   // Brilho quente de tochas e fogueiras, que atravessa a escuridão das cavernas.
   drawLights(ctx) {
-    const dark = Math.max(AREAS[this.room.area].dark, this.raids.night);
+    const dark = AREAS[this.room.area].dark;
     if (dark < 0.05) return;
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';

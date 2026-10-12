@@ -7,7 +7,7 @@ const ORIGEM = [
   'Seus olhos... um da cor do ocaso, outro da aurora. Dizem que só alguém assim pode devolver o dia a Vésper.',
   'Desde que o Rei Sem Coroa roubou a Coroa da Aurora, o sol nunca terminou de se pôr.',
   'Ele espera no alto das Ruínas Suspensas. Mas o caminho até lá exige mais do que uma lâmina.',
-  'Siga para o leste, pelo Bosque das Lanternas. E descanse nas fogueiras: elas guardam sua jornada. Eu desenho mapas das regiões, se quiser comprar. Ah, e a oeste fica a Planície do Lar: terra livre para quem quiser construir.',
+  'Siga para o leste, pelo Bosque das Lanternas. E descanse nas fogueiras: elas guardam sua jornada. Eu desenho mapas das regiões: pago em moedas ou em madeira, pedra e minério, tanto faz. Ah, e a oeste fica a Planície do Lar, onde minha casa ficava.',
 ];
 
 // Dica prática do próximo passo (o que o jogador ainda não fez).
@@ -24,7 +24,7 @@ function dica(s) {
 export const NPCS = {
   oren: {
     name: 'Oren, o Andarilho',
-    maps: true,
+    loja: 'oren',
     wander: 6,
     lines(game) {
       const s = game.save, a = s.abilities, b = s.bosses;
@@ -33,16 +33,13 @@ export const NPCS = {
       const olhos = b.moss && !s.talked.olhos ? ['Você nunca me perguntou por que seus olhos têm duas horas.', 'Quando um Alvorador morre, o Sol põe uma faísca de si numa criança que nasce no minuto em que o dia vira. O ocaso num olho, a aurora no outro.', 'Chamavam vocês de Filhos da Virada. Cada um é, de um jeito que ninguém diz alto, um filho do Sol.'] : [];
       // A história avança: cada marco muda o que ele diz (e o que ele evita dizer).
       let historia = [];
-      if (s.base.smith && b.tide) {
+      if (b.tide) {
         historia = [
           'Esta casa... a porta era azul. Eu pintei.',
           'Sua mãe a abria com o pé quando tinha as mãos cheias de lanternas.',
           '...Eu devia ter dito não.',
+          'Me mudei para cá depois de Ondina. Não aguentava mais os caminhos. Mas ainda desenho mapas, se quiser.',
         ];
-      } else if (s.base.smith) {
-        historia = ['Fumaça nesta terra, de novo. Minha filha acendia fogo aqui.', 'Fique à vontade, Errante. Esta casa é sua tanto quanto minha.'];
-      } else if (b.tide) {
-        historia = ['Então você já sabe quem eu sou.', '...Não. Não sabe. Eu mesmo ainda não sei.', 'Venha ao Lar quando tiver tempo. Eu preciso te contar sobre uma casa.'];
       } else if (a.wallJump) {
         historia = ['Os Escaladores... eu os conheci. A Mestra Íris tinha mãos como as suas.', 'Ela me contou uma vez que toda parede tem dois lados. Eu achei que era sobre paredes.'];
       } else if (a.doubleJump) {
@@ -58,28 +55,13 @@ export const NPCS = {
   },
   mira: {
     name: 'Mira, a Mercadora',
-    shop: true,
+    loja: 'mira',
     lines(game) {
       const s = game.save;
-      if (!s.talked.mira) return ['Hehe! Um cliente! Faz séculos.', 'Junto moedas de todo canto de Vésper, e também madeira, pedra e minério... quem constrói sempre precisa. Se tiver o bastante, tenho coisas que podem salvar sua pele.'];
+      if (!s.talked.mira) return ['Hehe! Um cliente! Faz séculos.', 'Junto moedas de todo canto de Vésper, e também madeira, pedra, minério e cristal... aceito de tudo. Se tiver o bastante, tenho coisas que podem salvar sua pele.'];
       if (s.charms.equipped.includes('alma_faminta')) return ['Esse aí... eu devia ter fundido.', 'Vai levar alguma coisa?'];
       if (Object.keys(s.bought).length >= 3) return ['Já tem o bastante, não tem?', 'Hehe. Não ligue. Hábito de velha.', 'Vai levar alguma coisa?'];
       return ['Vai levar alguma coisa?'];
-    },
-  },
-  smith: {
-    name: 'Tibério, o Ferreiro',
-    trade: true,
-    lines(game) {
-      const s = game.save;
-      if (!s.talked.smith) return [
-        'Vi a fumaça da sua fogueira lá da estrada. Lugar bom pra uma forja, esse.',
-        'Vou ficar por aqui. Se faltar madeira, pedra ou minério, é só falar comigo... por um punhado de moedas, claro.',
-        'Ah, e fique de olho à noite. Base com fogo aceso atrai bicho.',
-      ];
-      if (s.weapon === 'cristal') return ['Isso é um pedaço do dia, faísca. Não é brinquedo.', 'Precisa de material?'];
-      if (s.armor === 'pedra') return ['Eu fiz o primeiro desses. Não pra isso.', 'Precisa de material?'];
-      return ['Precisa de material?'];
     },
   },
   eco: {
@@ -171,12 +153,3 @@ NPCS.nami = {
     return ['Arcos, cajados, adagas, o que as ondas trouxerem. E boas histórias de graça.'];
   },
 };
-
-export const SHOP_ITEMS = [
-  { id: 'mask', name: 'Fragmento de Vida', desc: '+1 coração de vida máxima.', price: 120, apply: (s) => { s.masksMax += 1; } },
-  { id: 'nail', name: 'Afiar a Lâmina', desc: 'Seus golpes causam o dobro de dano.', price: 220, apply: (s) => { s.nail = 2; } },
-  { id: 'charm_alma_faminta', name: 'Amuleto: Alma Faminta', desc: 'Golpes enchem 50% mais ALMA.', price: 150, apply: (s) => { s.charms.owned.alma_faminta = true; } },
-  { id: 'charm_ima_moedas', name: 'Amuleto: Ímã de Moedas', desc: 'Moedas e materiais vêm até você.', price: 100, apply: (s) => { s.charms.owned.ima_moedas = true; } },
-  { id: 'charm_pele_pedra', name: 'Amuleto: Pele de Pedra', desc: '+1 coração enquanto equipado.', price: 200, apply: (s) => { s.charms.owned.pele_pedra = true; } },
-  { id: 'mask2', name: 'Vaso Antigo', desc: '+1 coração de vida máxima.', price: 300, apply: (s) => { s.masksMax += 1; } },
-];

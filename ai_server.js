@@ -16,7 +16,7 @@ export function loadEnv(root) {
 
 const WORLD = `Mundo: Vésper, um reino onde o sol parou no crepúsculo. O Rei Sem Coroa roubou a Coroa da Aurora e espera no Trono, no alto das Ruínas Suspensas.
 O herói é o Errante, com um olho da cor do ocaso (vermelho) e outro da aurora (azul).
-Regiões: Planície do Lar (terra livre a oeste do início, onde o herói pode construir sua base com madeira, pedra, minério e cristal), Campos do Crepúsculo (início, Abrigo com fogueira), Bosque das Lanternas (o Cavaleiro de Musgo guarda o bosque; quem o vence ganha o Manto do Vento/dash),
+Regiões: Planície do Lar (terra livre a oeste do início, onde ficava a casa do velho Oren), Campos do Crepúsculo (início, Abrigo com fogueira), Bosque das Lanternas (o Cavaleiro de Musgo guarda o bosque; quem o vence ganha o Manto do Vento/dash),
 Ruínas Suspensas (Ponte Partida exige dash; Torre dos Ventos exige escalar paredes com as Garras de Pedra, achadas na Galeria dos Escaladores),
 Jardins Submersos (um poço no Coração de Cristal leva a um recife e ao Templo da Maré, onde vive a Rainha das Marés; há um teto secreto no recife e um amuleto numa prova cronometrada), Cavernas de Cristal (sob um chão rachado no Abrigo; guardam as Asas de Cinza/pulo duplo). A Chama da Alma (magia) está atrás de uma parede oca nas Raízes Profundas.
 O dinheiro são moedas. ALMA enche ao acertar golpes; segurar o botão de alma cura. Fogueiras salvam o jogo. Ao morrer, o herói deixa uma lápide com as moedas.`;
@@ -24,7 +24,6 @@ O dinheiro são moedas. ALMA enche ao acertar golpes; segurar o botão de alma c
 const PERSONAS = {
   oren: 'Você é Oren, o Andarilho: um velho cartógrafo gentil e melancólico, fala devagar, usa metáforas sobre caminhos e o pôr do sol.',
   mira: 'Você é Mira, a Mercadora: animada, gananciosa de um jeito simpático, ri com "hehe", adora moedas e fofoca sobre o reino. Vende Fragmento de Vida (120 moedas), Afiar a Lâmina (220) e Vaso Antigo (300).',
-  smith: 'Você é Tibério, o Ferreiro: robusto, bem-humorado e direto, fala de metal, fogo e trabalho duro. Mora na base que o herói construiu na Planície do Lar e vende madeira, pedra, minério e cristal por moedas. Conhece as receitas da forja: Espada de Minério, Espada de Cristal e armaduras de madeira, pedra e cristal.',
   tome: 'Você é Tomé, o Lanterneiro: ex guarda-de-trilha do Reino das Lanternas, calmo e paciente, fala de trilhas, lanternas e do Capitão Brandão. Vende amuletos e lenha.',
   selene: 'Você é Selene, a Cronista: a última escriba dos Doze Tronos, formal e melancólica, fala de livros e nomes de soberanos. Sabe que o Regente apagava a história. Vende armas das Ruínas e pistas de Memórias.',
   brum: 'Você é Brum, o Mineiro: rouco e sussurrado, ouviu o geodo cantar "cansada". Vende armaduras e cristais.',
@@ -144,9 +143,6 @@ Responda APENAS com JSON:
 }
 
 const EVENTS = {
-  smith_arrive: 'Um ferreiro chamado Tibério acabou de se mudar para a base que o herói construiu na Planície do Lar.',
-  raid_start: 'Anoiteceu e uma horda de monstros está prestes a atacar a base do herói na Planície do Lar.',
-  raid_end: 'O herói acabou de defender sua base de um ataque noturno.',
   invasion_end: 'O herói acabou de derrotar o capitão de uma invasão de monstros numa região de Vésper e a horda se desfez.',
 };
 

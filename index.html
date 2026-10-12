@@ -24,9 +24,7 @@
   <link rel="modulepreload" href="src/game.js">
   <link rel="modulepreload" href="src/art.js">
   <link rel="modulepreload" href="src/config.js">
-  <link rel="modulepreload" href="src/build.js">
   <link rel="modulepreload" href="src/crafting.js">
-  <link rel="modulepreload" href="src/raids.js">
   <link rel="modulepreload" href="src/net.js">
   <link rel="modulepreload" href="src/cloud.js">
   <link rel="modulepreload" href="src/save.js">
@@ -45,6 +43,7 @@
   <link rel="modulepreload" href="src/story.js">
   <link rel="modulepreload" href="src/loot.js">
   <link rel="modulepreload" href="src/memorias.js">
+  <link rel="modulepreload" href="src/segredos.js">
   <link rel="modulepreload" href="src/cutscene.js">
   <link rel="modulepreload" href="src/cenas.js">
   <link rel="modulepreload" href="src/enemies2.js">
@@ -70,9 +69,6 @@
       <button id="btn-chat" class="hud-btn hidden" aria-label="Conversar">
         <svg viewBox="0 0 24 24"><path d="M4 5h16v10H9l-5 4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
       </button>
-      <button id="btn-build" class="hud-btn hidden" aria-label="Construir">
-        <svg viewBox="0 0 24 24"><path d="M14 4l6 6-3 3-6-6z M11 7L3.5 14.5a2 2 0 0 0 0 3l3 3a2 2 0 0 0 3 0L17 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
-      </button>
       <button id="btn-inv" class="hud-btn" aria-label="Inventário">
         <svg viewBox="0 0 24 24"><path d="M6 9h12l1 11H5z M9 9V7a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
       </button>
@@ -83,12 +79,6 @@
         <svg viewBox="0 0 24 24"><path d="M8 5v14 M16 5v14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
       </button>
     </div>
-  </div>
-
-  <div id="hotbar" class="hidden">
-    <div id="hb-res"></div>
-    <div class="hb-row"><div id="hb-slots"></div><button id="hb-close" class="hud-btn" aria-label="Sair do modo construção">✕</button></div>
-    <div id="hb-info"></div>
   </div>
 
   <div id="chat-feed"></div>
@@ -138,7 +128,7 @@
     <div class="panel map-panel">
       <h3 id="map-room"></h3>
       <canvas id="map-canvas"></canvas>
-      <p class="legend"><i class="lg-you"></i> você <i class="lg-bench"></i> fogueira <i class="lg-shade"></i> lápide <i class="lg-zone"></i> zona de construção</p>
+      <p class="legend"><i class="lg-you"></i> você <i class="lg-bench"></i> fogueira <i class="lg-shade"></i> lápide</p>
       <p class="hint">toque para fechar</p>
     </div>
   </div>
@@ -180,15 +170,6 @@
     </div>
   </div>
 
-  <div id="shop-screen" class="overlay hidden">
-    <div class="panel">
-      <h2>Mochila da Mira</h2>
-      <p class="shop-geo"><span class="geo-ico"></span><span id="shop-geo">0</span></p>
-      <div id="shop-list"></div>
-      <button id="btn-shop-close" class="menu-btn subtle">Sair</button>
-    </div>
-  </div>
-
   <div id="npc-chat" class="overlay hidden">
     <div class="panel chat-panel">
       <h3 id="chat-name"></h3>
@@ -224,7 +205,7 @@
         <button id="mp-leave" class="menu-btn danger">Sair do mundo</button>
       </div>
       <div id="mp-offline">
-        <p class="mp-hint">Jogue junto: a base é compartilhada, os monstros e chefes são os mesmos para todos. Cada um mantém o próprio progresso.</p>
+        <p class="mp-hint">Jogue junto: o mundo é compartilhado, os monstros e chefes são os mesmos para todos. Cada um mantém o próprio progresso.</p>
         <button id="mp-create" class="menu-btn primary">Criar um mundo</button>
         <form id="mp-join" class="mp-row">
           <input id="mp-join-code" type="text" maxlength="5" placeholder="CÓDIGO" autocomplete="off" spellcheck="false">
@@ -260,12 +241,9 @@
         <tr><td>Dash</td><td><kbd>Shift</kbd> <kbd>C</kbd> <kbd>L</kbd></td></tr>
         <tr><td>ALMA: segure = curar, toque = magia</td><td><kbd>Clique direito</kbd> ou <kbd>V</kbd> <kbd>F</kbd></td></tr>
         <tr><td>Falar, ler, descansar</td><td><kbd>W</kbd> <kbd>↑</kbd> <kbd>E</kbd></td></tr>
-        <tr><td>Modo construção</td><td><kbd>B</kbd></td></tr>
-        <tr><td>Colocar / remover peça</td><td><kbd>Clique esquerdo</kbd> / <kbd>Clique direito</kbd></td></tr>
-        <tr><td>Escolher peça</td><td><kbd>1</kbd>…<kbd>9</kbd>, roda do mouse, <kbd>0</kbd> = remover</td></tr>
         <tr><td>Nadar</td><td>na água, segure <kbd>Espaço</kbd> para subir; perto da superfície ele pula para fora</td></tr>
         <tr><td>Amuletos</td><td>Pausa → Amuletos (troque descansando numa fogueira)</td></tr>
-        <tr><td>Fabricar, abrir baú</td><td>fique perto da bancada, forja ou baú e aperte <kbd>W</kbd> / <kbd>E</kbd></td></tr>
+        <tr><td>Comprar e trocar</td><td>fale com um mercador: pague com moedas ou materiais</td></tr>
         <tr><td>Mapa · Pausa</td><td><kbd>M</kbd> <kbd>Tab</kbd> · <kbd>Esc</kbd> <kbd>P</kbd></td></tr>
       </table>
       <table class="manual-table hidden" data-tab="touch">
@@ -275,7 +253,6 @@
         <tr><td>Dash</td><td><kbd>»</kbd></td></tr>
         <tr><td>ALMA</td><td><kbd>✦</kbd> segure para curar, toque para magia</td></tr>
         <tr><td>Falar, ler, descansar</td><td>botão dourado que aparece perto</td></tr>
-        <tr><td>Construir</td><td>botão de martelo no topo · toque no cenário para colocar · escolha a picareta para remover</td></tr>
         <tr><td>Dica</td><td>deslize o dedo de um botão para outro sem soltar</td></tr>
       </table>
       <table class="manual-table hidden" data-tab="pad">
@@ -283,7 +260,7 @@
         <tr><td>Pular · Atacar</td><td><kbd>A</kbd> · <kbd>X</kbd></td></tr>
         <tr><td>Dash</td><td><kbd>RB</kbd> <kbd>RT</kbd></td></tr>
         <tr><td>ALMA</td><td><kbd>B</kbd></td></tr>
-        <tr><td>Interagir · Construir</td><td><kbd>Y</kbd> · <kbd>LB</kbd></td></tr>
+        <tr><td>Interagir</td><td><kbd>Y</kbd></td></tr>
         <tr><td>Mapa · Pausa</td><td><kbd>Select</kbd> · <kbd>Start</kbd></td></tr>
       </table>
       <button id="btn-manual-close" class="menu-btn">Fechar</button>

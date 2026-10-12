@@ -1,6 +1,6 @@
 # THEUS: Ecos de Vésper
 
-Um metroidvania 2D com exploração no estilo **Hollow Knight** e coleta e construção no estilo **Terraria**, feito em JavaScript puro com canvas e pensado primeiro para **jogar no celular** (e também no PC, com teclado ou controle).
+Um metroidvania 2D com exploração no estilo **Hollow Knight** e coleta, baús e trocas no estilo **Terraria**, feito em JavaScript puro com canvas e pensado primeiro para **jogar no celular** (e também no PC, com teclado ou controle).
 
 > Em Vésper o sol parou no crepúsculo. O Rei Sem Coroa roubou a Coroa da Aurora, e só um Errante, com um olho da cor do ocaso e outro da aurora, pode devolver o dia ao reino.
 
@@ -24,8 +24,6 @@ Também funciona em qualquer hospedagem estática (veja [HOSTINGER_DEPLOY.md](HO
 | Atacar (↑ ou ↓ + ataque mira para cima/baixo) | ⚔ | **clique esquerdo** (mira no cursor), X ou J | X |
 | Dash | » | C, Shift ou L | RB / RT |
 | ALMA: segure para **curar**, toque para **magia** | ✦ | **clique direito**, V ou F | B |
-| Modo construção | botão de martelo | B | LB |
-| Colocar / remover peça | toque no cenário / picareta | clique esquerdo / direito, teclas 1-8 e 0 | — |
 | Falar / descansar / ler | ↑ ou botão que aparece | ↑ ou E | Y |
 | Mapa | botão no topo | M ou Tab | Select |
 | Pausa | botão no topo | Esc ou P | Start |
@@ -36,23 +34,19 @@ O jogo tem um **Manual dos controles** completo na pausa e na tela inicial. No c
 
 ## 🗺️ O mundo
 
-20 salas conectadas, em 5 regiões, com mapa automático:
+66 salas conectadas (mais 14 câmaras secretas), em 5 regiões, com mapa automático:
 
-- **Planície do Lar**: terra livre a oeste do início, a principal zona para construir sua base.
+- **Planície do Lar**: a oeste do início, onde ficava a casa de porta azul do velho Oren.
 - **Campos do Crepúsculo**: colinas sob um pôr do sol eterno. Abrigo com banco, Oren o andarilho e Mira a mercadora.
 - **Bosque das Lanternas**: floresta escura e cheia de vaga-lumes. Esconde um segredo atrás de uma parede.
 - **Ruínas Suspensas**: ilhas flutuando entre as nuvens, uma torre para escalar e o trono do Rei.
 - **Cavernas de Cristal**: chega-se por um chão rachado no Abrigo (golpeie para baixo...).
 - **Jardins Submersos**: um poço no Coração de Cristal desce a recifes inundados, com algas, bolhas, peixes-lanterna e o Templo da Maré. Dentro d'água o herói flutua e nada; perto da superfície o pulo vira um salto para fora.
 
-### Coleta e construção (estilo Terraria)
-- Golpeie **árvores, rochas, veios de minério e cristais** para coletar **madeira, pedra, minério e cristal**.
-- Em **zonas de construção** (Planície do Lar, Santuário do Vento e Coração de Cristal) aperte **B** ou o martelo e construa: blocos de madeira, pedra e cristal, plataformas, tochas, estandartes, baús e **fogueiras**, que viram seu ponto de descanso e renascimento.
-- A picareta (ou o clique direito) remove a peça e devolve os materiais. Tudo fica salvo.
-- **Bancada** e **Forja** fabricam Lanterna, espadas (Minério x1,5 e Cristal x2,2) e armaduras de madeira, pedra e cristal (+1 a +3 corações), que aparecem no herói.
-- **Baús** guardam materiais.
-- Monte uma casa (fogueira, tocha, baú, bancada e 10 blocos) e o ferreiro **Tibério** se muda para a base e passa a vender materiais.
-- Com a base habitada, a planície sofre **ataques noturnos** em ondas; defender rende moedas e materiais. O Gemini narra os eventos.
+### Coleta e trocas (estilo Terraria)
+- Golpeie **árvores, rochas, veios de minério e cristais** para coletar **madeira, pedra, minério e cristal**. Eles voltam quando você descansa numa fogueira.
+- Não há construção: os materiais são **moeda de troca**. Todos os NPCs com loja (Mira, Oren, Tomé, Selene, Brum, Nami) aceitam **moedas ou materiais**: na loja, troque a *forma de pagamento*. Cada material vale uma quantia (madeira 4, pedra 5, minério 10, cristal 16) e o pagamento usa primeiro os mais baratos.
+- A Lanterna, as espadas de Minério e de Cristal e as armaduras são vendidas pelos NPCs (e também achadas em baús).
 
 ### Combate e exploração
 - Pulo com altura variável, *coyote time* e *buffer* de pulo.
@@ -70,15 +64,16 @@ O jogo tem um **Manual dos controles** completo na pausa e na tela inicial. No c
 ---
 
 ### Armas, baús e inventário (estilo Terraria)
-O herói começa com a Lâmina do Errante e acha outras armas em **baús de tesouro** espalhados pelo mundo ou as fabrica na forja: Adaga de Osso (rápida), Lança do Caçador (alcance longo), Machado de Pedra (pesado), Espada de Minério, Espada de Cristal, **Arco do Caçador** (flechas) e **Cajado da Névoa** (orbes). Cada arma tem raridade, dano e recarga próprios. Abra o **Inventário** com **Q** (ou pelo botão da mochila no celular) para equipar armas, ver armadura, materiais e itens. Os baús também dão moedas, materiais e armaduras.
+O herói começa com a Lâmina do Errante e acha outras armas em **baús de tesouro** espalhados pelo mundo ou as compra dos NPCs: Adaga de Osso (rápida), Lança do Caçador (alcance longo), Machado de Pedra (pesado), Espada de Minério, Espada de Cristal, **Arco do Caçador** (flechas) e **Cajado da Névoa** (orbes). Cada arma tem raridade, dano e recarga próprios. Abra o **Inventário** com **Q** (ou pelo botão da mochila no celular) para equipar armas, ver armadura, materiais e itens. Os baús também dão moedas, materiais e armaduras.
 
 ### Mundo vivo (regras do mapa)
 - **Zonas seguras:** perto de cada fogueira não aparecem monstros.
 - **Respawn pelo descanso:** monstros e recursos só voltam ao sentar numa fogueira (no multijogador, o descanso de um renova para todos).
 - **Fragmentos de Vida:** cinco fragmentos = um coração; cristais, mini-chefes, Soberanos e Memórias dão fragmentos.
-- **Baús selados** até limpar os guardiões da sala.
+- **Baús selados** até limpar os guardiões da sala. Os **Baús de Memória**, nas salas de chefe e mini-chefe, só abrem quando o chefe cai (inimigos comuns não contam).
+- **Câmaras secretas:** 14 câmaras escondidas atrás de paredes quebráveis (golpeie as paredes de beco) guardam Memórias; não aparecem nem no mapa comprado até serem visitadas.
 - **Os Soberanos:** cinco salões nas Ruínas com chefes que são os reis e rainhas antigos presos pelo Regente; Eliar luta no Trono antes de Alvar. Cada alma libertada enfraquece Alvar. Ver `docs/historia/10-revisao-reis-e-reinos.md`.
-- **Memórias e cenas:** a história vem em diários, cartas, ecos, inscrições e afrescos (Diário do Errante no menu) e em cenas nos momentos de reviravolta.
+- **Memórias e cenas:** 62 Memórias, guardadas em baús de chefe, câmaras secretas e achados pelo mapa. A história vem em diários, cartas, ecos, inscrições e afrescos (Diário do Errante no menu) e em cenas nos momentos de reviravolta.
 - **NPCs com lojas:** Tomé, Selene, Brum e Nami vendem os itens achados no mapa; Oren, Tomé e Nami andam pela região.
 - **IA:** só controla chefes, eventos raros e a conversa dos NPCs; inimigos comuns têm regras fixas (sincroniza melhor no multijogador).
 - Plano completo do mapa: `docs/PLANO_DO_MAPA.md`.
@@ -110,7 +105,7 @@ node tools/reach.mjs --margem=0.9 --estrito   # estrito: só vale voltar à fogu
 
 - Em **Multijogador e nuvem** (tela inicial ou pausa), crie um **mundo** e passe o código de 5 letras, ou entre no mundo de alguém (até 6 jogadores).
 - Todos se veem na mesma sala, com animações, espada, armadura e nome. Monstros e chefes são os mesmos para todos: o primeiro jogador da sala simula e os outros acompanham e acertam os mesmos inimigos. Se ele sair, outro assume.
-- A **base é compartilhada**: o que um constrói aparece para todos. Habilidades, materiais e moedas são de cada um.
+- Habilidades, materiais e moedas são de cada um; o mundo (monstros, chefes e descansos) é o mesmo para todos.
 - Tem **chat** (botão de balão ou tecla T).
 - **Salvar na nuvem**: cada aparelho tem um código de 10 letras. Digite-o em outro aparelho para continuar de onde parou.
 - Conexão por WebSocket, com reserva automática por HTTP. Mundos e saves ficam na pasta `data/` do servidor (fora do Git).
@@ -147,10 +142,10 @@ src/
   player.js       física e ações do herói
   enemies.js      inimigos comuns e projéteis
   bosses.js       chefes
-  build.js        modo construção (estilo Terraria)
-  crafting.js     bancada, forja, baú e loja do ferreiro
-  raids.js        ferreiro que se muda e ataques noturnos à base
-  entities.js     fogueiras, personagens, recursos, moedas, lápide, construções
+  crafting.js     inventário, lojas (moedas ou materiais), diário e viagem
+  lojas.js        o que cada NPC vende
+  segredos.js     câmaras secretas e baús de chefe com Memórias
+  entities.js     fogueiras, personagens, recursos, moedas, lápide
   rooms.js        mapa do mundo (editável)
   world.js        grade de blocos e conexão entre salas
   physics.js      colisão

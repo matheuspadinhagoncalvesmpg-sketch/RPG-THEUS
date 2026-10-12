@@ -4,7 +4,6 @@ import { AudioSystem } from './audio.js';
 import { UI } from './ui.js';
 import { Game } from './game.js';
 import { drawHero, EYE_COLORS } from './art.js';
-import { BUILD_ITEMS } from './config.js';
 import { cloudCode, setCloudCode, prettyCode, normalizeCode, downloadSave } from './cloud.js';
 import { loadSave, newSave, writeSave, clearSave, loadSettings, writeSettings, DEFAULT_PROFILE } from './save.js';
 import { shade } from './util.js';
@@ -260,13 +259,9 @@ $('#btn-start').addEventListener('click', () => {
 });
 
 // ───────── Mouse ─────────
-// Esquerdo: ataca mirando no cursor (ou coloca peça no modo construção).
-// Direito: ALMA — segure para curar, clique para magia (ou remove peça).
+// Esquerdo: ataca mirando no cursor. Direito: ALMA — segure para curar, clique para magia.
 const canvas = $('#game');
 canvas.addEventListener('contextmenu', (e) => e.preventDefault());
-canvas.addEventListener('pointermove', (e) => {
-  if (e.pointerType === 'mouse') game.build.hoverScreen(e.clientX, e.clientY);
-});
 canvas.addEventListener('pointerdown', (e) => {
   if (e.pointerType !== 'mouse') return;
   if (game.state === 'dialog') { game.advanceDialog(); return; }
@@ -274,26 +269,12 @@ canvas.addEventListener('pointerdown', (e) => {
   if (game.state !== 'play') return;
   input.setTouchMode(false);
   e.preventDefault();
-  if (game.build.active) { game.build.clickScreen(e.clientX, e.clientY, e.button === 2); return; }
   if (e.button === 0) input.mouseAttack(e.clientX, e.clientY);
   if (e.button === 2) input.setMouse('spell', true);
 });
 window.addEventListener('pointerup', (e) => {
   if (e.pointerType === 'mouse' && e.button === 2) input.setMouse('spell', false);
 });
-canvas.addEventListener('wheel', (e) => {
-  if (!game.build.active) return;
-  e.preventDefault();
-  const n = BUILD_ITEMS.length;
-  game.build.select((game.build.sel + (e.deltaY > 0 ? 1 : n - 1)) % n);
-}, { passive: false });
-
-// Toque no cenário durante o modo construção coloca/remove a peça.
-touch.onWorldTap = (x, y) => {
-  if (!game.build.active || game.state !== 'play') return false;
-  game.build.clickScreen(x, y);
-  return true;
-};
 game.touchLayout = () => touch.layout();
 
 // ───────── Multijogador e nuvem ─────────
@@ -360,7 +341,7 @@ $('#mp-join').addEventListener('submit', (e) => {
   if (code.length !== 5) return mpMsg('O código do mundo tem 5 letras.');
   connect({ code });
 });
-$('#mp-leave').addEventListener('click', () => { game.net.disconnect(); renderMP(); mpMsg('Você saiu do mundo. Sua base local voltou.'); });
+$('#mp-leave').addEventListener('click', () => { game.net.disconnect(); renderMP(); mpMsg('Você saiu do mundo. Seu mundo local voltou.'); });
 const copy = (text) => { try { navigator.clipboard.writeText(text); mpMsg('Copiado!'); } catch (e) { mpMsg(text); } };
 $('#mp-copy').addEventListener('click', () => copy(game.net.code));
 $('#cloud-copy').addEventListener('click', () => copy(prettyCode(cloudCode())));
@@ -434,7 +415,6 @@ for (const b of $$('.manual-tab')) b.addEventListener('click', () => {
 $('#btn-manual-close').addEventListener('click', () => ui.show($('#manual-screen'), false));
 
 // ───────── Menus do jogo ─────────
-$('#btn-build').addEventListener('click', () => { if (game.state === 'play') game.build.toggle(); });
 $('#btn-map').addEventListener('click', () => { if (game.state === 'play') game.openMenu('map'); });
 $('#btn-pause').addEventListener('click', () => { if (game.state === 'play') game.openMenu('pause'); });
 $('#btn-resume').addEventListener('click', () => game.closeMenu());
@@ -449,7 +429,6 @@ $('#btn-opts-back').addEventListener('click', () => { $('.pause-opts').classList
 $('#btn-pause-map').addEventListener('click', () => { game.closeMenu(); game.openMenu('map'); });
 $('#map-screen').addEventListener('click', () => game.closeMenu());
 $('#btn-quit').addEventListener('click', () => { game.persist(); toTitle(); });
-$('#btn-shop-close').addEventListener('click', () => game.closeShop());
 $('#dialog').addEventListener('pointerdown', (e) => { e.stopPropagation(); game.advanceDialog(); });
 $('#banner').addEventListener('pointerdown', () => { if (game.state === 'banner' && game.bannerTimer <= 0) game.closeBanner(); });
 $('#btn-end-continue').addEventListener('click', () => {

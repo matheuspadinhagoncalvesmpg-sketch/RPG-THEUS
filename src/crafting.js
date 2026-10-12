@@ -1,15 +1,9 @@
-// Painéis de fabricação (bancada/forja), baú e loja do ferreiro.
+// Painéis de menu: inventário, lojas dos NPCs, diário, viagem rápida, mapas e amuletos.
 import { MEMORIAS, TIPOS, REINOS, MEMORIAS_POR_REINO } from './memorias.js';
 import { LOJAS } from './lojas.js';
-import { RECIPES, RESOURCES, SMITH_STOCK, WEAPONS, ARMORS, CHARMS, CHARM_SLOTS, RARITY, ownsWeapon, MAP_PRICES, AREAS, FRAGMENTS_PER_HEART, giveWeapon, equipArmor } from './config.js';
+import { RESOURCES, WEAPONS, ARMORS, CHARMS, CHARM_SLOTS, RARITY, ownsWeapon, AREAS, FRAGMENTS_PER_HEART, giveWeapon, equipArmor, materialsWorth, payWithMaterials } from './config.js';
 
 const $ = (s) => document.querySelector(s);
-
-const costHTML = (cost, inv) => Object.entries(cost)
-  .map(([k, n]) => `<span class="${(inv[k] || 0) >= n ? '' : 'miss'}"><i style="background:${RESOURCES[k].color}"></i>${n} ${RESOURCES[k].name}</span>`)
-  .join(' ');
-
-const canPay = (cost, inv) => Object.entries(cost).every(([k, n]) => (inv[k] || 0) >= n);
 
 export class CraftUI {
   constructor(game) {
@@ -51,34 +45,6 @@ export class CraftUI {
     return `Equipado: <b>${WEAPONS[s.weapon || 'errante'].name}</b> · <b>${ARMORS[s.armor || 'none'].name}</b>`;
   }
 
-  // ── Bancada e forja ──
-  openStation(station) {
-    const g = this.game;
-    const title = station === 'forge' ? 'Forja' : 'Bancada';
-    this.open(title, this.equipped(), () => {
-      const s = g.save;
-      this.list.innerHTML = '';
-      $('#craft-sub').innerHTML = this.equipped();
-      for (const r of RECIPES.filter((x) => x.station === station)) {
-        const owned = r.owned(s);
-        const ok = canPay(r.cost, s.inv);
-        this.item(r.name, `${r.desc}<br>${costHTML(r.cost, s.inv)}`, owned ? 'Feito' : ok ? 'Fabricar' : 'Faltam materiais', () => {
-          if (owned || !canPay(r.cost, s.inv)) return;
-          for (const [k, n] of Object.entries(r.cost)) s.inv[k] -= n;
-          r.give(s);
-          g.masks = s.masksMax;
-          g.audio.play('pickup');
-          g.input.vibrate(60);
-          g.persist();
-          g.ui.resetHud();
-          g.ui.updateHud(g);
-          g.build.refresh();
-          this.render();
-        }, owned || !ok);
-      }
-    });
-  }
-
   heading(text) {
     const h = document.createElement('p');
     h.className = 'inv-head';
@@ -110,12 +76,12 @@ export class CraftUI {
       }
       this.heading('Armadura');
       const a = ARMORS[s.armor || 'none'];
-      this.item(a.name, a.hearts ? `+${a.hearts} coração${a.hearts > 1 ? 'ões' : ''}.` : 'Fabrique armaduras na bancada e na forja.', 'Equipada', () => {}, true);
-      this.heading('Materiais');
+      this.item(a.name, a.hearts ? `+${a.hearts} coração${a.hearts > 1 ? 'ões' : ''}.` : 'Compre armaduras dos mineiros e ferreiros.', 'Equipada', () => {}, true);
+      this.heading(`Materiais · valem ${materialsWorth(s.inv)} moedas nas trocas`);
       const mats = Object.entries(RESOURCES);
       const any = mats.some(([k]) => (s.inv[k] || 0) > 0);
-      for (const [k, r] of mats) this.item(`<i class="mat-dot" style="background:${r.color}"></i>${r.name}`, r.desc || 'Material de construção e fabricação.', String(s.inv[k] || 0), () => {}, true);
-      if (!any) { const p = document.createElement('p'); p.className = 'si-desc'; p.textContent = 'Quebre árvores, pedras e minérios para coletar.'; this.list.appendChild(p); }
+      for (const [k, r] of mats) this.item(`<i class="mat-dot" style="background:${r.color}"></i>${r.name}`, r.desc, String(s.inv[k] || 0), () => {}, true);
+      if (!any) { const p = document.createElement('p'); p.className = 'si-desc'; p.textContent = 'Quebre árvores, pedras e minérios: os NPCs trocam por mercadorias.'; this.list.appendChild(p); }
       const items = [s.items.lantern ? ['Lanterna', 'Ilumina bosques e cavernas escuras.'] : null].filter(Boolean);
       if (items.length) { this.heading('Itens'); for (const [n, d] of items) this.item(n, d, 'Possui', () => {}, true); }
       this.heading('Atalhos');
@@ -123,56 +89,75 @@ export class CraftUI {
     });
   }
 
-  // ── Lojas dos NPCs da história ──
+  // ── Lojas dos NPCs: pague com moedas ou com materiais (cada material vale uma quantia) ──
   openNpcShop(id) {
     const g = this.game, loja = LOJAS[id];
     if (!loja) return;
+    this.payMode = 'geo';
     this.open(loja.titulo, loja.sub, () => {
-      const s = g.save;
+      const s = g.save, porMat = this.payMode === 'mat';
       this.list.innerHTML = '';
-      $('#craft-sub').innerHTML = `${loja.sub}<br>Moedas: <b>${s.geo}</b>`;
-      for (const it of loja.itens) {
-        let nome, desc, tem = false, aplicar;
-        if (it.tipo === 'arma') {
-          const w = WEAPONS[it.id]; tem = ownsWeapon(s, it.id);
-          nome = `<span style="color:${RARITY[w.rarity].color}">${w.name}</span>`; desc = `${w.desc} (dano ${w.dmg}×)`;
-          aplicar = () => { giveWeapon(s, it.id); };
-        } else if (it.tipo === 'armadura') {
-          const a = ARMORS[it.id]; tem = (ARMORS[s.armor || 'none'].hearts >= a.hearts);
-          nome = a.name; desc = `+${a.hearts} coração${a.hearts > 1 ? 'ões' : ''}.`;
-          aplicar = () => { equipArmor(s, it.id); g.masks = s.masksMax; };
-        } else if (it.tipo === 'amuleto') {
-          const c = CHARMS[it.id]; tem = !!s.charms.owned[it.id];
-          nome = `<span class="charm-dot" style="background:${c.color}">${c.icon}</span>${c.name}`; desc = c.desc;
-          aplicar = () => { s.charms.owned[it.id] = true; };
-        } else if (it.tipo === 'recurso') {
-          nome = `${it.n} ${RESOURCES[it.id].name}`; desc = 'Material de construção e fabricação.';
-          aplicar = () => { s.inv[it.id] = (s.inv[it.id] || 0) + it.n; };
-        } else {
-          // Pista: aponta uma Memória do reino que o herói ainda não leu.
-          const faltam = Object.keys(MEMORIAS).filter((k) => MEMORIAS[k].regiao === it.reino && !s.memorias[k]);
-          nome = `Pista: ${REINOS[it.reino].nome}`; tem = !faltam.length;
-          desc = tem ? 'Você já leu tudo deste reino.' : `Ainda há ${faltam.length} Memória${faltam.length > 1 ? 's' : ''} por ler neste reino.`;
-          aplicar = () => {
-            const k = faltam[0];
-            const sala = g.world.rooms.find((r) => r.lore.includes(k));
-            g.ui.toast(`Procure em: ${sala ? sala.name : REINOS[it.reino].nome}`, 5000);
-          };
-        }
-        const ok = s.geo >= it.preco;
-        this.item(nome, desc, tem ? (it.tipo === 'pista' ? 'Completo' : 'Possui') : `${it.preco} moedas`, () => {
-          if (tem || !ok) return;
-          s.geo -= it.preco;
-          aplicar();
-          g.audio.play('pickup');
-          g.persist();
-          g.ui.resetHud();
-          g.ui.updateHud(g);
-          g.build.refresh();
-          this.render();
-        }, tem || !ok);
-      }
+      $('#craft-sub').innerHTML = `${loja.sub}<br>Moedas: <b>${s.geo}</b> · Materiais: <b>${materialsWorth(s.inv)}</b> em valor`;
+      this.item('Forma de pagamento', 'Os NPCs aceitam moedas ou materiais (madeira, pedra, minério, cristal).', porMat ? 'Materiais' : 'Moedas', () => {
+        this.payMode = porMat ? 'geo' : 'mat';
+        this.render();
+      });
+      for (const it of loja.itens) this.shopRow(it, porMat);
     });
+  }
+
+  // Uma mercadoria da loja: descreve, mostra o preço e faz a compra.
+  shopRow(it, porMat) {
+    const g = this.game, s = g.save;
+    let nome, desc, tem = false, aplicar;
+    if (it.tipo === 'arma') {
+      const w = WEAPONS[it.id]; tem = ownsWeapon(s, it.id);
+      nome = `<span style="color:${RARITY[w.rarity].color}">${w.name}</span>`; desc = `${w.desc} (dano ${w.dmg}×)`;
+      aplicar = () => { giveWeapon(s, it.id); };
+    } else if (it.tipo === 'armadura') {
+      const a = ARMORS[it.id]; tem = ARMORS[s.armor || 'none'].hearts >= a.hearts;
+      nome = a.name; desc = `+${a.hearts} coração${a.hearts > 1 ? 'ões' : ''}.`;
+      aplicar = () => { equipArmor(s, it.id); g.masks = s.masksMax; };
+    } else if (it.tipo === 'amuleto') {
+      const c = CHARMS[it.id]; tem = !!s.charms.owned[it.id];
+      nome = `<span class="charm-dot" style="background:${c.color}">${c.icon}</span>${c.name}`; desc = c.desc;
+      aplicar = () => { s.charms.owned[it.id] = true; };
+    } else if (it.tipo === 'lanterna') {
+      tem = !!s.items.lantern; nome = 'Lanterna'; desc = 'Ilumina bosques e cavernas escuras.';
+      aplicar = () => { s.items.lantern = true; };
+    } else if (it.tipo === 'mapa') {
+      const a = AREAS[it.id]; tem = !!s.maps[it.id];
+      nome = `Mapa: ${a.name}`; desc = a.subtitle;
+      aplicar = () => { s.maps[it.id] = true; };
+    } else if (it.tipo === 'melhoria') {
+      tem = !!s.bought[it.id]; nome = it.nome; desc = it.desc;
+      aplicar = () => { s.bought[it.id] = true; it.aplicar(s); g.masks = s.masksMax; };
+    } else {
+      // Pista: aponta uma Memória do reino que o herói ainda não leu.
+      const faltam = Object.keys(MEMORIAS).filter((k) => MEMORIAS[k].regiao === it.reino && !s.memorias[k]);
+      nome = `Pista: ${REINOS[it.reino].nome}`; tem = !faltam.length;
+      desc = tem ? 'Você já leu tudo deste reino.' : `Ainda há ${faltam.length} Memória${faltam.length > 1 ? 's' : ''} por ler neste reino.`;
+      aplicar = () => {
+        const sala = g.world.rooms.find((r) => r.lore.includes(faltam[0]) || r.baus.includes(faltam[0]));
+        g.ui.toast(`Procure em: ${sala ? sala.name : REINOS[it.reino].nome}`, 5000);
+      };
+    }
+    const ok = porMat ? materialsWorth(s.inv) >= it.preco : s.geo >= it.preco;
+    const preco = tem ? (it.tipo === 'pista' ? 'Completo' : 'Possui') : porMat ? `${it.preco} em materiais` : `${it.preco} moedas`;
+    this.item(nome, desc, preco, () => {
+      if (tem || !ok) return;
+      if (porMat) {
+        const dado = payWithMaterials(s.inv, it.preco);
+        if (!dado) return;
+        g.ui.toast(`Você entregou: ${dado}`, 2600);
+      } else s.geo -= it.preco;
+      aplicar();
+      g.audio.play('pickup');
+      g.persist();
+      g.ui.resetHud();
+      g.ui.updateHud(g);
+      this.render();
+    }, tem || !ok);
   }
 
   // ── Diário do Errante: todas as Memórias já lidas, por reino ──
@@ -212,51 +197,6 @@ export class CraftUI {
     });
   }
 
-  // ── Oren vende mapas das regiões ──
-  openMaps() {
-    const g = this.game;
-    this.open('Mapas do Oren', 'Cada mapa revela o desenho das salas da região no seu mapa. Falta preencher o resto andando por lá.', () => {
-      const s = g.save;
-      this.list.innerHTML = '';
-      $('#craft-sub').innerHTML = `Moedas: <b>${s.geo}</b>`;
-      for (const [area, price] of Object.entries(MAP_PRICES)) {
-        const has = !!s.maps[area];
-        const ok = s.geo >= price;
-        this.item(`Mapa: ${AREAS[area].name}`, AREAS[area].subtitle, has ? 'Comprado' : `${price} moedas`, () => {
-          if (has || !ok) return;
-          s.geo -= price;
-          s.maps[area] = true;
-          g.audio.play('pickup');
-          g.persist();
-          g.ui.resetHud();
-          g.ui.updateHud(g);
-          this.render();
-        }, has || !ok);
-      }
-    });
-  }
-
-  // ── Baú: guarda materiais ──
-  openChest(key) {
-    const g = this.game;
-    this.open('Baú', 'Guarde materiais para não perdê-los de vista.', () => {
-      const s = g.save;
-      const box = (s.chests[key] = s.chests[key] || {});
-      this.list.innerHTML = '';
-      for (const [k, r] of Object.entries(RESOURCES)) {
-        const inBag = s.inv[k] || 0, inBox = box[k] || 0;
-        this.item(r.name, `Mochila: ${inBag} · Baú: ${inBox}`, inBag ? 'Guardar tudo' : inBox ? 'Pegar tudo' : '—', () => {
-          if (s.inv[k]) { box[k] = (box[k] || 0) + s.inv[k]; s.inv[k] = 0; }
-          else if (box[k]) { s.inv[k] = box[k]; box[k] = 0; }
-          g.audio.play('place');
-          g.persist();
-          g.build.refresh();
-          this.render();
-        }, !inBag && !inBox);
-      }
-    });
-  }
-
   // ── Amuletos: até 3 equipados; só se troca descansando numa fogueira ──
   openCharms() {
     const g = this.game;
@@ -291,29 +231,6 @@ export class CraftUI {
           g.ui.updateHud(g);
           this.render();
         }, !canSwap || (full && !on));
-      }
-    });
-  }
-
-  // ── Tibério vende materiais por moedas ──
-  openSmith() {
-    const g = this.game;
-    this.open('Tibério, o Ferreiro', 'Materiais frescos, direto da minha carroça.', () => {
-      const s = g.save;
-      this.list.innerHTML = '';
-      $('#craft-sub').innerHTML = `Suas moedas: <b>${s.geo}</b>`;
-      for (const it of SMITH_STOCK) {
-        const r = RESOURCES[it.kind];
-        this.item(`${it.n} ${r.name}`, `Você tem ${s.inv[it.kind] || 0}`, `◆ ${it.price}`, () => {
-          if (s.geo < it.price) return;
-          s.geo -= it.price;
-          s.inv[it.kind] = (s.inv[it.kind] || 0) + it.n;
-          g.audio.play('geo');
-          g.persist();
-          g.ui.updateHud(g);
-          g.build.refresh();
-          this.render();
-        }, s.geo < it.price);
       }
     });
   }

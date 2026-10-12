@@ -159,7 +159,7 @@ export class AIDirector {
     return list[list.length - 1][0];
   }
 
-  // Narração curta de eventos (ataques à base, chegada do ferreiro...). Sem IA, usa o texto local.
+  // Narração curta de eventos (invasões, fim da horda...). Sem IA, usa o texto local.
   async narrate(event, fallback, context = {}) {
     if (!this.enabled) return fallback;
     try {

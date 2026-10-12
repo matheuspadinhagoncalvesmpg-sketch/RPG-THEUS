@@ -210,8 +210,7 @@ export class Player {
     }
 
     // ── Ataque
-    if (inp.pressed.attack && game.build.active) inp.aim = null;
-    if (inp.pressed.attack && !game.build.active && this.attackCd <= 0 && !this.focusing && !stunned && this.dashTimer <= 0) {
+    if (inp.pressed.attack && this.attackCd <= 0 && !this.focusing && !stunned && this.dashTimer <= 0) {
       this.attackDir = inp.held.up ? 'up' : inp.held.down && !this.onGround ? 'down' : 'side';
       if (inp.aim) {
         // Ataque com o mouse: mira para onde o cursor está.

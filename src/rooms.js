@@ -1,4 +1,5 @@
 import { LORE_SALAS } from './memorias.js';
+import { BAUS_DE_CHEFE, aplicarCamaras } from './segredos.js';
 // Mundo de Vésper: cada sala ocupa um retângulo numa grade global de blocos.
 // Salas vizinhas se conectam automaticamente pelas aberturas nas bordas.
 //
@@ -34,7 +35,7 @@ const DEFS = [
   // ───────────── CAMPOS DO CREPÚSCULO ─────────────
   {
     id: 'planicie_lar', name: 'Planície do Lar', area: 'campos',
-    x: -44, y: 18, w: 44, h: 16, sky: true, zone: [4, 2, 30, 11],
+    x: -44, y: 18, w: 44, h: 16, sky: true,
     build: (b) => {
       b.rect(0, 13, 44, 3);
       b.rect(0, 0, 2, 9); // abertura oeste (linhas 9-12) para o Brejo dos Cogumelos
@@ -140,7 +141,7 @@ const DEFS = [
   },
   {
     id: 'santuario_vento', name: 'Santuário do Vento', area: 'bosque',
-    x: 206, y: 30, w: 22, h: 16, zone: [10, 3, 11, 10],
+    x: 206, y: 30, w: 22, h: 16,
     build: (b) => {
       b.rect(0, 0, 22, 2);
       b.rect(0, 2, 1, 7);
@@ -265,7 +266,7 @@ const DEFS = [
   },
   {
     id: 'cristal_coracao', name: 'Coração de Cristal', area: 'cristal',
-    x: 110, y: 48, w: 24, h: 16, zone: [2, 2, 11, 8],
+    x: 110, y: 48, w: 24, h: 16,
     build: (b) => {
       b.rect(0, 0, 24, 2);
       b.rect(0, 2, 1, 4);
@@ -882,9 +883,11 @@ const DEFS = [
 // Inimigos regionais (src/enemies2.js) espalhados pelas salas: [x, y, letra].
 const EXTRA = {"bosque_olho":[[14,3,"m"],[26,6,"m"]],"campos_brejo":[[15,12,"s"],[27,12,"s"],[31,10,"M"],[20,12,"L"]],"campos_ermo":[[15,12,"s"],[31,12,"s"],[9,10,"M"],[19,12,"L"]],"campos_marco":[[13,8,"s"]],"campos_abrigo":[[27,12,"s"]],"campos_moinho":[[15,7,"s"]],"campos_alto":[[18,12,"s"]],"campos_cripta":[[25,7,"s"],[21,3,"L"]],"bosque_entrada":[[7,4,"m"],[26,4,"m"]],"bosque_raizes":[[11,7,"m"],[24,5,"m"],[13,15,"M"]],"bosque_dossel":[[16,5,"m"],[32,6,"m"],[19,6,"L"]],"bosque_cume":[[4,9,"m"],[9,6,"m"]],"bosque_copas":[[9,5,"m"],[26,6,"m"],[15,12,"L"]],"bosque_ninho_alto":[[11,6,"m"],[10,12,"N"]],"bosque_gruta":[[22,5,"m"]],"mirante_ventos":[[15,10,"m"]],"ruinas_abismo":[[17,10,"n"]],"ruinas_galeria":[[8,5,"n"]],"ruinas_aqueduto":[[11,5,"n"],[32,8,"n"]],"ruinas_jardim":[[27,8,"n"]],"ruinas_biblioteca":[[8,6,"n"],[28,6,"n"],[24,12,"N"]],"ruinas_telhado":[[16,6,"n"]],"ruinas_torreao":[[14,6,"n"],[18,12,"L"]],"ruinas_arsenal":[[16,10,"n"]],"ruinas_observatorio":[[17,10,"n"]],"ruinas_pico":[[14,12,"n"]],"cristal_galeria":[[26,5,"x"],[28,5,"x"]],"cristal_poco":[[9,5,"x"],[12,5,"M"]],"cristal_veio":[[15,13,"x"],[18,13,"L"],[24,13,"N"]],"cristal_veio_fundo":[[17,9,"x"],[23,3,"x"],[16,5,"L"]],"cristal_catacumba":[[9,7,"x"],[13,9,"x"]],"cristal_ossario":[[9,5,"x"],[8,11,"L"]],"cristal_abismo":[[26,10,"x"],[31,4,"x"]],"cristal_coracao":[[18,9,"x"]],"jardins_poco":[[5,17,"j"],[11,20,"j"]],"jardins_recife":[[11,9,"j"],[21,5,"j"]],"jardins_gruta":[[10,4,"j"]],"jardins_nascente":[[5,9,"j"]],"jardins_salao":[[9,8,"j"],[20,11,"j"],[5,11,"L"]],"jardins_coral":[[5,10,"j"],[15,3,"j"]],"jardins_costa":[[19,11,"j"],[25,4,"L"],[24,4,"N"]],"jardins_trincheira":[[7,4,"j"],[20,4,"j"]],"jardins_abissal":[[10,3,"j"],[24,4,"j"]]};
 
-export const ROOM_DEFS = DEFS.map((d) => {
+export const ROOM_DEFS = aplicarCamaras(DEFS).map((d) => {
   const b = new RoomBuilder(d.w, d.h);
   d.build(b);
   for (const [x, y, c] of EXTRA[d.id] || []) b.set(x, y, c);
-  return { ...d, rows: b.rows(), lore: LORE_SALAS[d.id] || [] };
+  const bau = BAUS_DE_CHEFE[d.id];
+  if (bau) b.set(bau[0], bau[1], 't');
+  return { ...d, rows: b.rows(), lore: LORE_SALAS[d.id] || [], baus: bau ? [bau[2]] : [] };
 });

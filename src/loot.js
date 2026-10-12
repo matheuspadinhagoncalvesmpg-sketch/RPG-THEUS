@@ -1,5 +1,5 @@
 // Conteúdo dos baús de tesouro do mundo (letra "t" nas salas). A ordem segue a das letras "t" na sala.
-// weapon: arma (equipada ao abrir) · geo: moedas · res: materiais · armor: armadura.
+// weapon: arma (equipada ao abrir) · geo: moedas · res: materiais · armor: armadura · memoria: id de uma Memória (lida ao abrir).
 export const LOOT = {
   campos_moinho: [{ weapon: 'adaga', geo: 30 }],
   bosque_gruta: [{ weapon: 'lanca', geo: 40 }],
@@ -33,4 +33,16 @@ export const LOOT = {
   jardins_trincheira: [{ geo: 110, res: { crystal: 3 } }],
   jardins_abissal: [{ geo: 180, res: { crystal: 5, ore: 5 } }],
   bosque_olho: [{ weapon: 'cajado', geo: 300, res: { crystal: 5 } }],
+  // Baús das salas de chefe: guardam uma Memória e só abrem depois que o chefe cai.
+  bosque_arena: [{ memoria: 'moss_diario', geo: 80, res: { wood: 6 } }],
+  bosque_covil: [{ memoria: 'besouro_eco', geo: 60, res: { ore: 3 } }],
+  ninho_vespa: [{ memoria: 'vespa_carta', geo: 70, res: { wood: 4, crystal: 2 } }],
+  bosque_mariposal: [{ memoria: 'mariposa_eco', geo: 90, res: { crystal: 3 } }],
+  cristal_geodo: [{ memoria: 'golem_diario', geo: 80, res: { stone: 6, ore: 2 } }],
+  jardins_covil: [{ memoria: 'lampreia_eco', geo: 90, res: { crystal: 3 } }],
+  ruinas_salao_dalva: [{ memoria: 'dalva_eco', geo: 120, res: { crystal: 3 } }],
+  ruinas_salao_ruben: [{ memoria: 'ruben_livro', geo: 120, res: { ore: 4 } }],
+  ruinas_salao_lidia: [{ memoria: 'lidia_carta', geo: 120, res: { ore: 4 } }],
+  ruinas_salao_marta: [{ memoria: 'marta_diario', geo: 120, res: { crystal: 4 } }],
+  ruinas_salao_sibila: [{ memoria: 'sibila_eco', geo: 140, res: { crystal: 4, ore: 2 } }],
 };

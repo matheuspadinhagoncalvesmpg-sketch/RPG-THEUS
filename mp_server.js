@@ -37,7 +37,7 @@ function loadWorld(code) {
   if (worlds.has(code)) return worlds.get(code);
   try {
     const data = JSON.parse(fs.readFileSync(worldFile(code), 'utf8'));
-    const w = { code, builds: data.builds || {}, players: new Map(), hosts: {}, saveTimer: null };
+    const w = { code, players: new Map(), hosts: {}, saveTimer: null };
     worlds.set(code, w);
     return w;
   } catch (e) { return null; }
@@ -46,20 +46,8 @@ function loadWorld(code) {
 function persistWorld(w) {
   clearTimeout(w.saveTimer);
   w.saveTimer = setTimeout(() => {
-    fs.writeFile(worldFile(w.code), JSON.stringify({ builds: w.builds }), () => {});
+    fs.writeFile(worldFile(w.code), JSON.stringify({ code: w.code }), () => {});
   }, 1500);
-}
-
-function sanitizeBuilds(b) {
-  const out = {};
-  if (!b || typeof b !== 'object') return out;
-  for (const [room, items] of Object.entries(b).slice(0, 20)) {
-    if (!/^[a-z_]{1,30}$/.test(room) || !items || typeof items !== 'object') continue;
-    out[room] = {};
-    for (const [idx, id] of Object.entries(items).slice(0, 2000))
-      if (/^\d{1,5}$/.test(idx) && /^[a-z_]{1,20}$/.test(id)) out[room][idx] = id;
-  }
-  return out;
 }
 
 function publicPlayer(c) {
@@ -136,7 +124,7 @@ function handle(c, msg) {
       if (msg.create) {
         let code;
         do { code = randCode(5); } while (worlds.has(code) || fs.existsSync(worldFile(code)));
-        world = { code, builds: sanitizeBuilds(msg.builds), players: new Map(), hosts: {}, saveTimer: null };
+        world = { code, players: new Map(), hosts: {}, saveTimer: null };
         worlds.set(code, world);
         persistWorld(world);
       } else {
@@ -147,7 +135,7 @@ function handle(c, msg) {
       }
       c.world = world;
       world.players.set(c.id, c);
-      c.send({ t: 'welcome', id: c.id, code: world.code, builds: world.builds, players: [...world.players.values()].filter((p) => p !== c).map(publicPlayer) });
+      c.send({ t: 'welcome', id: c.id, code: world.code, players: [...world.players.values()].filter((p) => p !== c).map(publicPlayer) });
       toWorld(world, { t: 'join', player: publicPlayer(c) }, c);
       break;
     }
@@ -162,16 +150,6 @@ function handle(c, msg) {
         c.send({ t: 'host', room, id: w.hosts[room] });
       }
       toWorld(w, cleanState(c, msg, room), c);
-      break;
-    }
-    case 'build': {
-      if (!w) return;
-      const room = clean(msg.room, 30), idx = String(msg.idx | 0), id = msg.id ? clean(msg.id, 20) : null;
-      if (!/^[a-z_]{1,30}$/.test(room) || (id && !/^[a-z_]+$/.test(id))) return;
-      w.builds[room] = w.builds[room] || {};
-      if (id) w.builds[room][idx] = id; else delete w.builds[room][idx];
-      persistWorld(w);
-      toWorld(w, { t: 'build', room, idx: Number(idx), id, by: c.id }, c);
       break;
     }
     case 'snap': {

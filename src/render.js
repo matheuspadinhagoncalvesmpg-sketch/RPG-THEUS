@@ -1,7 +1,6 @@
 // Renderização: céu, paralaxe, blocos (pré-renderizados em pedaços) e iluminação.
 import { TILE, VIEW_H, MAX_RENDER_SCALE, AREAS, T } from './config.js';
 import { mulberry32, hashStr, shade, rgba, rand } from './util.js';
-import { drawPlacedBlock } from './build.js';
 
 const CHUNK = 16;           // blocos por pedaço
 const MARGIN = 48;          // margem para grama/cipós que vazam do bloco
@@ -103,8 +102,6 @@ export class Renderer {
     const area = room.area;
     const solid = (dx, dy) => game.world.isSolid(room, tx + dx, ty + dy);
 
-    const placed = room.placed.get(ty * room.w + tx);
-    if (placed) return drawPlacedBlock(ctx, placed, x, y);
     if (t === T.SPIKE) return this.drawSpikes(ctx, x, y, pal, area, rng);
     if (t === T.ONEWAY) return this.drawPlank(ctx, x, y, pal, area, rng, tx);
 
@@ -585,13 +582,7 @@ export class Renderer {
     const pal = AREAS[game.room.area];
     const W = this.canvas.width, H = this.canvas.height, s = this.scale;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    const night = game.raids ? game.raids.night : 0;
-    if (night > 0.01) {
-      // Noite de ataque: escurece tudo com um tom azulado.
-      ctx.fillStyle = `rgba(8,6,30,${night * 0.75})`;
-      ctx.fillRect(0, 0, W, H);
-    }
-    let dark = Math.max(pal.dark, night);
+    let dark = pal.dark;
     const lantern = game.save && game.save.items && game.save.items.lantern;
     if (lantern) dark *= 0.6;
     if (dark > 0.01) {

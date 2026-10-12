@@ -1,6 +1,5 @@
 // Interface em HTML sobre o canvas: HUD, diálogos, mapa, loja, avisos.
 import { AREAS, TILE, T, SOUL_MAX, RESOURCES } from './config.js';
-import { SHOP_ITEMS } from './dialog.js';
 import { rgba } from './util.js';
 import { TACTIC_NAMES } from './ai.js';
 
@@ -27,7 +26,6 @@ export class UI {
     this.interactBtn = $('#tb-interact');
     this.mapScreen = $('#map-screen');
     this.mapCanvas = $('#map-canvas');
-    this.shopScreen = $('#shop-screen');
     this.last = {};
     this.dialog = null;
     this.aiBadge = $('#ai-badge');
@@ -199,7 +197,7 @@ export class UI {
     ctx.scale(dpr, dpr);
     const W = rect.width, H = rect.height;
     const known = (r) => game.save.visited[r.id];
-    const rooms = game.world.rooms.filter((r) => known(r) || game.save.maps[r.area]);
+    const rooms = game.world.rooms.filter((r) => known(r) || (game.save.maps[r.area] && !r.secreta));
     if (!rooms.length) return;
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
     for (const r of rooms) {
@@ -230,17 +228,9 @@ export class UI {
       ctx.beginPath(); ctx.arc(ox + gx * k, oy + gy * k, size, 0, Math.PI * 2); ctx.fill();
     };
     for (const r of rooms) {
-      if (r.zone) {
-        ctx.strokeStyle = 'rgba(255,207,122,0.8)';
-        ctx.setLineDash([3, 2]);
-        ctx.strokeRect(ox + (r.x + r.zone[0]) * k, oy + (r.y + r.zone[1]) * k, r.zone[2] * k, r.zone[3] * k);
-        ctx.setLineDash([]);
-      }
       if (!known(r)) continue; // salas só desenhadas pelo mapa não mostram fogueiras
       for (const e of r.entities)
         if (e.ch === 'B') mark(r.x + e.tx + 0.5, r.y + e.ty + 0.5, '#ffcf7a', 4);
-      for (const [idx, id] of r.placed)
-        if (id === 'campfire') mark(r.x + (idx % r.w) + 0.5, r.y + Math.floor(idx / r.w) + 0.5, '#ffcf7a', 4);
     }
     const sh = game.save.shade;
     if (sh && game.world.byId[sh.room]) {
@@ -310,37 +300,5 @@ export class UI {
     this.chatInput.disabled = false;
     this.chatLog.scrollTop = this.chatLog.scrollHeight;
     if (!document.body.classList.contains('touch-mode') && this.chat) this.chatInput.focus();
-  }
-
-  // ───── Loja ─────
-  openShop(game, onClose) {
-    const list = $('#shop-list');
-    const render = () => {
-      $('#shop-geo').textContent = game.save.geo;
-      list.innerHTML = '';
-      for (const it of SHOP_ITEMS) {
-        const sold = game.save.bought[it.id];
-        const b = document.createElement('button');
-        b.className = 'shop-item' + (sold ? ' sold' : '');
-        b.disabled = sold || game.save.geo < it.price;
-        b.innerHTML = `<span class="si-name">${it.name}</span><span class="si-desc">${it.desc}</span><span class="si-price">${sold ? 'Vendido' : '◆ ' + it.price}</span>`;
-        b.addEventListener('click', () => {
-          if (sold || game.save.geo < it.price) return;
-          game.save.geo -= it.price;
-          game.save.bought[it.id] = true;
-          it.apply(game.save);
-          game.masks = game.save.masksMax;
-          game.audio.play('pickup');
-          game.persist();
-          this.resetHud();
-          this.updateHud(game);
-          render();
-        });
-        list.appendChild(b);
-      }
-    };
-    render();
-    this.shopClose = onClose;
-    this.show(this.shopScreen);
   }
 }

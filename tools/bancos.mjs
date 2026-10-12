@@ -6,11 +6,12 @@ import { T } from '../src/config.js';
 const argv = process.argv.slice(2);
 const MAX = Number((argv.find((a) => a.startsWith('--max=')) || '').slice(6)) || 3;
 const world = new World();
+const salas = world.rooms.filter((r) => !r.secreta); // câmaras secretas não contam como rota
 const passable = (t) => t !== T.SOLID && t !== T.BREAK;
 
 // Grafo de salas: duas salas se ligam quando há passagem aberta dos dois lados.
-const adj = new Map(world.rooms.map((r) => [r.id, new Set()]));
-for (const r of world.rooms) for (let y = 0; y < r.h; y++) for (let x = 0; x < r.w; x++) {
+const adj = new Map(salas.map((r) => [r.id, new Set()]));
+for (const r of salas) for (let y = 0; y < r.h; y++) for (let x = 0; x < r.w; x++) {
   if (!passable(r.tile(x, y))) continue;
   for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
     if (r.inside(x + dx, y + dy)) continue;
@@ -18,13 +19,13 @@ for (const r of world.rooms) for (let y = 0; y < r.h; y++) for (let x = 0; x < r
     if (n && passable(n.tile(r.x + x + dx - n.x, r.y + y + dy - n.y))) { adj.get(r.id).add(n.id); adj.get(n.id).add(r.id); }
   }
 }
-const benchRooms = () => world.rooms.filter((r) => r.entities.some((e) => e.ch === 'B')).map((r) => r.id);
+const benchRooms = () => salas.filter((r) => r.entities.some((e) => e.ch === 'B')).map((r) => r.id);
 function dist(from) {
   const d = new Map(from.map((id) => [id, 0])), q = [...from];
   while (q.length) { const id = q.shift(); for (const n of adj.get(id)) if (!d.has(n)) { d.set(n, d.get(id) + 1); q.push(n); } }
   return d;
 }
-const arenas = world.rooms.filter((r) => r.boss).map((r) => r.id);
+const arenas = salas.filter((r) => r.boss).map((r) => r.id);
 
 function report(benches) {
   const d = dist(benches);
@@ -39,11 +40,11 @@ function report(benches) {
 {
   const edges = [...adj.values()].reduce((a, v) => a + v.size, 0) / 2;
   const becos = [...adj.entries()].filter(([, v]) => v.size === 1).map(([k]) => k);
-  console.log(`Ligações: ${edges} · laços (ciclos independentes): ${edges - world.rooms.length + 1} · becos sem saída: ${becos.length} (${becos.join(', ')})`);
+  console.log(`Ligações: ${edges} · laços (ciclos independentes): ${edges - salas.length + 1} · becos sem saída: ${becos.length} (${becos.join(', ')})`);
 }
 const now = benchRooms();
 let r = report(now);
-console.log(`Salas: ${world.rooms.length} · fogueiras: ${now.length} · pior distância: ${r.worst} salas`);
+console.log(`Salas: ${salas.length} · fogueiras: ${now.length} · pior distância: ${r.worst} salas`);
 if (r.far.length) console.log('Salas a mais de ' + MAX + ' salas de uma fogueira: ' + r.far.join(', '));
 if (r.semBancoAntes.length) console.log('Arenas sem fogueira por perto: ' + r.semBancoAntes.join(', '));
 

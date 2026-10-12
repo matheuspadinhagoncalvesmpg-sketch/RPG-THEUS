@@ -1,5 +1,5 @@
 // Estrutura do mundo: salas, blocos e consulta de colisão entre salas vizinhas.
-import { T, TILE, BUILD_BY_ID } from './config.js';
+import { T, TILE } from './config.js';
 import { ROOM_DEFS } from './rooms.js';
 
 const TILE_CHARS = { '#': T.SOLID, '^': T.SPIKE, '=': T.ONEWAY, X: T.BREAK, D: T.DOOR, '~': T.WATER };
@@ -26,12 +26,6 @@ export class Room {
       }
     }
     this.breakGroups = this.findBreakGroups();
-    this.placed = new Map(); // índice do bloco → id do item construído pelo jogador
-  }
-
-  inZone(tx, ty) {
-    const z = this.zone;
-    return !!z && tx >= z[0] && ty >= z[1] && tx < z[0] + z[2] && ty < z[1] + z[3];
   }
 
   get pxW() { return this.w * TILE; }
@@ -104,30 +98,9 @@ export class World {
     return t === T.SOLID || t === T.BREAK || (t === T.DOOR && r && r.doorsClosed);
   }
 
-  // Troca todas as construções (base do mundo online ou do save local).
-  applyBuilds(builds) {
-    for (const r of this.rooms) {
-      for (const [idx, id] of r.placed) if (BUILD_BY_ID[id] && BUILD_BY_ID[id].tile) r.tiles[idx] = T.EMPTY;
-      r.placed.clear();
-      for (const [idx, id] of Object.entries(builds[r.id] || {})) {
-        const item = BUILD_BY_ID[id];
-        if (!item) continue;
-        r.placed.set(Number(idx), id);
-        if (item.tile) r.tiles[Number(idx)] = item.tile;
-      }
-    }
-  }
-
   applySave(save) {
     for (const r of this.rooms) {
       for (const g of r.breakGroups) if (save.broken[g.id]) r.breakGroup(g);
-      const builds = (save.builds || {})[r.id] || {};
-      for (const [idx, id] of Object.entries(builds)) {
-        const item = BUILD_BY_ID[id];
-        if (!item) continue;
-        r.placed.set(Number(idx), id);
-        if (item.tile) r.tiles[Number(idx)] = item.tile;
-      }
     }
   }
 }

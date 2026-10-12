@@ -553,21 +553,6 @@ export function drawNPC(ctx, kind, x, y, t, facing = 1) {
     ctx.beginPath(); ctx.moveTo(-9, -26 + b); ctx.quadraticCurveTo(0, -44 + b, 9, -26 + b); ctx.lineTo(6, -29 + b); ctx.quadraticCurveTo(0, -36 + b, -6, -29 + b); ctx.fill();
     ctx.fillStyle = '#ffd36e';
     ellipse(ctx, -2, -27 + b, 1.4, 2); ellipse(ctx, 3, -27 + b, 1.4, 2);
-  } else if (kind === 'smith') {
-    // Tibério, o ferreiro: avental de couro, barba e martelo
-    ctx.fillStyle = '#5a3a24';
-    ctx.fillRect(-8, -24 + b, 16, 18);
-    ctx.fillStyle = '#7a4f2a';
-    ctx.fillRect(-6, -20 + b, 12, 16);
-    ctx.fillStyle = '#2a2230'; ctx.fillRect(-7, -6, 5, 6); ctx.fillRect(2, -6, 5, 6);
-    ctx.fillStyle = '#d9a37a';
-    ellipse(ctx, 0, -30 + b, 7, 6.5);
-    ctx.fillStyle = '#8a4a2a';
-    ctx.beginPath(); ctx.moveTo(-6, -29 + b); ctx.quadraticCurveTo(0, -14 + b, 6, -29 + b); ctx.fill();
-    ctx.fillStyle = '#14121c'; ctx.fillRect(1, -32 + b, 2, 2); ctx.fillRect(-4, -32 + b, 2, 2);
-    ctx.strokeStyle = '#5a3a22'; ctx.lineWidth = 2.4;
-    ctx.beginPath(); ctx.moveTo(10, -6); ctx.lineTo(13, -24 + b); ctx.stroke();
-    ctx.fillStyle = '#7c8291'; ctx.fillRect(9, -28 + b, 9, 6);
   } else if (kind === 'tome') {
     // Tomé, o Lanterneiro: capuz verde, vara com lanterna acesa
     ctx.fillStyle = '#2f5a45'; ctx.beginPath(); ctx.moveTo(-9, 0); ctx.lineTo(-7, -26 + b); ctx.lineTo(7, -26 + b); ctx.lineTo(10, 0); ctx.fill();
@@ -827,60 +812,6 @@ export function drawResourceIcon(ctx, kind, x, y, s = 1) {
   } else if (kind === 'crystal') {
     ctx.fillStyle = '#7ef0ff';
     ctx.beginPath(); ctx.moveTo(-3, 5); ctx.lineTo(-3, -2); ctx.lineTo(0, -6); ctx.lineTo(3, -2); ctx.lineTo(3, 5); ctx.fill();
-  }
-  ctx.restore();
-}
-
-// ── Peças construíveis (decoração) ──
-export function drawBuildDeco(ctx, kind, x, y, t, accent) {
-  ctx.save();
-  ctx.translate(x, y);
-  if (kind === 'torch') {
-    const g = ctx.createRadialGradient(0, -22, 2, 0, -22, 60);
-    g.addColorStop(0, 'rgba(255,190,90,0.35)'); g.addColorStop(1, 'rgba(255,170,80,0)');
-    ctx.fillStyle = g; ctx.fillRect(-60, -82, 120, 120);
-    ctx.fillStyle = '#5a3a22'; ctx.fillRect(-1.6, -20, 3.2, 20);
-    ctx.fillStyle = '#c9932f'; ctx.fillRect(-2.6, -21, 5.2, 3);
-    ctx.globalCompositeOperation = 'lighter';
-    const h = 9 + Math.sin(t * 0.3) * 2;
-    ctx.fillStyle = 'rgba(255,150,50,0.9)';
-    ctx.beginPath(); ctx.moveTo(-3.5, -21); ctx.quadraticCurveTo(0, -21 - h * 1.4, 3.5, -21); ctx.fill();
-    ctx.fillStyle = 'rgba(255,240,190,0.95)';
-    ctx.beginPath(); ctx.moveTo(-1.6, -21); ctx.quadraticCurveTo(0, -21 - h, 1.6, -21); ctx.fill();
-  } else if (kind === 'banner') {
-    ctx.fillStyle = '#5a3a22'; ctx.fillRect(-1.5, -32, 3, 32);
-    ctx.fillStyle = '#c9932f'; ellipse(ctx, 0, -33, 2.4, 2.4);
-    const w = Math.sin(t * 0.06) * 1.5;
-    ctx.fillStyle = accent || '#8f2f3a';
-    ctx.beginPath(); ctx.moveTo(1.5, -30); ctx.lineTo(14 + w, -29); ctx.lineTo(13 + w, -13); ctx.lineTo(8 + w, -16); ctx.lineTo(2, -13); ctx.fill();
-    ctx.fillStyle = 'rgba(255,230,160,0.85)';
-    ctx.beginPath(); ctx.arc(8 + w * 0.6, -23, 3, 0, Math.PI * 2); ctx.fill();
-  } else if (kind === 'workbench') {
-    ctx.fillStyle = '#5c3a20'; ctx.fillRect(-14, -12, 3, 12); ctx.fillRect(11, -12, 3, 12);
-    ctx.fillStyle = '#8a5a32'; ctx.fillRect(-16, -15, 32, 4);
-    ctx.fillStyle = '#c08a52'; ctx.fillRect(-16, -15, 32, 1.2);
-    ctx.fillStyle = '#9aa0ad'; ctx.fillRect(-10, -19, 8, 3);
-    ctx.fillStyle = '#5c3a20'; ctx.fillRect(-4, -18, 6, 1.6);
-    ctx.fillStyle = '#c08a52'; ctx.fillRect(5, -18, 6, 3);
-  } else if (kind === 'forge') {
-    const g = ctx.createRadialGradient(0, -10, 2, 0, -10, 46);
-    g.addColorStop(0, 'rgba(255,120,50,0.35)'); g.addColorStop(1, 'rgba(255,120,50,0)');
-    ctx.fillStyle = g; ctx.fillRect(-46, -56, 92, 60);
-    ctx.fillStyle = '#4a4654'; ctx.fillRect(-14, -20, 28, 20);
-    ctx.fillStyle = '#6a6676'; ctx.fillRect(-14, -20, 28, 3);
-    ctx.fillRect(-5, -32, 10, 12);
-    ctx.fillStyle = '#1a0a08'; ctx.fillRect(-8, -13, 16, 9);
-    ctx.globalCompositeOperation = 'lighter';
-    ctx.fillStyle = `rgba(255,${140 + Math.sin(t * 0.3) * 40},60,0.9)`;
-    ctx.fillRect(-7, -10, 14, 6);
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.fillStyle = '#2a2830';
-    ctx.fillRect(16, -9, 10, 4); ctx.fillRect(19, -5, 4, 5);
-  } else if (kind === 'chest') {
-    ctx.fillStyle = '#5c3a20'; ctx.fillRect(-12, -16, 24, 16);
-    ctx.fillStyle = '#7a4f2a'; ctx.fillRect(-12, -16, 24, 6);
-    ctx.fillStyle = '#c9932f'; ctx.fillRect(-12, -11, 24, 2); ctx.fillRect(-2, -12, 4, 5);
-    ctx.fillStyle = '#3a2414'; ctx.fillRect(-12, -1, 24, 1);
   }
   ctx.restore();
 }

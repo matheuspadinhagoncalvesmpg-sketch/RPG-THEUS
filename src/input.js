@@ -1,6 +1,6 @@
 // Entrada unificada: teclado, controle (gamepad) e toque com multitoque.
 
-export const ACTIONS = ['left', 'right', 'up', 'down', 'jump', 'attack', 'dash', 'spell', 'interact', 'map', 'pause', 'build', 'inv'];
+export const ACTIONS = ['left', 'right', 'up', 'down', 'jump', 'attack', 'dash', 'spell', 'interact', 'map', 'pause', 'inv'];
 
 const KEYMAP = {
   ArrowLeft: 'left', KeyA: 'left',
@@ -15,10 +15,9 @@ const KEYMAP = {
   KeyM: 'map', Tab: 'map',
   KeyQ: 'inv',
   Escape: 'pause', KeyP: 'pause',
-  KeyB: 'build',
 };
 
-const PAD_BUTTONS = { 0: 'jump', 2: 'attack', 1: 'spell', 5: 'dash', 7: 'dash', 3: 'interact', 4: 'build', 9: 'pause', 8: 'map', 12: 'up', 13: 'down', 14: 'left', 15: 'right' };
+const PAD_BUTTONS = { 0: 'jump', 2: 'attack', 1: 'spell', 5: 'dash', 7: 'dash', 3: 'interact', 9: 'pause', 8: 'map', 12: 'up', 13: 'down', 14: 'left', 15: 'right' };
 
 export class Input {
   constructor() {
@@ -153,7 +152,6 @@ export class TouchControls {
     this.radius = 56;
     this.enabled = false;
     this.leftHanded = false;
-    this.onWorldTap = null; // retorna true se o toque foi usado (ex.: construir)
 
     root.addEventListener('pointerdown', (e) => this.down(e), { passive: false });
     root.addEventListener('pointermove', (e) => this.move(e), { passive: false });
@@ -207,8 +205,6 @@ export class TouchControls {
     if (btn) {
       this.pointers.set(e.pointerId, { kind: 'btn', act: btn.act, el: btn.el });
       this.press(btn);
-    } else if (this.onWorldTap && !joyZone && this.onWorldTap(e.clientX, e.clientY)) {
-      // toque usado pelo modo construção
     } else if (this.isJoySide(e.clientX)) {
       if (this.joyId !== null) {
         // O dedo anterior ficou preso: o toque novo assume o joystick.

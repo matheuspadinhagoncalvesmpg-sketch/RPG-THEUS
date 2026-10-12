@@ -155,35 +155,39 @@ export const ABILITIES = {
   },
 };
 
-// ── Coleta e construção (estilo Terraria) ──
+// ── Materiais: coletados no mundo e usados como moeda de troca com os NPCs ──
+// value: quanto o material vale em moedas quando o NPC aceita a troca.
 export const RESOURCES = {
-  wood: { name: 'Madeira', color: '#c08a52' },
-  stone: { name: 'Pedra', color: '#a7a3b3' },
-  ore: { name: 'Minério', color: '#e39a3a' },
-  crystal: { name: 'Cristal', color: '#7ef0ff' },
+  wood: { name: 'Madeira', color: '#c08a52', value: 4, desc: 'Lenha e tábuas. Os NPCs aceitam como pagamento.' },
+  stone: { name: 'Pedra', color: '#a7a3b3', value: 5, desc: 'Pedra bruta. Os NPCs aceitam como pagamento.' },
+  ore: { name: 'Minério', color: '#e39a3a', value: 10, desc: 'Minério de bronze. Vale bem nas trocas.' },
+  crystal: { name: 'Cristal', color: '#7ef0ff', value: 16, desc: 'Cristal puro. O material mais valioso.' },
 };
+
+// Valor total, em moedas, dos materiais da mochila.
+export const materialsWorth = (inv) => Object.entries(RESOURCES).reduce((t, [k, r]) => t + (inv[k] || 0) * r.value, 0);
+
+// Paga um preço (em moedas) com materiais, dos mais baratos para os mais caros.
+// Devolve o texto do que foi entregue, ou null se a mochila não vale o preço.
+export function payWithMaterials(inv, price) {
+  if (materialsWorth(inv) < price) return null;
+  let left = price;
+  const given = [];
+  for (const [k, r] of Object.entries(RESOURCES).sort((a, b) => a[1].value - b[1].value)) {
+    if (left <= 0) break;
+    const n = Math.min(inv[k] || 0, Math.ceil(left / r.value));
+    if (!n) continue;
+    inv[k] -= n;
+    left -= n * r.value;
+    given.push(`${n} ${r.name}`);
+  }
+  return given.join(', ');
+}
 
 // Nós de recurso no mapa (letra → recurso)
 export const NODE_CHARS = { w: 'wood', r: 'stone', o: 'ore', k: 'crystal' };
 
-export const BUILD_ITEMS = [
-  { id: 'remove', name: 'Remover', tool: true },
-  { id: 'wood_block', name: 'Bloco de Madeira', cost: { wood: 2 }, tile: T.SOLID },
-  { id: 'wood_plat', name: 'Plataforma', cost: { wood: 1 }, tile: T.ONEWAY },
-  { id: 'stone_block', name: 'Bloco de Pedra', cost: { stone: 2 }, tile: T.SOLID },
-  { id: 'crystal_block', name: 'Tijolo de Cristal', cost: { crystal: 1, stone: 1 }, tile: T.SOLID },
-  { id: 'torch', name: 'Tocha', cost: { wood: 1, ore: 1 }, deco: true, support: 'any' },
-  { id: 'banner', name: 'Estandarte', cost: { wood: 2, crystal: 1 }, deco: true, support: 'below' },
-  { id: 'chest', name: 'Baú', cost: { wood: 4, ore: 1 }, deco: true, support: 'below' },
-  { id: 'campfire', name: 'Fogueira', cost: { wood: 5, stone: 3 }, deco: true, support: 'below', desc: 'vira ponto de descanso' },
-  { id: 'workbench', name: 'Bancada', cost: { wood: 6 }, deco: true, support: 'below', desc: 'fabrica lanterna e armadura' },
-  { id: 'forge', name: 'Forja', cost: { stone: 8, ore: 3 }, deco: true, support: 'below', desc: 'forja espadas e armaduras' },
-];
-export const BUILD_BY_ID = Object.fromEntries(BUILD_ITEMS.map((b) => [b.id, b]));
-export const BUILD_REACH = 7 * TILE;
-
-// Espadas: multiplicador de dano e visual da lâmina.
-// Armas (estilo Terraria): achadas em baús, fabricadas na forja ou compradas.
+// Armas (estilo Terraria): achadas em baús ou compradas dos NPCs.
 // kind: melee (golpe corpo a corpo) | bow (flechas) | staff (orbes). cd = recarga do golpe, em quadros.
 export const RARITY = {
   comum: { name: 'Comum', color: '#e8e4da' },
@@ -191,9 +195,6 @@ export const RARITY = {
   raro: { name: 'Raro', color: '#6ab8ff' },
   epico: { name: 'Épico', color: '#c79bff' },
 };
-// Mapas vendidos pelo Oren (cartógrafo): revelam o desenho das salas de cada região.
-export const MAP_PRICES = { campos: 40, bosque: 90, ruinas: 140, cristal: 110, jardins: 130 };
-
 export const WEAPONS = {
   errante: { name: 'Lâmina do Errante', desc: 'A espada pequena de quem acorda na Colina.', dmg: 1, len: 27, cd: 19, style: 'steel', kind: 'melee', rarity: 'comum' },
   adaga: { name: 'Adaga de Osso', desc: 'Veloz, mas de alcance curto.', dmg: 0.75, len: 18, cd: 11, style: 'bone', kind: 'melee', rarity: 'incomum' },
@@ -224,27 +225,9 @@ export const ARMORS = {
   cristal: { name: 'Armadura de Cristal', hearts: 3, color: '#3aa9c4', trim: '#bff7ff' },
 };
 
-// Receitas por estação de trabalho.
-export const RECIPES = [
-  { id: 'lantern', station: 'workbench', name: 'Lanterna', desc: 'Ilumina bosques e cavernas escuras.', cost: { wood: 3, ore: 2, crystal: 1 }, give: (s) => { s.items.lantern = true; }, owned: (s) => !!s.items.lantern },
-  { id: 'armor_madeira', station: 'workbench', name: 'Armadura de Madeira', desc: '+1 coração.', cost: { wood: 12 }, give: (s) => equipArmor(s, 'madeira'), owned: (s) => ARMORS[s.armor || 'none'].hearts >= 1 },
-  { id: 'sword_minerio', station: 'forge', name: 'Espada de Minério', desc: 'Dano x1,5. Lâmina de bronze.', cost: { ore: 6, wood: 2 }, give: (s) => giveWeapon(s, 'minerio'), owned: (s) => ownsWeapon(s, 'minerio') },
-  { id: 'sword_cristal', station: 'forge', name: 'Espada de Cristal', desc: 'Dano x2,2. Lâmina longa e brilhante.', cost: { crystal: 6, ore: 4 }, give: (s) => giveWeapon(s, 'cristal'), owned: (s) => ownsWeapon(s, 'cristal') },
-  { id: 'armor_pedra', station: 'forge', name: 'Armadura de Pedra', desc: '+2 corações.', cost: { stone: 10, ore: 2 }, give: (s) => equipArmor(s, 'pedra'), owned: (s) => ARMORS[s.armor || 'none'].hearts >= 2 },
-  { id: 'armor_cristal', station: 'forge', name: 'Armadura de Cristal', desc: '+3 corações.', cost: { crystal: 8, ore: 4 }, give: (s) => equipArmor(s, 'cristal'), owned: (s) => (s.armor || 'none') === 'cristal' },
-];
-
 // Troca a armadura ajustando a vida máxima pela diferença de corações.
 export function equipArmor(s, id) {
   const before = ARMORS[s.armor || 'none'].hearts;
   s.armor = id;
   s.masksMax += ARMORS[id].hearts - before;
 }
-
-// Materiais vendidos pelo ferreiro que se muda para a base.
-export const SMITH_STOCK = [
-  { kind: 'wood', n: 10, price: 25 },
-  { kind: 'stone', n: 10, price: 30 },
-  { kind: 'ore', n: 5, price: 60 },
-  { kind: 'crystal', n: 5, price: 90 },
-];

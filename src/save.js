@@ -40,7 +40,6 @@ export function newSave(profile) {
     bought: {},
     shade: null,
     inv: { wood: 0, stone: 0, ore: 0, crystal: 0 },
-    builds: {},
     weapon: 'errante',
     armor: 'none',
     items: {},
@@ -48,7 +47,7 @@ export function newSave(profile) {
     chests: {},
     brasas: {},
     marcas: {},
-    base: { smith: false, raids: 0 },
+    base: { invasions: 0 },
     playTime: 0,
     finished: false,
   };
@@ -75,7 +74,7 @@ export function loadSave() {
     const base = newSave(s.profile);
     const ch = s.charms || {};
     return {
-      ...base, ...s, inv: { ...base.inv, ...(s.inv || {}) }, builds: s.builds || {}, base: { ...base.base, ...(s.base || {}) },
+      ...base, ...s, inv: { ...base.inv, ...(s.inv || {}) }, base: { ...base.base, ...(s.base || {}) },
       profile: { ...DEFAULT_PROFILE, capeStyle: 'cachecol', ...(s.profile || {}) }, // saves antigos mantêm o cachecol
       weapons: { errante: true, [s.weapon || 'errante']: true, ...(s.weapons || {}) },
       opened: { ...(s.opened || {}) },

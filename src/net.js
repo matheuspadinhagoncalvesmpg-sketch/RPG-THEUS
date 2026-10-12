@@ -1,9 +1,9 @@
-// Multijogador no cliente: conexão, outros jogadores, inimigos compartilhados e base comum.
+// Multijogador no cliente: conexão, outros jogadores, inimigos compartilhados.
 //
 // Regras:
 // - Cada sala tem um "anfitrião" (o primeiro jogador nela). Ele simula os inimigos e manda
 //   fotos (snapshots) do estado; os outros só desenham essas fotos e mandam os golpes que deram.
-// - Progresso (habilidades, moedas, materiais) é de cada jogador; as construções são do mundo.
+// - Progresso (habilidades, moedas, materiais) é de cada jogador.
 import { ENEMY_TYPES, Projectile } from './enemies.js';
 import './enemies2.js';
 import { BOSS_TYPES } from './bosses.js';
@@ -149,7 +149,7 @@ export class Net {
       setTimeout(() => { if (this.pending) { this.pending = null; reject(new Error('O servidor não respondeu.')); } }, 8000);
       this.transport.send({
         t: 'hello', create: !!create, world: code, name: g.save.profile.name,
-        profile: g.save.profile, builds: create ? g.save.builds : undefined,
+        profile: g.save.profile,
       });
     });
   }
@@ -191,7 +191,6 @@ export class Net {
     this.players.clear();
     this.hosts = {};
     this.code = null;
-    this.game.applyWorldBuilds(this.game.save.builds || {});
     if (this.onChange) this.onChange();
   }
 
@@ -214,7 +213,6 @@ export class Net {
         this.id = m.id;
         this.code = m.code;
         for (const p of m.players) this.players.set(p.id, new RemotePlayer(p));
-        g.applyWorldBuilds(m.builds || {});
         this.sendState(true);
         if (this.pending) { this.pending.resolve(m.code); this.pending = null; }
         // Redes móveis derrubam conexões paradas (menu aberto, tela de diálogo): um "oi" a cada 20 s evita.
@@ -247,9 +245,6 @@ export class Net {
       }
       case 'host':
         this.hosts[m.room] = m.id;
-        break;
-      case 'build':
-        g.applyRemoteBuild(m.room, m.idx, m.id);
         break;
       case 'snap':
         if (m.room === g.room.id && this.puppet) this.applySnap(m);
@@ -312,7 +307,7 @@ export class Net {
     ]);
     const pr = g.projectiles.filter((q) => q.hostile && !q.dead).map((q) => [Math.round(q.x), Math.round(q.y), +q.vx.toFixed(2), +q.vy.toFixed(2), q.kind, q.r, q.grav]);
     const hb = g.hostileBoxes.map((b) => ({ x: Math.round(b.x), y: Math.round(b.y), w: Math.round(b.w), h: Math.round(b.h) }));
-    this.send({ t: 'snap', e, p: pr, hb, n: +g.raids.night.toFixed(2), d: g.room.doorsClosed ? 1 : 0, iv: g.invasions.hud() });
+    this.send({ t: 'snap', e, p: pr, hb, d: g.room.doorsClosed ? 1 : 0, iv: g.invasions.hud() });
   }
 
   // ── Aplicar foto (convidado) ──
@@ -362,7 +357,6 @@ export class Net {
     }
     g.projectiles = g.projectiles.filter((q) => !q.hostile);
     for (const [x, y, vx, vy, kind, r, grav] of m.p) g.projectiles.push(new Projectile(x, y, vx, vy, { kind, r, grav, life: 8 }));
-    g.raids.remoteNight = m.n;
     g.invasions.remote = Array.isArray(m.iv) ? m.iv : null;
     g.room.doorsClosed = !!m.d;
   }
@@ -373,7 +367,6 @@ export class Net {
   }
 
   sendHit(e, dmg, kx, ky) { this.send({ t: 'hit', eid: e.eid, dmg, kx, ky }); }
-  sendBuild(room, idx, id) { this.send({ t: 'build', room, idx, id }); }
   sendRest() { this.send({ t: 'rest' }); }
   sendChat(text) { this.send({ t: 'chat', text }); }
 

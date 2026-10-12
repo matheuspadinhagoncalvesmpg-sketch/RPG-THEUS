@@ -1,11 +1,11 @@
-// Objetos das salas: fogueiras, personagens, placas, itens, recursos, moedas, lápide e construções.
-import { TILE, NODE_CHARS, BUILD_BY_ID, CHARMS } from './config.js';
+// Objetos das salas: fogueiras, personagens, placas, itens, recursos, moedas e lápide.
+import { TILE, NODE_CHARS, CHARMS } from './config.js';
 import { moveBody } from './physics.js';
 import { rand } from './util.js';
 import { NPCS } from './dialog.js';
 import {
   drawNPC, drawOrb, drawGeoRock, drawGeo, drawCampfire, drawTombstone,
-  drawLifeCrystal, drawResourceNode, drawResourceIcon, drawBuildDeco, drawCloakPost, drawMarkA, drawTreasure, drawMemoria,
+  drawLifeCrystal, drawResourceNode, drawResourceIcon, drawCloakPost, drawMarkA, drawTreasure, drawMemoria,
 } from './art.js';
 import { LOOT } from './loot.js';
 import { WEAPONS, RARITY } from './config.js';
@@ -15,13 +15,12 @@ class Entity {
   constructor(x, y) { this.x = x; this.y = y; this.t = Math.floor(rand(0, 100)); this.dead = false; }
   update() { this.t++; }
   near(p, rx = 42, ry = 40) { return Math.abs(p.cx - this.x) < rx && Math.abs(p.y + p.h - this.y) < ry; }
-  // Área ocupada (usada para não construir em cima).
   box() { return { x: this.x - 12, y: this.y - 28, w: 24, h: 28 }; }
 }
 
-// Fogueira: descansa, cura e salva. Também pode ser construída pelo jogador.
+// Fogueira: descansa, cura e salva.
 export class Campfire extends Entity {
-  constructor(x, y, built = false) { super(x, y); this.label = 'Descansar'; this.built = built; this.light = 1; }
+  constructor(x, y) { super(x, y); this.label = 'Descansar'; this.light = 1; }
   interact(game) { game.restAtBench(this); }
   update(game) {
     this.t++;
@@ -106,8 +105,11 @@ export class MarkA extends Entity {
 // Baú de tesouro do mundo: abre uma vez e guarda o que for (arma, moedas, materiais).
 export class TreasureChest extends Entity {
   constructor(x, y, id, loot, done) { super(x, y); this.id = id; this.loot = loot; this.label = 'Abrir'; this.done = !!done; }
-  // Selado enquanto houver guardiões (inimigos ou chefe) vivos na sala.
-  sealed(game) { return game.enemies.some((e) => !e.dead && !e.inv); }
+  // Baús de Memória só abrem quando o chefe da sala cai; os outros, quando não restam guardiões vivos.
+  sealed(game) {
+    if (this.loot.memoria) return !!game.room.boss && !game.save.bosses[game.room.boss];
+    return game.enemies.some((e) => !e.dead && !e.inv);
+  }
   near(p) { return !this.done && Math.abs(p.cx - this.x) < 36 && Math.abs(p.y + p.h - this.y) < 40; }
   update(game) {
     this.t++;
@@ -115,7 +117,7 @@ export class TreasureChest extends Entity {
   }
   interact(game) {
     if (this.done) return;
-    if (this.sealed(game)) { game.ui.toast('Selado: derrote os guardiões desta sala.', 2600); game.audio.play('deny'); return; }
+    if (this.sealed(game)) { game.ui.toast(this.loot.memoria ? 'Selado: só abre quando o guardião desta sala cair.' : 'Selado: derrote os guardiões desta sala.', 2600); game.audio.play('deny'); return; }
     this.done = true;
     game.save.opened[this.id] = true;
     game.audio.play('pickup');
@@ -124,7 +126,7 @@ export class TreasureChest extends Entity {
   }
   draw(ctx, game) {
     const w = this.loot.weapon && WEAPONS[this.loot.weapon];
-    drawTreasure(ctx, this.x, this.y, this.done, this.t, this.label === 'Selado' ? '#ff5a4a' : w ? RARITY[w.rarity].color : '#ffd27a');
+    drawTreasure(ctx, this.x, this.y, this.done, this.t, this.label === 'Selado' ? '#ff5a4a' : this.loot.memoria ? '#9fe3ff' : w ? RARITY[w.rarity].color : '#ffd27a');
   }
 }
 
@@ -276,37 +278,7 @@ export class Tombstone extends Entity {
   draw(ctx) { drawTombstone(ctx, this.x, this.y, this.t); }
 }
 
-// Peça decorativa construída (tocha, estandarte, baú).
-export class BuildDeco extends Entity {
-  constructor(x, y, kind, idx) { super(x, y); this.kind = kind; this.idx = idx; this.light = kind === 'torch' ? 0.8 : 0; }
-  draw(ctx, game) { drawBuildDeco(ctx, this.kind, this.x, this.y, this.t, game.save.profile.cloak); }
-}
-
-// Bancada e forja: abrem o painel de fabricação.
-export class Station extends BuildDeco {
-  constructor(x, y, kind, idx) { super(x, y, kind, idx); this.label = 'Fabricar'; this.light = kind === 'forge' ? 0.6 : 0; }
-  interact(game) { game.craft.openStation(this.kind); }
-}
-
-// Baú: guarda materiais.
-export class ChestBox extends BuildDeco {
-  constructor(x, y, kind, idx) { super(x, y, kind, idx); this.label = 'Abrir'; }
-  interact(game) { game.craft.openChest(`${game.room.id}:${this.idx}`); }
-}
-
-// Cria a entidade de uma peça construída no índice de bloco idx.
-export function makeBuilt(room, idx, id) {
-  const item = BUILD_BY_ID[id];
-  if (!item || !item.deco) return null;
-  const tx = idx % room.w, ty = Math.floor(idx / room.w);
-  const x = tx * TILE + TILE / 2, y = (ty + 1) * TILE;
-  if (id === 'campfire') { const c = new Campfire(x, y, true); c.idx = idx; return c; }
-  if (id === 'workbench' || id === 'forge') return new Station(x, y, id, idx);
-  if (id === 'chest') return new ChestBox(x, y, id, idx);
-  return new BuildDeco(x, y, id, idx);
-}
-
-// Cria as entidades de uma sala a partir dos marcadores do mapa e das construções.
+// Cria as entidades de uma sala a partir dos marcadores do mapa.
 export function spawnRoomEntities(room, save, spent = { nodes: new Set() }) {
   const list = [];
   const at = (e) => ({ x: e.tx * TILE + TILE / 2, y: (e.ty + 1) * TILE });
@@ -316,7 +288,7 @@ export function spawnRoomEntities(room, save, spent = { nodes: new Set() }) {
       case 'B': list.push(new Campfire(x, y)); break;
       case 'N': {
         const who = room.npcs[e.index];
-        if (who === 'oren' && save.base && save.base.smith) break; // Oren se mudou para o Lar
+        if (who === 'oren' && save.bosses.tide) break; // Oren se muda para o Lar
         list.push(new NPC(x, y, who));
         break;
       }
@@ -334,13 +306,7 @@ export function spawnRoomEntities(room, save, spent = { nodes: new Set() }) {
         if (NODE_CHARS[e.ch] && !spent.nodes.has(e.id)) list.push(new ResourceNode(x, y, NODE_CHARS[e.ch], e.id));
     }
   }
-  if (room.id === 'planicie_lar' && save.base && save.base.smith) {
-    list.push(new NPC(34 * TILE + TILE / 2, 13 * TILE, 'smith'));
-    list.push(new NPC(30 * TILE + TILE / 2, 13 * TILE, 'oren'));
-  }
-  for (const [idx, id] of room.placed) {
-    const ent = makeBuilt(room, idx, id);
-    if (ent) list.push(ent);
-  }
+  // Depois de Ondina, Oren espera no Lar, diante da casa de porta azul.
+  if (room.id === 'planicie_lar' && save.bosses.tide) list.push(new NPC(30 * TILE + TILE / 2, 13 * TILE, 'oren'));
   return list;
 }

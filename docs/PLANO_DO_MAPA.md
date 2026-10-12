@@ -12,20 +12,21 @@ Este documento registra o que **aprendemos** olhando o desenho de um metroidvani
 | **Poucos corações, muito espalhados, em pedaços** | Vida vem em **Fragmentos de Vida**: **5 fragmentos = 1 coração**. Há 15 cristais pelo mapa, 1 por mini-chefe, 2 por Soberano e 1 a cada 6 Memórias. | `addFragments` |
 | **Prêmios que exigem enfrentar algo** | **Baús ficam selados** (brilho vermelho) enquanto houver inimigos ou chefe vivos na sala; abrem depois. Os mini-chefes dão fragmentos; os Soberanos dão fragmentos **e libertam almas**. | `TreasureChest.sealed` |
 | **Mapa muito interligado, com atalhos** | O grafo de salas tem **7 laços independentes** (eram 2) e atalhos verticais com pulinho automático; o **Dossel das Lanternas** liga 4 salas de 3 regiões. | `tools/bancos.mjs` |
+| **Segredos escondidos** | 14 **câmaras secretas** (atrás de paredes quebráveis) e 11 **Baús de Memória** nas salas de chefe, que só abrem quando o chefe cai. | `segredos.js` |
 | **A história é uma recompensa** | **Memórias** (diários, cartas, ecos, inscrições, afrescos) rendem moedas, **fragmentos a cada 6** e **bônus ao completar um reino**; revelações importantes vêm em **cenas**. | `memorias.js`, `cutscene.js` |
-| **Mercadores que fazem parte do mundo** | Quatro NPCs novos, cada um de um reino, vendem os itens que o jogador acha no mapa (para repor); alguns **andam** pela região. | `lojas.js`, `dialog.js` |
+| **Mercadores que fazem parte do mundo** | Quatro NPCs novos, cada um de um reino, vendem os itens que o jogador acha no mapa (para repor); alguns **andam** pela região. Tudo se paga com **moedas ou materiais** (a construção foi removida; os materiais viraram moeda de troca). | `lojas.js`, `dialog.js` |
 | **Mapa que se compra** | O Oren vende o mapa de cada região. | `Mapas do Oren` |
 
 ## 2. Os números hoje
 
 | Região (reino) | Salas | Fogueiras | Baús | Cristais de Vida | Chefes | Mini-chefes / Soberanos | NPCs | Memórias |
 | :--- | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: |
-| Campos (Reino de Brasa) | 9 | 3 | 5 | 4 | 0 | 0 | 2 | 8 |
-| Bosque (Reino das Lanternas) | 17 | 6 | 8 | 4 | 1 (Cavaleiro de Musgo) | 3 | 2 | 7 |
-| Ruínas (Reino dos Doze Tronos) | 19 | 7 | 7 | 3 | 1 (Alvar) | 5 Soberanos (+ Eliar no Trono) | 1 | 13 |
-| Cristal (Reino de Cristal) | 9 | 3 | 5 | 3 | 0 | 1 (Golem) | 1 | 6 |
-| Jardins (Reino da Maré) | 12 | 3 | 7 | 1 | 1 (Ondina) | 1 (Lampreia) | 1 | 3 |
-| **Total** | **66** | **22** | **32** | **15** | **3** | **11** | **7** | **37** |
+| Campos (Reino de Brasa) | 9 | 3 | 5 | 4 | 0 | 0 | 2 | 11 |
+| Bosque (Reino das Lanternas) | 17 | 6 | 8 | 4 | 1 (Cavaleiro de Musgo) | 3 | 2 | 14 |
+| Ruínas (Reino dos Doze Tronos) | 19 | 7 | 7 | 3 | 1 (Alvar) | 5 Soberanos (+ Eliar no Trono) | 1 | 20 |
+| Cristal (Reino de Cristal) | 9 | 3 | 5 | 3 | 0 | 1 (Golem) | 1 | 10 |
+| Jardins (Reino da Maré) | 12 | 3 | 7 | 1 | 1 (Ondina) | 1 (Lampreia) | 1 | 7 |
+| **Total** | **66** | **22** | **32** | **15** | **3** | **11** | **7** | **62** |
 
 Pior distância de qualquer sala até uma fogueira: **2 salas**.
 
