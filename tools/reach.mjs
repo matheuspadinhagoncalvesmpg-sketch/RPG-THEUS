@@ -182,9 +182,10 @@ const near = (st, e, rx = 56, ry = 80) => {
 
 const SUBSETS = [];
 for (let m = 0; m < 8; m++) SUBSETS.push({ dash: !!(m & 1), wallJump: !!(m & 2), doubleJump: !!(m & 4), name: ['dash', 'parede', 'duplo'].filter((_, i) => m & (1 << i)).join('+') || 'nada' });
+SUBSETS.push({ dash: true, wallJump: true, doubleJump: true, glide: true, name: 'tudo+planar' });
 const results = SUBSETS.map((ab) => ({ ab, ...explore(ab, startPos) }));
-const full = results[7];
-const cnt = (ab) => (ab.dash ? 1 : 0) + (ab.wallJump ? 1 : 0) + (ab.doubleJump ? 1 : 0);
+const full = results[results.length - 1]; // tudo + Asas de Seda
+const cnt = (ab) => (ab.dash ? 1 : 0) + (ab.wallJump ? 1 : 0) + (ab.doubleJump ? 1 : 0) + (ab.glide ? 1 : 0);
 
 let problems = 0;
 const warn = (m) => { problems++; console.log('⚠ ' + m); };

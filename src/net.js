@@ -5,6 +5,7 @@
 //   fotos (snapshots) do estado; os outros só desenham essas fotos e mandam os golpes que deram.
 // - Progresso (habilidades, moedas, materiais) é de cada jogador; as construções são do mundo.
 import { ENEMY_TYPES, Projectile } from './enemies.js';
+import './enemies2.js';
 import { BOSS_TYPES } from './bosses.js';
 import { MINI_TYPES } from './minibosses.js';
 import { drawHero, drawSlash } from './art.js';

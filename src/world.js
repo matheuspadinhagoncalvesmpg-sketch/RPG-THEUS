@@ -3,7 +3,7 @@ import { T, TILE, BUILD_BY_ID } from './config.js';
 import { ROOM_DEFS } from './rooms.js';
 
 const TILE_CHARS = { '#': T.SOLID, '^': T.SPIKE, '=': T.ONEWAY, X: T.BREAK, D: T.DOOR, '~': T.WATER };
-const ENTITY_CHARS = 'SBNLAM$KchfpgwrokqCTEvVat';
+const ENTITY_CHARS = 'SBNLAM$KchfpgwrokqCTEvVatmsxnj';
 
 export class Room {
   constructor(def) {

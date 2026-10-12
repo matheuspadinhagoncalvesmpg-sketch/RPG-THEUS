@@ -3,7 +3,7 @@ import { World } from '../src/world.js';
 import { T } from '../src/config.js';
 const world = new World();
 let problems = 0;
-const GROUND = 'cBNLSKhgpwrokv$aVt';
+const GROUND = 'cBNLSKhgpwrokv$aVtsx';
 for (const r of world.rooms) {
   for (const e of r.entities) {
     const t = r.tile(e.tx, e.ty);

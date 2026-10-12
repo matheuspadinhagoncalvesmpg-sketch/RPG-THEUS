@@ -388,6 +388,18 @@ export function drawHero(ctx, x, y, o) {
     ellipse(ctx, 2.4, -18.6 + by, 3.4, 2.2);
   }
 
+  if (o.glide) {
+    // Asas de Seda abertas nas costas
+    ctx.save();
+    ctx.globalAlpha *= 0.8;
+    const fl = Math.sin(t * 0.3) * 1.5;
+    for (const [dx, k] of [[-1, 1], [1, 0.8]]) {
+      ctx.fillStyle = col(k === 1 ? '#f4e6b8' : '#e9d7a0');
+      ctx.beginPath(); ctx.moveTo(dx * 2 - 3, -17 + by); ctx.quadraticCurveTo(dx * 16 - 12, -34 + by + fl, dx * 22 - 12, -22 + by + fl); ctx.quadraticCurveTo(dx * 14 - 10, -14 + by, dx * 2 - 3, -14 + by); ctx.fill();
+    }
+    ctx.restore();
+  }
+
   // Cabeça redonda: contorno escuro, rosto claro, cabelo e olhos altos de duas cores
   const hy = -26 + by;
   ctx.save();

@@ -121,6 +121,12 @@ export const ABILITIES = {
     desc: 'Avance num piscar de olhos, no chão ou no ar.',
     keys: 'Celular: botão »  ·  Teclado: C ou Shift',
   },
+  glide: {
+    name: 'Asas de Seda',
+    icon: '✦',
+    desc: 'Segure o pulo no ar para planar devagar e atravessar abismos largos.',
+    keys: 'Segure o botão de pulo enquanto cai',
+  },
   wallJump: {
     name: 'Garras de Pedra',
     icon: '⟰',

@@ -28,7 +28,7 @@ export function newSave(profile) {
     maps: {},
     nail: 1,
     geo: 0,
-    abilities: { dash: false, wallJump: false, doubleJump: false, spell: false },
+    abilities: { dash: false, wallJump: false, doubleJump: false, spell: false, glide: false },
     collected: {},
     broken: {},
     bosses: {},

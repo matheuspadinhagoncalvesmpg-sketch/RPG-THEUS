@@ -384,4 +384,55 @@ export class LampreiaAncia extends Boss {
   }
 }
 
-export const MINI_TYPES = { mini_besouro: BesouroRei, mini_golem: GolemRachado, mini_vespa: VespaRainha, mini_lampreia: LampreiaAncia };
+// ───────────── MARIPOSA RAINHA ─────────────
+export class MariposaRainha extends VespaRainha {
+  constructor(x, y) {
+    super(x, y);
+    this.key = 'mini_mariposa';
+    this.title = 'Mariposa Rainha';
+    this.subtitle = 'Guardiã dos Ventos';
+    this.bloodColor = '#ffe9a8';
+    this.hp = this.maxHp = 28;
+    this.geo = 100;
+    this.ring = 200;
+  }
+  update(game) {
+    super.update(game);
+    if (this.state === 'intro' || this.dead) return;
+    if (--this.ring <= 0) {
+      const n = this.phase2 ? 10 : 7, off = rand(0, Math.PI * 2);
+      for (let i = 0; i < n; i++) {
+        const a = off + (i / n) * Math.PI * 2;
+        game.spawnProjectile(new Projectile(this.cx, this.cy, Math.cos(a) * 2.2, Math.sin(a) * 2.2, { kind: 'orb', r: 6, life: 150 }));
+      }
+      game.audio.play('orb');
+      this.ring = this.phase2 ? 130 : 200;
+    }
+  }
+  draw(ctx) {
+    ctx.save();
+    ctx.translate(this.cx, this.cy);
+    ctx.scale(this.facing, 1);
+    const c = (x) => this.col(x);
+    const flap = Math.sin(this.t * 0.35);
+    for (const s of [-1, 1]) {
+      ctx.fillStyle = c(s < 0 ? '#e9d7a0' : '#f6e9bf');
+      ctx.beginPath(); ctx.ellipse(s * 4 - 8, -6 - flap * 6, 26, 15 + flap * 3, s * 0.45, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = c('#c98f4a');
+      for (const [ex, ey, r] of [[-26, -10, 5], [-16, -4, 3.5]]) { ctx.beginPath(); ctx.arc(s * 4 + ex * 0.9, ey - flap * 5, r, 0, Math.PI * 2); ctx.fill(); }
+    }
+    ctx.fillStyle = c('#5a4630');
+    ctx.beginPath(); ctx.ellipse(-8, 4, 9, 15, 1.3, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = c('#ffcf7a');
+    ctx.beginPath(); ctx.arc(-24, 5, 4, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = c('#3a2a1a');
+    ctx.beginPath(); ctx.arc(8, -2, 9, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = this.phase2 || this.state === 'diveWind' ? '#ff6a4a' : '#fff2b0';
+    ctx.beginPath(); ctx.ellipse(11, -4, 3.5, 3, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = c('#3a2a1a'); ctx.lineWidth = 1.6; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(6, -9); ctx.quadraticCurveTo(8, -18, 16, -22); ctx.moveTo(10, -9); ctx.quadraticCurveTo(14, -17, 22, -17); ctx.stroke();
+    ctx.restore();
+  }
+}
+
+export const MINI_TYPES = { mini_mariposa: MariposaRainha, mini_besouro: BesouroRei, mini_golem: GolemRachado, mini_vespa: VespaRainha, mini_lampreia: LampreiaAncia };

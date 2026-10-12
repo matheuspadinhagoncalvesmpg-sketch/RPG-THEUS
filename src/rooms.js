@@ -736,9 +736,10 @@ const DEFS = [
     id: 'bosque_ninho_alto', name: 'Ninho Alto', area: 'bosque',
     x: 300, y: 14, w: 36, h: 16,
     build: (b) => {
-      b.rect(0, 0, 36, 2).rect(0, 2, 1, 7).rect(35, 0, 1, 16);
+      b.rect(0, 0, 36, 2).rect(16, 0, 4, 2, '.').rect(0, 2, 1, 7).rect(35, 0, 1, 9); // aberturas: teto (Mariposa) e leste (Vendaval)
       b.rect(0, 13, 36, 3);
       b.plat(8, 10, 4).plat(14, 8, 4).plat(20, 6, 4).plat(26, 8, 4);
+      b.plat(22, 4, 4).plat(17, 3, 4).plat(16, 1, 4); // subida para o Covil da Mariposa
       b.set(27, 7, 't').set(6, 12, 'B').set(12, 12, 'f').set(22, 12, 'g').set(31, 12, 'c').set(4, 12, 'L');
     },
     lore: ['Um ninho enorme feito de lanternas quebradas. Dentro, um bilhete amarrado com fio de pavio:\n"Para o próximo que chegar aqui: o Cavaleiro de Musgo também fazia ninhos. Ele era mais gentil do que parecia."'],
@@ -823,10 +824,49 @@ const DEFS = [
       b.set(5, 4, 'B').set(30, 9, 'M').set(10, 13, 't').set(16, 8, 'q').set(24, 11, 'q').set(14, 13, 'k');
     },
   },
+
+  // ───────────── ASAS DE SEDA: MARIPOSA, VENDAVAL E OLHO DA TEMPESTADE ─────────────
+  {
+    id: 'bosque_mariposal', name: 'Covil da Mariposa Rainha', area: 'bosque',
+    x: 300, y: -2, w: 36, h: 16, sky: true,
+    build: (b) => {
+      b.rect(0, 0, 36, 2).rect(0, 2, 1, 14).rect(35, 2, 1, 14);
+      b.rect(0, 13, 36, 3).rect(16, 13, 4, 3, '.').rect(16, 13, 4, 1, 'D').plat(16, 15, 4);
+      b.plat(6, 9, 5).plat(25, 9, 5);
+      b.set(27, 12, 'K');
+    },
+    boss: 'mini_mariposa',
+  },
+  {
+    id: 'bosque_vendaval', name: 'Vendaval', area: 'bosque',
+    x: 336, y: 14, w: 40, h: 16, sky: true,
+    build: (b) => {
+      b.rect(0, 13, 40, 3).rect(0, 0, 1, 9).rect(39, 0, 1, 5).rect(39, 9, 1, 7);
+      b.plat(2, 11, 3).plat(5, 9, 3).plat(2, 7, 3);
+      b.rect(8, 5, 6, 1);
+      b.rect(14, 13, 18, 2, '.').rect(14, 14, 18, 1, '^');
+      b.rect(32, 9, 8, 7);
+      b.set(5, 12, 'B').set(10, 4, 'L').set(36, 8, 'o');
+    },
+    lore: ['Um poste de bronze rasgado pelo vento. Preso nele, um pedaço de seda dourada, ainda inteiro:\n"Só quem aprendeu a cair devagar atravessa o Vendaval."'],
+  },
+  {
+    id: 'bosque_olho', name: 'Olho da Tempestade', area: 'bosque',
+    x: 376, y: 14, w: 36, h: 16, sky: true,
+    build: (b) => {
+      b.rect(0, 9, 36, 7).rect(0, 0, 1, 5).rect(35, 0, 1, 9);
+      b.plat(10, 6, 5).plat(20, 4, 5);
+      b.set(24, 3, 't').set(12, 5, 'M').set(5, 8, 'B').set(30, 8, 'k').set(28, 8, 'k');
+    },
+  },
 ];
+
+// Inimigos regionais (src/enemies2.js) espalhados pelas salas: [x, y, letra].
+const EXTRA = {"campos_brejo":[[15,12,"s"],[27,12,"s"]],"campos_ermo":[[15,12,"s"],[31,12,"s"]],"campos_marco":[[13,8,"s"]],"campos_abrigo":[[27,12,"s"]],"campos_moinho":[[15,7,"s"]],"campos_alto":[[18,12,"s"]],"campos_cripta":[[25,7,"s"]],"bosque_entrada":[[7,4,"m"],[26,4,"m"]],"bosque_raizes":[[11,7,"m"],[24,5,"m"]],"bosque_dossel":[[16,5,"m"],[32,6,"m"]],"bosque_cume":[[4,9,"m"],[9,6,"m"]],"bosque_copas":[[9,5,"m"],[26,6,"m"]],"bosque_ninho_alto":[[11,6,"m"]],"bosque_gruta":[[22,5,"m"]],"mirante_ventos":[[15,10,"m"]],"ruinas_abismo":[[17,10,"n"]],"ruinas_galeria":[[8,5,"n"]],"ruinas_aqueduto":[[11,5,"n"],[32,8,"n"]],"ruinas_jardim":[[27,8,"n"]],"ruinas_biblioteca":[[8,6,"n"],[28,6,"n"]],"ruinas_telhado":[[16,6,"n"]],"ruinas_torreao":[[14,6,"n"]],"ruinas_arsenal":[[16,10,"n"]],"ruinas_observatorio":[[17,10,"n"]],"ruinas_pico":[[14,12,"n"]],"cristal_galeria":[[26,5,"x"],[28,5,"x"]],"cristal_poco":[[9,5,"x"]],"cristal_veio":[[15,13,"x"]],"cristal_veio_fundo":[[17,9,"x"],[23,3,"x"]],"cristal_catacumba":[[9,7,"x"],[13,9,"x"]],"cristal_ossario":[[9,5,"x"]],"cristal_abismo":[[26,10,"x"],[31,4,"x"]],"cristal_coracao":[[18,9,"x"]],"jardins_poco":[[5,17,"j"],[11,20,"j"]],"jardins_recife":[[11,9,"j"],[21,5,"j"]],"jardins_gruta":[[10,4,"j"]],"jardins_nascente":[[5,9,"j"]],"jardins_salao":[[9,8,"j"],[20,11,"j"]],"jardins_coral":[[5,10,"j"],[15,3,"j"]],"jardins_costa":[[19,11,"j"]],"jardins_trincheira":[[7,4,"j"],[20,4,"j"]],"jardins_abissal":[[10,3,"j"],[24,4,"j"]]};
 
 export const ROOM_DEFS = DEFS.map((d) => {
   const b = new RoomBuilder(d.w, d.h);
   d.build(b);
+  for (const [x, y, c] of EXTRA[d.id] || []) b.set(x, y, c);
   return { ...d, rows: b.rows() };
 });

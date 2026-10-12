@@ -474,7 +474,7 @@ export class Projectile {
       game.particles.add({ x: this.x + rand(-4, 4), y: this.y + rand(-4, 4), vx: -this.vx * 0.1, vy: rand(-0.5, 0.5), life: 14, size: rand(2, 4), color: this.color(game), glow: true });
   }
   color() {
-    return { arrow: '#e8dcc0', bolt: '#c7a2ff', blob: '#b6ff7a', spell: '#bfe9ff', orb: '#ffd36e', wave: '#9ef0c0', debris: '#a9a2b8', bubble: '#9ff7e6' }[this.kind] || '#fff';
+    return { arrow: '#e8dcc0', bolt: '#c7a2ff', blob: '#b6ff7a', spell: '#bfe9ff', orb: '#ffd36e', wave: '#9ef0c0', debris: '#a9a2b8', bubble: '#9ff7e6', shard: '#9ef0ff' }[this.kind] || '#fff';
   }
   draw(ctx) {
     const c = this.color();

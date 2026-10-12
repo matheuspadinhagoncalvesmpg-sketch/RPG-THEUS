@@ -118,7 +118,7 @@ export class Player {
     } else if (this.wallLock > 0) {
       this.wallLock--;
     } else {
-      this.vx = mx * P.run * (this.inWater ? 0.72 : 1) + this.recoilX;
+      this.vx = mx * P.run * (this.inWater ? 0.72 : this.gliding ? 1.25 : 1) + this.recoilX;
     }
     this.recoilX = approach(this.recoilX, 0, 0.45);
     if (mx && this.dashTimer <= 0 && this.attackTimer <= 0 && !stunned && !this.wallSliding && this.wallLock <= 0) {
@@ -136,7 +136,10 @@ export class Player {
       }
       this.vy = Math.min(this.vy + g, fall);
       if (this.wallSliding && this.vy > P.wallSlide) this.vy = P.wallSlide;
-    }
+      // Asas de Seda: segurar o pulo no ar faz o herói planar.
+      this.gliding = !!(ab.glide && this.vy > 1.5 && inp.held.jump && !this.onGround && !this.inWater && !this.wallSliding && !stunned);
+      if (this.gliding) this.vy = 1.5;
+    } else this.gliding = false;
 
     // ── Pulo (com buffer, coyote time, parede e pulo duplo)
     if (inp.pressed.jump) this.jumpBuffer = P.jumpBuffer;
@@ -297,7 +300,7 @@ export class Player {
       drawSlash(ctx, this.cx + this.facing * 2, this.y + this.h - 18, this.attackDir, this.facing, swingK, level, wp.style);
     drawHero(ctx, this.cx, this.y + this.h, {
       profile: game.save.profile, facing: this.facing, state: this.sitting ? 'sit' : this.state,
-      t: this.t, alpha, flash: this.flash, sword, armor, wkind: wp.kind,
+      t: this.t, alpha, flash: this.flash, sword, armor, wkind: wp.kind, glide: this.gliding,
       turn: (this.turnT || 0) / 8, squash: this.squash || 0,
       attack: this.attackTimer > 0 ? { dir: this.attackDir, k: swingK } : null,
     });

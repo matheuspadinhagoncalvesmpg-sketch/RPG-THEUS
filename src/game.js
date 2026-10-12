@@ -3,6 +3,7 @@ import { TILE, T, AREAS, ABILITIES, PHYS, SOUL_MAX, SOUL_PER_HIT, SOUL_COST, RES
 import { World } from './world.js';
 import { Player } from './player.js';
 import { ENEMY_TYPES, Projectile } from './enemies.js';
+import './enemies2.js';
 import { BOSS_TYPES } from './bosses.js';
 import { MINI_TYPES } from './minibosses.js';
 import { spawnRoomEntities, GeoCoin, Tombstone, ItemDrop, Campfire } from './entities.js';
@@ -1025,6 +1026,7 @@ export class Game {
         this.particles.burst(this.player.cx, this.player.cy, 30, { color: ['#ffffff', '#ffd27a'], speed: 6, life: 40, glow: true });
         this.ui.updateHud(this);
         this.ui.toast('Fragmento de Vida! +1 coração', 3500);
+        if (key === 'mini_mariposa') this.acquireAbility('glide');
       } else if (key === 'tide') this.acquireCharm('mare_viva');
       else if (key === 'moss') { this.ui.toast('O Cavaleiro cai... e o vento obedece a você.', 3000); this.acquireAbility('dash'); }
       else if (key === 'king') {

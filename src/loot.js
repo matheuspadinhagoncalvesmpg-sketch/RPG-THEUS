@@ -32,4 +32,5 @@ export const LOOT = {
   jardins_costa: [{ geo: 100, res: { ore: 3 } }],
   jardins_trincheira: [{ geo: 110, res: { crystal: 3 } }],
   jardins_abissal: [{ geo: 180, res: { crystal: 5, ore: 5 } }],
+  bosque_olho: [{ weapon: 'cajado', geo: 300, res: { crystal: 5 } }],
 };

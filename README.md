@@ -72,6 +72,9 @@ O jogo tem um **Manual dos controles** completo na pausa e na tela inicial. No c
 ### Armas, baús e inventário (estilo Terraria)
 O herói começa com a Lâmina do Errante e acha outras armas em **baús de tesouro** espalhados pelo mundo ou as fabrica na forja: Adaga de Osso (rápida), Lança do Caçador (alcance longo), Machado de Pedra (pesado), Espada de Minério, Espada de Cristal, **Arco do Caçador** (flechas) e **Cajado da Névoa** (orbes). Cada arma tem raridade, dano e recarga próprios. Abra o **Inventário** com **Q** (ou pelo botão da mochila no celular) para equipar armas, ver armadura, materiais e itens. Os baús também dão moedas, materiais e armaduras.
 
+### Asas de Seda e inimigos regionais
+O novo mini-chefe **Mariposa Rainha** (Covil acima do Ninho Alto, no Bosque) concede as **Asas de Seda**: segure o pulo no ar para planar e atravessar abismos largos, como o **Vendaval**, que leva ao **Olho da Tempestade**. Cada região também ganhou um inimigo próprio: Mariposa Lanterneira (Bosque), Espinhudo (Campos), Atirador de Cristal (Cristal), Fantasma (Ruínas) e Água-viva (Jardins).
+
 ### Viagem rápida
 Descansando numa fogueira, o menu de pausa mostra **Viajar entre fogueiras**: escolha qualquer fogueira onde você já descansou e chegue sentado nela.
 
