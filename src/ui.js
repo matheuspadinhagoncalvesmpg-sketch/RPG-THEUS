@@ -193,7 +193,8 @@ export class UI {
     const ctx = c.getContext('2d');
     ctx.scale(dpr, dpr);
     const W = rect.width, H = rect.height;
-    const rooms = game.world.rooms.filter((r) => game.save.visited[r.id]);
+    const known = (r) => game.save.visited[r.id];
+    const rooms = game.world.rooms.filter((r) => known(r) || game.save.maps[r.area]);
     if (!rooms.length) return;
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
     for (const r of rooms) {
@@ -208,9 +209,10 @@ export class UI {
     for (const r of rooms) {
       const pal = AREAS[r.area];
       const cur = r === game.room;
-      ctx.fillStyle = rgba(pal.top, cur ? 0.35 : 0.18);
+      const seen = known(r);
+      ctx.fillStyle = rgba(pal.top, cur ? 0.35 : seen ? 0.18 : 0.07);
       ctx.fillRect(ox + r.x * k, oy + r.y * k, r.w * k, r.h * k);
-      ctx.fillStyle = cur ? '#f4efe6' : rgba('#d9d2c5', 0.75);
+      ctx.fillStyle = cur ? '#f4efe6' : rgba('#d9d2c5', seen ? 0.75 : 0.28);
       for (let ty = 0; ty < r.h; ty++)
         for (let tx = 0; tx < r.w; tx++) {
           const t = r.tile(tx, ty);
@@ -229,6 +231,7 @@ export class UI {
         ctx.strokeRect(ox + (r.x + r.zone[0]) * k, oy + (r.y + r.zone[1]) * k, r.zone[2] * k, r.zone[3] * k);
         ctx.setLineDash([]);
       }
+      if (!known(r)) continue; // salas só desenhadas pelo mapa não mostram fogueiras
       for (const e of r.entities)
         if (e.ch === 'B') mark(r.x + e.tx + 0.5, r.y + e.ty + 0.5, '#ffcf7a', 4);
       for (const [idx, id] of r.placed)

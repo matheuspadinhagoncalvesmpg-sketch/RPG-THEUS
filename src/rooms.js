@@ -85,7 +85,8 @@ const DEFS = [
     x: 76, y: 8, w: 28, h: 26, sky: true,
     build: (b) => {
       b.rect(0, 23, 28, 3);
-      b.rect(26, 0, 2, 18).rect(0, 0, 2, 10);
+      b.rect(26, 0, 2, 3).rect(26, 7, 2, 11).rect(0, 0, 2, 10); // abertura leste (linhas 3-6) para o Dossel
+      b.rect(24, 7, 4, 1).plat(20, 8, 3);
       b.rect(2, 0, 10, 1).rect(16, 0, 10, 1);
       b.plat(4, 20, 4).plat(9, 17, 4).plat(15, 14, 4).plat(9, 11, 4);
       b.plat(15, 8, 4).plat(9, 5, 4).plat(13, 2, 3);
@@ -99,8 +100,9 @@ const DEFS = [
     id: 'bosque_entrada', name: 'Orla das Lanternas', area: 'bosque',
     x: 104, y: 18, w: 40, h: 16,
     build: (b) => {
-      b.rect(0, 0, 40, 2);
+      b.rect(0, 0, 40, 2).rect(30, 0, 4, 2, '.');
       b.rect(0, 0, 2, 8).rect(38, 0, 2, 8);
+      b.plat(30, 3, 3).plat(31, 1, 3); // subida para o Dossel das Lanternas
       b.rect(0, 13, 40, 3);
       b.rect(12, 13, 3, 1, '^');
       b.rect(16, 13, 3, 2, 'X').plat(17, 15, 2).set(16, 15, '.'); // buraco secreto para a Gruta Sob as Raízes
@@ -176,6 +178,7 @@ const DEFS = [
       b.rect(44, 0, 2, 11);
       b.rect(30, 12, 2, 2);
       b.plat(34, 9, 5);
+      b.plat(30, 7, 4).plat(35, 5, 4).plat(30, 3, 4).plat(35, 1, 4); // subida para o Aqueduto Alto
       b.set(3, 13, '$').set(28, 8, 'f').set(39, 13, 'g');
       b.set(26, 13, 'r').set(42, 13, 'o');
       b.set(4, 13, 'L').set(12, 13, 'L').set(28, 13, 'L').set(44, 13, 'L');
@@ -203,6 +206,7 @@ const DEFS = [
       b.rect(0, 0, 18, 1);
       b.plat(6, 0, 4);
       b.rect(0, 0, 2, 43).rect(16, 0, 2, 43);
+      b.rect(0, 19, 2, 4, '.'); // passagem oeste para o Aqueduto Alto
       b.rect(0, 46, 18, 2);
       // degraus de 4 blocos: cabem no pulo duplo com folga
       for (let i = 0; i < 11; i++) b.plat(i % 2 ? 10 : 2, 43 - i * 4, 6);
@@ -514,9 +518,9 @@ const DEFS = [
     x: 200, y: 46, w: 36, h: 16,
     build: (b) => {
       b.rect(0, 0, 36, 2).rect(10, 0, 3, 2, '.');
-      b.rect(0, 2, 1, 10).rect(35, 2, 1, 10);
+      b.rect(0, 2, 1, 10).rect(35, 2, 1, 7).rect(35, 12, 1, 0);
       b.rect(0, 12, 36, 4);
-      b.rect(22, 9, 13, 3, '~');
+      b.rect(22, 9, 14, 3, '~'); // água até a borda leste
       b.plat(14, 10, 4).plat(8, 8, 4).plat(14, 6, 4).plat(8, 4, 4).plat(10, 3, 3).plat(10, 1, 3);
       b.set(18, 11, 't').set(4, 11, 'k').set(20, 11, 'k').set(27, 10, 'q').set(31, 10, 'q').set(6, 11, 'c');
     },
@@ -537,8 +541,9 @@ const DEFS = [
     id: 'ruinas_observatorio', name: 'Observatório Quebrado', area: 'ruinas',
     x: 176, y: -30, w: 34, h: 24,
     build: (b) => {
-      b.rect(0, 0, 34, 1);
+      b.rect(0, 0, 34, 1).rect(14, 0, 3, 1, '.');
       b.rect(0, 1, 1, 20).rect(33, 1, 1, 20);
+      b.plat(14, 3, 3).plat(14, 1, 3); // subida para o Telhado
       b.rect(0, 21, 34, 3).rect(14, 21, 3, 3, '.').plat(14, 23, 3);
       // degraus de 2 blocos, em zigue-zague, até o topo
       b.plat(4, 19, 4).plat(10, 17, 4).plat(16, 15, 4).plat(22, 13, 4).plat(28, 11, 4);
@@ -598,7 +603,7 @@ const DEFS = [
     x: 228, y: 14, w: 36, h: 16, sky: true,
     build: (b) => {
       b.rect(0, 13, 36, 3).rect(4, 13, 3, 3, '.').plat(4, 15, 3);
-      b.rect(0, 0, 1, 13).rect(35, 0, 1, 13);
+      b.rect(0, 0, 1, 13).rect(35, 0, 1, 9); // abertura leste (linhas 9-12)
       b.plat(12, 9, 5).plat(20, 6, 5);
       b.set(20, 12, 'B').set(30, 12, 't').set(10, 12, 'L').set(14, 5, 'f').set(26, 4, 'f').set(24, 12, 'c');
     },
@@ -646,6 +651,107 @@ const DEFS = [
       b.rect(20, 2, 8, 3, '.').rect(21, 5, 7, 1).set(20, 4, '~');
       b.rect(8, 11, 3, 5).rect(14, 8, 3, 8).rect(24, 12, 3, 4);
       b.set(24, 4, 'B').set(15, 7, 't').set(5, 15, 'k').set(12, 15, 'o').set(19, 10, 'q').set(29, 9, 'q').set(30, 15, 'k');
+    },
+  },
+
+  // ───────────── EXPANSÃO 3: RUÍNAS E BOSQUE ─────────────
+  {
+    id: 'ruinas_aqueduto', name: 'Aqueduto Alto', area: 'ruinas',
+    x: 82, y: -24, w: 46, h: 16, sky: true,
+    build: (b) => {
+      b.rect(0, 13, 46, 3).rect(30, 13, 6, 3, '.').plat(31, 15, 4);
+      b.rect(0, 0, 1, 9).rect(45, 0, 1, 3).rect(45, 7, 1, 6);
+      b.plat(36, 11, 4).plat(38, 9, 3);
+      b.rect(40, 7, 6, 1); // borda alinhada com a passagem da Torre dos Ventos
+      b.set(4, 12, 'B').set(14, 12, 'g').set(24, 12, 'g').set(20, 6, 'f').set(9, 12, 't').set(40, 6, 'o');
+    },
+  },
+  {
+    id: 'ruinas_jardim', name: 'Jardim Suspenso', area: 'ruinas',
+    x: 36, y: -24, w: 46, h: 16, sky: true,
+    build: (b) => {
+      b.rect(0, 13, 46, 3).rect(0, 0, 1, 9).rect(45, 0, 1, 9);
+      b.rect(26, 13, 3, 1, '^');
+      b.plat(8, 10, 4).plat(14, 8, 4).plat(20, 10, 4).plat(34, 10, 4);
+      b.set(16, 7, 'M').set(6, 12, 'B').set(12, 12, 'p').set(22, 12, 'p').set(32, 12, 'p').set(38, 12, 't').set(18, 12, 'h').set(42, 12, 'k');
+    },
+  },
+  {
+    id: 'ruinas_biblioteca', name: 'Biblioteca Soterrada', area: 'ruinas',
+    x: -10, y: -24, w: 46, h: 16, sky: true,
+    build: (b) => {
+      b.rect(0, 13, 46, 3).rect(0, 0, 1, 13).rect(45, 0, 1, 9);
+      b.plat(6, 10, 5).plat(14, 8, 5).plat(24, 10, 5).plat(32, 8, 5);
+      b.set(10, 12, 'L').set(19, 12, 'L').set(40, 12, 'L').set(28, 12, 'B').set(16, 7, 'f').set(34, 7, 'f').set(4, 12, 'c').set(37, 12, 'c');
+    },
+    lore: [
+      'Estantes de pedra, livros que viraram pó. Um sobrevive, preso por uma corrente:\n"Registro das Crianças da Virada. Doze Alvoradores. Doze mãos pequenas."',
+      'Uma página legível:\n"O Dízimo não era pedido. Era cobrado. A cada Alvorador, a Casa devolvia uma criança ao Sol: a mais nova que nascesse na hora certa."',
+      'No último livro, uma anotação a lápis:\n"Se houver uma décima terceira, avise a Aurora. Ela vai reconhecer os olhos."\nEmbaixo, riscado: "Ela não vai."',
+    ],
+  },
+  {
+    id: 'ruinas_telhado', name: 'Telhado das Ruínas', area: 'ruinas',
+    x: 188, y: -46, w: 34, h: 16, sky: true,
+    build: (b) => {
+      b.rect(0, 13, 34, 3).rect(2, 13, 3, 3, '.').plat(2, 15, 3);
+      b.rect(0, 0, 1, 13).rect(33, 0, 1, 9);
+      b.plat(6, 9, 5).plat(24, 9, 5);
+      b.set(9, 12, 'B').set(28, 12, 't').set(20, 12, 'L').set(10, 6, 'f').set(26, 6, 'f').set(30, 12, 'g').set(8, 8, 'k');
+    },
+    lore: ['No telhado, uma estrutura de bronze aponta para o horizonte onde o sol deveria sair. Gravado no metal:\n"Quatrocentos e doze anos olhando para o mesmo lado."'],
+  },
+  {
+    id: 'ruinas_torreao', name: 'Torreão do Vigia', area: 'ruinas',
+    x: 222, y: -46, w: 34, h: 16, sky: true,
+    build: (b) => {
+      b.rect(0, 13, 34, 3).rect(0, 0, 1, 9).rect(33, 0, 1, 13);
+      b.rect(14, 13, 4, 1, '^');
+      b.plat(6, 10, 4).plat(20, 10, 4).plat(26, 7, 4);
+      b.set(27, 6, 't').set(4, 12, 'B').set(10, 12, 'g').set(22, 12, 'g').set(30, 12, 'o');
+    },
+  },
+  {
+    id: 'bosque_dossel', name: 'Dossel das Lanternas', area: 'bosque',
+    x: 104, y: 8, w: 40, h: 10,
+    build: (b) => {
+      b.rect(0, 0, 40, 2).rect(0, 0, 1, 3).rect(0, 7, 1, 3).rect(39, 0, 1, 10);
+      b.rect(0, 7, 40, 3).rect(30, 7, 4, 3, '.').plat(30, 9, 4);
+      b.plat(8, 4, 4).plat(18, 4, 4);
+      b.set(4, 6, 't').set(12, 6, 'f').set(22, 6, 'p').set(28, 3, 'f').set(36, 6, 'h');
+    },
+  },
+  {
+    id: 'bosque_copas', name: 'Ponte das Copas', area: 'bosque',
+    x: 264, y: 14, w: 36, h: 16,
+    build: (b) => {
+      b.rect(0, 0, 36, 2).rect(0, 2, 1, 7).rect(35, 2, 1, 7);
+      b.rect(0, 13, 36, 3);
+      b.rect(10, 13, 4, 1, '.').rect(10, 14, 4, 1, '^').rect(22, 13, 4, 1, '.').rect(22, 14, 4, 1, '^');
+      b.plat(16, 9, 5);
+      b.set(30, 12, 'B').set(18, 8, 'M').set(6, 12, 'c').set(18, 12, 'h').set(28, 12, 'p').set(18, 4, 'f');
+    },
+  },
+  {
+    id: 'bosque_ninho_alto', name: 'Ninho Alto', area: 'bosque',
+    x: 300, y: 14, w: 36, h: 16,
+    build: (b) => {
+      b.rect(0, 0, 36, 2).rect(0, 2, 1, 7).rect(35, 0, 1, 16);
+      b.rect(0, 13, 36, 3);
+      b.plat(8, 10, 4).plat(14, 8, 4).plat(20, 6, 4).plat(26, 8, 4);
+      b.set(27, 7, 't').set(6, 12, 'B').set(12, 12, 'f').set(22, 12, 'g').set(31, 12, 'c').set(4, 12, 'L');
+    },
+    lore: ['Um ninho enorme feito de lanternas quebradas. Dentro, um bilhete amarrado com fio de pavio:\n"Para o próximo que chegar aqui: o Cavaleiro de Musgo também fazia ninhos. Ele era mais gentil do que parecia."'],
+  },
+  {
+    id: 'bosque_lago', name: 'Lago das Lanternas', area: 'bosque',
+    x: 236, y: 46, w: 40, h: 16,
+    build: (b) => {
+      b.rect(0, 0, 40, 2).rect(0, 2, 1, 7).rect(0, 12, 1, 4).rect(39, 2, 1, 14);
+      b.rect(0, 14, 40, 2);
+      b.rect(1, 8, 38, 6, '~').rect(0, 9, 1, 3, '~');
+      b.plat(8, 6, 4).plat(26, 6, 5);
+      b.set(10, 5, 'B').set(28, 5, 't').set(10, 11, 'q').set(20, 10, 'q').set(30, 12, 'q').set(6, 13, 'k').set(24, 13, 'k').set(34, 13, 'o');
     },
   },
 ];

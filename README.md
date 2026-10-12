@@ -72,6 +72,9 @@ O jogo tem um **Manual dos controles** completo na pausa e na tela inicial. No c
 ### Armas, baús e inventário (estilo Terraria)
 O herói começa com a Lâmina do Errante e acha outras armas em **baús de tesouro** espalhados pelo mundo ou as fabrica na forja: Adaga de Osso (rápida), Lança do Caçador (alcance longo), Machado de Pedra (pesado), Espada de Minério, Espada de Cristal, **Arco do Caçador** (flechas) e **Cajado da Névoa** (orbes). Cada arma tem raridade, dano e recarga próprios. Abra o **Inventário** com **Q** (ou pelo botão da mochila no celular) para equipar armas, ver armadura, materiais e itens. Os baús também dão moedas, materiais e armaduras.
 
+### Mapas do Oren
+O Oren desenha mapas por região (Campos 40, Bosque 90, Ruínas 140, Cristal 110, Jardins 130 moedas). Comprado o mapa, o desenho de todas as salas da região aparece (esmaecido) no mapa; as salas já visitadas ficam em destaque.
+
 ### Mini-chefes
 Quatro câmaras opcionais (Gruta Sob as Raízes → Covil do Besouro-Rei, Veio de Cristal → Geodo do Golem, Mirante dos Ventos → Ninho da Vespa Rainha, Gruta das Marés → Covil da Lampreia). Cada mini-chefe dá um **Fragmento de Vida** (+1 coração). A fogueira fica sempre *antes* da arena, nunca dentro dela.
 

@@ -918,6 +918,7 @@ export class Game {
       if (this.ai.enabled) this.openChat(npc);
       else if (npc.data.shop) this.openShop();
       else if (npc.data.trade) this.craft.openSmith();
+      else if (npc.data.maps) this.craft.openMaps();
     });
   }
 
@@ -1058,7 +1059,7 @@ export class Game {
     document.body.classList.add('menu-open');
     this.ui.openChat(npc, this.ai.histories[npc.id] || [], {
       send: (text) => this.ai.npcReply(npc.id, text),
-      shop: npc.data.shop ? () => { this.closeChat(); this.openShop(); } : npc.data.trade ? () => { this.closeChat(); this.craft.openSmith(); } : null,
+      shop: npc.data.shop ? () => { this.closeChat(); this.openShop(); } : npc.data.trade ? () => { this.closeChat(); this.craft.openSmith(); } : npc.data.maps ? () => { this.closeChat(); this.craft.openMaps(); } : null,
       close: () => this.closeChat(),
       sound: () => this.audio.play('talk'),
     });

@@ -19,4 +19,11 @@ export const LOOT = {
   ruinas_mirante_leste: [{ geo: 200, res: { crystal: 4, ore: 4 } }],
   jardins_salao: [{ geo: 130, res: { crystal: 3 } }],
   jardins_coral: [{ weapon: 'tridente', geo: 200 }],
+  ruinas_aqueduto: [{ geo: 90, res: { stone: 5 } }],
+  ruinas_jardim: [{ geo: 110, res: { wood: 4, crystal: 2 } }],
+  ruinas_telhado: [{ geo: 150, res: { ore: 4 } }],
+  ruinas_torreao: [{ weapon: 'foice', geo: 160 }],
+  bosque_dossel: [{ geo: 70, res: { wood: 5 } }],
+  bosque_ninho_alto: [{ geo: 130, res: { crystal: 3, ore: 3 } }],
+  bosque_lago: [{ geo: 100, res: { ore: 3, stone: 3 } }],
 };

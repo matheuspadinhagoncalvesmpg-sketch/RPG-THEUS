@@ -7,7 +7,7 @@ const ORIGEM = [
   'Seus olhos... um da cor do ocaso, outro da aurora. Dizem que só alguém assim pode devolver o dia a Vésper.',
   'Desde que o Rei Sem Coroa roubou a Coroa da Aurora, o sol nunca terminou de se pôr.',
   'Ele espera no alto das Ruínas Suspensas. Mas o caminho até lá exige mais do que uma lâmina.',
-  'Siga para o leste, pelo Bosque das Lanternas. E descanse nas fogueiras: elas guardam sua jornada. Ah, e a oeste fica a Planície do Lar: terra livre para quem quiser construir.',
+  'Siga para o leste, pelo Bosque das Lanternas. E descanse nas fogueiras: elas guardam sua jornada. Eu desenho mapas das regiões, se quiser comprar. Ah, e a oeste fica a Planície do Lar: terra livre para quem quiser construir.',
 ];
 
 // Dica prática do próximo passo (o que o jogador ainda não fez).
@@ -23,6 +23,7 @@ function dica(s) {
 export const NPCS = {
   oren: {
     name: 'Oren, o Andarilho',
+    maps: true,
     lines(game) {
       const s = game.save, a = s.abilities, b = s.bosses;
       if (!s.talked.oren) return ORIGEM;

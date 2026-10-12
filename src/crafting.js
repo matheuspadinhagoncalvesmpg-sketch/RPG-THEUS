@@ -1,5 +1,5 @@
 // Painéis de fabricação (bancada/forja), baú e loja do ferreiro.
-import { RECIPES, RESOURCES, SMITH_STOCK, WEAPONS, ARMORS, CHARMS, CHARM_SLOTS, RARITY, ownsWeapon } from './config.js';
+import { RECIPES, RESOURCES, SMITH_STOCK, WEAPONS, ARMORS, CHARMS, CHARM_SLOTS, RARITY, ownsWeapon, MAP_PRICES, AREAS } from './config.js';
 
 const $ = (s) => document.querySelector(s);
 
@@ -118,6 +118,30 @@ export class CraftUI {
       if (items.length) { this.heading('Itens'); for (const [n, d] of items) this.item(n, d, 'Possui', () => {}, true); }
       this.heading('Atalhos');
       this.item('Amuletos', 'Equipe até 3 (descansando numa fogueira).', 'Abrir', () => { this.close(); this.openCharms(); });
+    });
+  }
+
+  // ── Oren vende mapas das regiões ──
+  openMaps() {
+    const g = this.game;
+    this.open('Mapas do Oren', 'Cada mapa revela o desenho das salas da região no seu mapa. Falta preencher o resto andando por lá.', () => {
+      const s = g.save;
+      this.list.innerHTML = '';
+      $('#craft-sub').innerHTML = `Moedas: <b>${s.geo}</b>`;
+      for (const [area, price] of Object.entries(MAP_PRICES)) {
+        const has = !!s.maps[area];
+        const ok = s.geo >= price;
+        this.item(`Mapa: ${AREAS[area].name}`, AREAS[area].subtitle, has ? 'Comprado' : `${price} moedas`, () => {
+          if (has || !ok) return;
+          s.geo -= price;
+          s.maps[area] = true;
+          g.audio.play('pickup');
+          g.persist();
+          g.ui.resetHud();
+          g.ui.updateHud(g);
+          this.render();
+        }, has || !ok);
+      }
     });
   }
 

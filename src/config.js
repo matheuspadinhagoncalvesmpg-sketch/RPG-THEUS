@@ -177,6 +177,9 @@ export const RARITY = {
   raro: { name: 'Raro', color: '#6ab8ff' },
   epico: { name: 'Épico', color: '#c79bff' },
 };
+// Mapas vendidos pelo Oren (cartógrafo): revelam o desenho das salas de cada região.
+export const MAP_PRICES = { campos: 40, bosque: 90, ruinas: 140, cristal: 110, jardins: 130 };
+
 export const WEAPONS = {
   errante: { name: 'Lâmina do Errante', desc: 'A espada pequena de quem acorda na Colina.', dmg: 1, len: 27, cd: 19, style: 'steel', kind: 'melee', rarity: 'comum' },
   adaga: { name: 'Adaga de Osso', desc: 'Veloz, mas de alcance curto.', dmg: 0.75, len: 18, cd: 11, style: 'bone', kind: 'melee', rarity: 'incomum' },
@@ -184,6 +187,7 @@ export const WEAPONS = {
   machado: { name: 'Machado de Pedra', desc: 'Pesado: dano alto, golpes lentos.', dmg: 2, len: 30, cd: 31, style: 'axe', kind: 'melee', rarity: 'raro' },
   minerio: { name: 'Espada de Minério', desc: 'Dano x1,5. Lâmina de bronze.', dmg: 1.5, len: 29, cd: 19, style: 'ore', kind: 'melee', rarity: 'incomum' },
   cristal: { name: 'Espada de Cristal', desc: 'Dano x2,2. Lâmina longa e brilhante.', dmg: 2.2, len: 32, cd: 19, style: 'crystal', kind: 'melee', rarity: 'raro' },
+  foice: { name: 'Foice Lunar', desc: 'Arco largo e rápido, de lâmina pálida.', dmg: 1.5, len: 36, cd: 21, style: 'bone', kind: 'melee', rarity: 'raro' },
   tridente: { name: 'Tridente da Maré', desc: 'Alcance enorme e dano alto. Forjado no fundo do recife.', dmg: 1.8, len: 52, cd: 27, style: 'spear', kind: 'melee', rarity: 'epico' },
   arco: { name: 'Arco do Caçador', desc: 'Dispara flechas à distância. Para baixo: pancada de arco.', dmg: 0.9, len: 15, cd: 17, style: 'steel', kind: 'bow', rarity: 'incomum' },
   cajado: { name: 'Cajado da Névoa', desc: 'Lança orbes de névoa à distância.', dmg: 1.1, len: 15, cd: 22, style: 'steel', kind: 'staff', rarity: 'raro' },

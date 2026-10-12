@@ -25,6 +25,7 @@ export function newSave(profile) {
     weapon: 'errante',
     weapons: { errante: true },
     opened: {},
+    maps: {},
     nail: 1,
     geo: 0,
     abilities: { dash: false, wallJump: false, doubleJump: false, spell: false },
@@ -75,6 +76,7 @@ export function loadSave() {
       profile: { ...DEFAULT_PROFILE, capeStyle: 'cachecol', ...(s.profile || {}) }, // saves antigos mantêm o cachecol
       weapons: { errante: true, [s.weapon || 'errante']: true, ...(s.weapons || {}) },
       opened: { ...(s.opened || {}) },
+      maps: { ...(s.maps || {}) },
       charms: { owned: { ...(ch.owned || {}) }, equipped: [...(ch.equipped || [])] },
       brasas: { ...(s.brasas || {}) }, marcas: { ...(s.marcas || {}) },
     };
