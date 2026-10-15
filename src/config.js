@@ -155,31 +155,31 @@ export const ABILITIES = {
   },
 };
 
-// ── Materiais: coletados no mundo e usados como moeda de troca com os NPCs ──
-// value: quanto o material vale em moedas quando o NPC aceita a troca.
+// ── Materiais: coletados no mundo e trocados com os NPCs ──
+// Cada NPC só aceita os materiais de que precisa (ver `aceita` em lojas.js).
 export const RESOURCES = {
-  wood: { name: 'Madeira', color: '#c08a52', value: 4, desc: 'Lenha e tábuas. Os NPCs aceitam como pagamento.' },
-  stone: { name: 'Pedra', color: '#a7a3b3', value: 5, desc: 'Pedra bruta. Os NPCs aceitam como pagamento.' },
-  ore: { name: 'Minério', color: '#e39a3a', value: 10, desc: 'Minério de bronze. Vale bem nas trocas.' },
-  crystal: { name: 'Cristal', color: '#7ef0ff', value: 16, desc: 'Cristal puro. O material mais valioso.' },
+  wood: { name: 'Madeira', color: '#c08a52', desc: 'Tábuas e lenha. Barqueiros, lanterneiros e mineiros precisam.' },
+  stone: { name: 'Pedra', color: '#a7a3b3', desc: 'Pedra bruta. Escribas e cartógrafos aceitam.' },
+  ore: { name: 'Minério', color: '#e39a3a', desc: 'Minério de bronze. Pescadores e escribas aceitam.' },
+  crystal: { name: 'Cristal', color: '#7ef0ff', desc: 'Cristal puro. Mineiros e lanterneiros pagam bem.' },
 };
 
-// Valor total, em moedas, dos materiais da mochila.
-export const materialsWorth = (inv) => Object.entries(RESOURCES).reduce((t, [k, r]) => t + (inv[k] || 0) * r.value, 0);
+// Valor, em moedas, dos materiais da mochila que um NPC aceita (`aceita`: material → valor de cada unidade).
+export const materialsWorth = (inv, aceita) => Object.entries(aceita).reduce((t, [k, v]) => t + (inv[k] || 0) * v, 0);
 
-// Paga um preço (em moedas) com materiais, dos mais baratos para os mais caros.
+// Paga um preço (em moedas) com os materiais que o NPC aceita, dos mais baratos para os mais caros.
 // Devolve o texto do que foi entregue, ou null se a mochila não vale o preço.
-export function payWithMaterials(inv, price) {
-  if (materialsWorth(inv) < price) return null;
+export function payWithMaterials(inv, price, aceita) {
+  if (materialsWorth(inv, aceita) < price) return null;
   let left = price;
   const given = [];
-  for (const [k, r] of Object.entries(RESOURCES).sort((a, b) => a[1].value - b[1].value)) {
+  for (const [k, v] of Object.entries(aceita).sort((a, b) => a[1] - b[1])) {
     if (left <= 0) break;
-    const n = Math.min(inv[k] || 0, Math.ceil(left / r.value));
+    const n = Math.min(inv[k] || 0, Math.ceil(left / v));
     if (!n) continue;
     inv[k] -= n;
-    left -= n * r.value;
-    given.push(`${n} ${r.name}`);
+    left -= n * v;
+    given.push(`${n} ${RESOURCES[k].name}`);
   }
   return given.join(', ');
 }

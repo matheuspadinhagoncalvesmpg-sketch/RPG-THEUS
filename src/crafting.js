@@ -77,7 +77,7 @@ export class CraftUI {
       this.heading('Armadura');
       const a = ARMORS[s.armor || 'none'];
       this.item(a.name, a.hearts ? `+${a.hearts} coração${a.hearts > 1 ? 'ões' : ''}.` : 'Compre armaduras dos mineiros e ferreiros.', 'Equipada', () => {}, true);
-      this.heading(`Materiais · valem ${materialsWorth(s.inv)} moedas nas trocas`);
+      this.heading('Materiais · cada NPC aceita só o que precisa');
       const mats = Object.entries(RESOURCES);
       const any = mats.some(([k]) => (s.inv[k] || 0) > 0);
       for (const [k, r] of mats) this.item(`<i class="mat-dot" style="background:${r.color}"></i>${r.name}`, r.desc, String(s.inv[k] || 0), () => {}, true);
@@ -97,17 +97,18 @@ export class CraftUI {
     this.open(loja.titulo, loja.sub, () => {
       const s = g.save, porMat = this.payMode === 'mat';
       this.list.innerHTML = '';
-      $('#craft-sub').innerHTML = `${loja.sub}<br>Moedas: <b>${s.geo}</b> · Materiais: <b>${materialsWorth(s.inv)}</b> em valor`;
-      this.item('Forma de pagamento', 'Os NPCs aceitam moedas ou materiais (madeira, pedra, minério, cristal).', porMat ? 'Materiais' : 'Moedas', () => {
+      const aceita = Object.entries(loja.aceita).map(([k, v]) => `${RESOURCES[k].name} (${v})`).join(', ');
+      $('#craft-sub').innerHTML = `${loja.sub}<br>Moedas: <b>${s.geo}</b> · Em materiais aceitos: <b>${materialsWorth(s.inv, loja.aceita)}</b>`;
+      this.item('Forma de pagamento', `Aceita moedas ou: ${aceita}. Os outros materiais não interessam.`, porMat ? 'Materiais' : 'Moedas', () => {
         this.payMode = porMat ? 'geo' : 'mat';
         this.render();
       });
-      for (const it of loja.itens) this.shopRow(it, porMat);
+      for (const it of loja.itens) this.shopRow(it, porMat ? loja.aceita : null);
     });
   }
 
   // Uma mercadoria da loja: descreve, mostra o preço e faz a compra.
-  shopRow(it, porMat) {
+  shopRow(it, aceita) {
     const g = this.game, s = g.save;
     let nome, desc, tem = false, aplicar;
     if (it.tipo === 'arma') {
@@ -142,12 +143,12 @@ export class CraftUI {
         g.ui.toast(`Procure em: ${sala ? sala.name : REINOS[it.reino].nome}`, 5000);
       };
     }
-    const ok = porMat ? materialsWorth(s.inv) >= it.preco : s.geo >= it.preco;
-    const preco = tem ? (it.tipo === 'pista' ? 'Completo' : 'Possui') : porMat ? `${it.preco} em materiais` : `${it.preco} moedas`;
+    const ok = aceita ? materialsWorth(s.inv, aceita) >= it.preco : s.geo >= it.preco;
+    const preco = tem ? (it.tipo === 'pista' ? 'Completo' : 'Possui') : aceita ? `${it.preco} em materiais` : `${it.preco} moedas`;
     this.item(nome, desc, preco, () => {
       if (tem || !ok) return;
-      if (porMat) {
-        const dado = payWithMaterials(s.inv, it.preco);
+      if (aceita) {
+        const dado = payWithMaterials(s.inv, it.preco, aceita);
         if (!dado) return;
         g.ui.toast(`Você entregou: ${dado}`, 2600);
       } else s.geo -= it.preco;

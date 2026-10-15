@@ -45,7 +45,7 @@ O jogo tem um **Manual dos controles** completo na pausa e na tela inicial. No c
 
 ### Coleta e trocas (estilo Terraria)
 - Golpeie **árvores, rochas, veios de minério e cristais** para coletar **madeira, pedra, minério e cristal**. Eles voltam quando você descansa numa fogueira.
-- Não há construção: os materiais são **moeda de troca**. Todos os NPCs com loja (Mira, Oren, Tomé, Selene, Brum, Nami) aceitam **moedas ou materiais**: na loja, troque a *forma de pagamento*. Cada material vale uma quantia (madeira 4, pedra 5, minério 10, cristal 16) e o pagamento usa primeiro os mais baratos.
+- Não há construção: os materiais são **moeda de troca**, mas cada NPC só aceita o que precisa. O Brum (mineiro) tem pedra de sobra e quer cristal e madeira; o Tomé quer cristal e madeira; a Selene, pedra e minério; a Nami, madeira e minério; o Oren, madeira e pedra; a Mira aceita tudo, mas paga pouco. Na loja, troque a *forma de pagamento* e veja o que ela aceita.
 - A Lanterna, as espadas de Minério e de Cristal e as armaduras são vendidas pelos NPCs (e também achadas em baús).
 
 ### Combate e exploração
@@ -70,7 +70,7 @@ O herói começa com a Lâmina do Errante e acha outras armas em **baús de teso
 - **Zonas seguras:** perto de cada fogueira não aparecem monstros.
 - **Respawn pelo descanso:** monstros e recursos só voltam ao sentar numa fogueira (no multijogador, o descanso de um renova para todos).
 - **Fragmentos de Vida:** cinco fragmentos = um coração; cristais, mini-chefes, Soberanos e Memórias dão fragmentos.
-- **Baús selados** até limpar os guardiões da sala. Os **Baús de Memória**, nas salas de chefe e mini-chefe, só abrem quando o chefe cai (inimigos comuns não contam).
+- **Baús com horda:** tocar num baú de tesouro chama 2 ou 3 ondas de monstros da região (a última com um capitão); o baú só abre depois da última onda. Sair da sala ou morrer cancela a prova. Há bem menos baús, e seis deles ficam em câmaras secretas. Os **Baús de Memória**, nas salas de chefe e mini-chefe, só abrem quando o chefe cai (inimigos comuns não contam).
 - **Câmaras secretas:** 14 câmaras escondidas atrás de paredes quebráveis (golpeie as paredes de beco) guardam Memórias; não aparecem nem no mapa comprado até serem visitadas.
 - **Os Soberanos:** cinco salões nas Ruínas com chefes que são os reis e rainhas antigos presos pelo Regente; Eliar luta no Trono antes de Alvar. Cada Soberano tem uma mecânica própria: **Dalva** canta (invulnerável cantando, exposta no silêncio), **Rúben** marca dívidas explosivas no chão, **Lídia** chama a Guarda e fica protegida enquanto ela viver, **Marta** deixa reflexos que repetem o ataque e **Sibila** varre o salão com o Olhar. Cada alma libertada enfraquece Alvar. Ver `docs/historia/10-revisao-reis-e-reinos.md`.
 - **Memórias e cenas:** 62 Memórias, guardadas em baús de chefe, câmaras secretas e achados pelo mapa. A história vem em diários, cartas, ecos, inscrições e afrescos (Diário do Errante no menu) e em cenas nos momentos de reviravolta.
@@ -145,6 +145,7 @@ src/
   crafting.js     inventário, lojas (moedas ou materiais), diário e viagem
   lojas.js        o que cada NPC vende
   segredos.js     câmaras secretas e baús de chefe com Memórias
+  hordas.js       ondas de monstros que abrem os baús de tesouro
   entities.js     fogueiras, personagens, recursos, moedas, lápide
   rooms.js        mapa do mundo (editável)
   world.js        grade de blocos e conexão entre salas

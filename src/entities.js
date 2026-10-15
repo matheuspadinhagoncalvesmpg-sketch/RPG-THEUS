@@ -103,21 +103,26 @@ export class MarkA extends Entity {
 }
 
 // Baú de tesouro do mundo: abre uma vez e guarda o que for (arma, moedas, materiais).
+// Os comuns chamam uma horda de monstros ao serem tocados e só abrem depois da última onda;
+// os de Memória ficam selados até o chefe da sala cair.
 export class TreasureChest extends Entity {
   constructor(x, y, id, loot, done) { super(x, y); this.id = id; this.loot = loot; this.label = 'Abrir'; this.done = !!done; }
-  // Baús de Memória só abrem quando o chefe da sala cai; os outros, quando não restam guardiões vivos.
-  sealed(game) {
-    if (this.loot.memoria) return !!game.room.boss && !game.save.bosses[game.room.boss];
-    return game.enemies.some((e) => !e.dead && !e.inv);
-  }
+  selado(game) { return !!this.loot.memoria && !!game.room.boss && !game.save.bosses[game.room.boss]; }
+  emHorda(game) { return game.hordas.bau === this; }
   near(p) { return !this.done && Math.abs(p.cx - this.x) < 36 && Math.abs(p.y + p.h - this.y) < 40; }
   update(game) {
     this.t++;
-    this.label = this.sealed(game) ? 'Selado' : 'Abrir';
+    this.label = this.selado(game) ? 'Selado' : this.emHorda(game) ? 'Horda!' : this.loot.memoria ? 'Abrir' : 'Desafiar';
   }
   interact(game) {
     if (this.done) return;
-    if (this.sealed(game)) { game.ui.toast(this.loot.memoria ? 'Selado: só abre quando o guardião desta sala cair.' : 'Selado: derrote os guardiões desta sala.', 2600); game.audio.play('deny'); return; }
+    if (this.selado(game)) { game.ui.toast('Selado: só abre quando o guardião desta sala cair.', 2600); game.audio.play('deny'); return; }
+    if (this.loot.memoria) return this.abrir(game);
+    if (game.hordas.ativa) { game.ui.toast(this.emHorda(game) ? 'A horda ainda não acabou.' : 'Termine a horda em andamento.', 2200); game.audio.play('deny'); return; }
+    if (game.net.online && !game.net.isHost()) { game.ui.toast('Só quem simula esta sala pode chamar a horda.', 2600); game.audio.play('deny'); return; }
+    game.hordas.start(this);
+  }
+  abrir(game) {
     this.done = true;
     game.save.opened[this.id] = true;
     game.audio.play('pickup');
@@ -126,7 +131,8 @@ export class TreasureChest extends Entity {
   }
   draw(ctx, game) {
     const w = this.loot.weapon && WEAPONS[this.loot.weapon];
-    drawTreasure(ctx, this.x, this.y, this.done, this.t, this.label === 'Selado' ? '#ff5a4a' : this.loot.memoria ? '#9fe3ff' : w ? RARITY[w.rarity].color : '#ffd27a');
+    const cor = this.label === 'Selado' || this.label === 'Horda!' ? '#ff5a4a' : this.loot.memoria ? '#9fe3ff' : w ? RARITY[w.rarity].color : '#ffd27a';
+    drawTreasure(ctx, this.x, this.y, this.done, this.t, cor);
   }
 }
 

@@ -10,6 +10,7 @@ import { SOBERANOS } from './soberanos.js';
 import { spawnRoomEntities, GeoCoin, Tombstone, ItemDrop, Campfire } from './entities.js';
 import { CraftUI } from './crafting.js';
 import { Invasions } from './invasions.js';
+import { Hordas } from './hordas.js';
 import { Net } from './net.js';
 import { scheduleUpload } from './cloud.js';
 import { Particles } from './fx.js';
@@ -36,6 +37,7 @@ export class Game {
     this.floaters = [];
     this.craft = new CraftUI(this);
     this.invasions = new Invasions(this);
+    this.hordas = new Hordas(this);
     this.cutscene = new Cutscene(this);
     this.invSeq = 0;
     // O que já foi derrotado/colhido desde o último descanso: volta ao sentar numa fogueira ou ao morrer.
@@ -153,6 +155,7 @@ export class Game {
     if (sh && sh.room === id) this.entities.push(new Tombstone(sh.x, sh.y, sh.geo));
     this.floaters = [];
     this.invasions.onRoomEnter(room);
+    this.hordas.cancel();
     this.projectiles = [];
     this.coins = [];
     this.hostileBoxes = [];
@@ -422,6 +425,7 @@ export class Game {
 
     this.ai.update();
     this.invasions.update();
+    this.hordas.update();
     this.updateChallenge();
     for (const b of this.bubbles) b.t--;
     this.bubbles = this.bubbles.filter((b) => b.t > 0 && !b.target.dead);

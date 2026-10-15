@@ -1,10 +1,12 @@
-// Lojas dos NPCs. Tudo se paga em moedas ou em materiais (ver payWithMaterials em config.js).
+// Lojas dos NPCs. Tudo se paga em moedas ou em materiais, mas cada NPC só aceita o que precisa:
+// `aceita` diz quais materiais e quanto vale cada unidade (o mineiro tem pedra de sobra, quer cristal).
 // Os itens que o jogador acha pelo mapa também são vendidos aqui, para quem perdeu algo ou quer repor.
 // tipo: arma | armadura | amuleto | lanterna | melhoria | mapa | pista
 
 export const LOJAS = {
   mira: {
     titulo: 'Tenda da Mira',
+    aceita: { wood: 3, stone: 4, ore: 8, crystal: 14 }, // a Coletora junta de tudo, mas paga pouco
     sub: 'A Coletora arrependida junta o que o mundo perdeu e vende o que pode salvar sua pele.',
     itens: [
       { tipo: 'melhoria', id: 'nail', nome: 'Afiar a Lâmina', desc: 'Seus golpes causam o dobro de dano.', preco: 220, aplicar: (s) => { s.nail = 2; } },
@@ -17,6 +19,7 @@ export const LOJAS = {
   },
   oren: {
     titulo: 'Mapas do Oren',
+    aceita: { wood: 7, stone: 6 }, // lenha para a fogueira e pedra para firmar o papel
     sub: 'Cada mapa revela o desenho das salas da região. Falta preencher o resto andando por lá.',
     itens: [
       { tipo: 'mapa', id: 'campos', preco: 40 },
@@ -28,6 +31,7 @@ export const LOJAS = {
   },
   tome: {
     titulo: 'Lanternas do Tomé',
+    aceita: { wood: 6, crystal: 22 }, // hastes de madeira e cristal para a luz
     sub: 'O Guarda-de-Trilha Sem Sombra vende o que sobrou da trilha.',
     itens: [
       { tipo: 'lanterna', preco: 90 },
@@ -39,6 +43,7 @@ export const LOJAS = {
   },
   selene: {
     titulo: 'Biblioteca da Selene',
+    aceita: { stone: 8, ore: 14 }, // lajes para gravar e minério para as correntes dos livros
     sub: 'A última escriba vende as armas que a Guarda deixou e pistas do que ainda não foi lido.',
     itens: [
       { tipo: 'arma', id: 'lanca', preco: 260 },
@@ -50,6 +55,7 @@ export const LOJAS = {
   },
   brum: {
     titulo: 'Oficina do Brum',
+    aceita: { crystal: 24, wood: 7 }, // pedra e minério ele tem de sobra; quer cristal e escoras
     sub: 'O mineiro que ouviu a terra vende armaduras e lâminas de minério e cristal.',
     itens: [
       { tipo: 'armadura', id: 'madeira', preco: 90 },
@@ -62,6 +68,7 @@ export const LOJAS = {
   },
   nami: {
     titulo: 'Rede da Nami',
+    aceita: { wood: 8, ore: 13 }, // madeira para os barcos e minério para os anzóis
     sub: 'A pescadora vende o que o mar devolve.',
     itens: [
       { tipo: 'arma', id: 'arco', preco: 240 },

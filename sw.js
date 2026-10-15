@@ -1,10 +1,10 @@
 // Service worker: deixa o jogo jogável offline depois da primeira visita.
-const CACHE = 'theus-v2.24.0';
+const CACHE = 'theus-v2.25.0';
 const ASSETS = [
   './', 'index.html', 'style.css', 'manifest.json', 'icon.svg', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png',
   'src/main.js', 'src/game.js', 'src/player.js', 'src/enemies.js', 'src/bosses.js', 'src/entities.js',
   'src/world.js', 'src/rooms.js', 'src/physics.js', 'src/render.js', 'src/art.js', 'src/fx.js',
-  'src/input.js', 'src/audio.js', 'src/ui.js', 'src/save.js', 'src/dialog.js', 'src/story.js', 'src/minibosses.js', 'src/invasions.js', 'src/loot.js', 'src/memorias.js', 'src/segredos.js', 'src/cutscene.js', 'src/cenas.js', 'src/enemies2.js', 'src/soberanos.js', 'src/lojas.js', 'src/config.js', 'src/util.js', 'src/ai.js', 'src/crafting.js', 'src/net.js', 'src/cloud.js',
+  'src/input.js', 'src/audio.js', 'src/ui.js', 'src/save.js', 'src/dialog.js', 'src/story.js', 'src/minibosses.js', 'src/invasions.js', 'src/loot.js', 'src/memorias.js', 'src/segredos.js', 'src/hordas.js', 'src/cutscene.js', 'src/cenas.js', 'src/enemies2.js', 'src/soberanos.js', 'src/lojas.js', 'src/config.js', 'src/util.js', 'src/ai.js', 'src/crafting.js', 'src/net.js', 'src/cloud.js',
 ];
 
 self.addEventListener('install', (e) => {

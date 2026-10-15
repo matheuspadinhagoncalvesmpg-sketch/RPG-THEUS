@@ -453,7 +453,7 @@ const DEFS = [
       b.rect(12, 13, 3, 1, '^');
       b.rect(24, 13, 3, 3, 'X').plat(25, 15, 2); // buraco secreto para a Cripta Rasa
       b.plat(6, 11, 4).plat(30, 11, 4);
-      b.set(4, 12, 't').set(8, 12, 'h').set(18, 12, 'h').set(22, 12, 'p').set(30, 12, 'c');
+      b.set(8, 12, 'h').set(18, 12, 'h').set(22, 12, 'p').set(30, 12, 'c');
       b.set(32, 10, '$').set(10, 12, 'w').set(36, 12, 'r');
     },
   },
@@ -488,7 +488,7 @@ const DEFS = [
       b.rect(22, 9, 14, 3, '~'); // água até a borda leste
       b.plat(14, 10, 4).plat(8, 8, 4).plat(14, 6, 4).plat(8, 4, 4).plat(10, 3, 3).plat(10, 1, 3);
       b.plat(28, 7, 3).plat(31, 5, 3).plat(28, 3, 3).plat(31, 1, 3); // subida para o Mirante dos Ventos
-      b.set(18, 11, 't').set(4, 11, 'k').set(20, 11, 'k').set(27, 10, 'q').set(31, 10, 'q').set(6, 11, 'c');
+      b.set(4, 11, 'k').set(20, 11, 'k').set(27, 10, 'q').set(31, 10, 'q').set(6, 11, 'c');
     },
   },
   {
@@ -549,7 +549,7 @@ const DEFS = [
       b.rect(16, 13, 3, 2, '.').rect(16, 14, 3, 1, '^');
       b.rect(27, 13, 3, 1, '^');
       b.plat(8, 11, 4).plat(32, 10, 4);
-      b.set(21, 12, 'B').set(36, 12, 't').set(6, 12, 'c').set(12, 12, 'h').set(24, 12, 'c').set(33, 9, 'f').set(3, 12, 'w').set(10, 12, 'r').set(34, 12, 'k');
+      b.set(21, 12, 'B').set(6, 12, 'c').set(12, 12, 'h').set(24, 12, 'c').set(33, 9, 'f').set(3, 12, 'w').set(10, 12, 'r').set(34, 12, 'k');
     },
   },
   {
@@ -559,7 +559,7 @@ const DEFS = [
       b.rect(0, 13, 40, 3).rect(0, 0, 2, 13).rect(38, 0, 2, 9);
       b.rect(22, 13, 3, 1, '^');
       b.plat(8, 11, 4).plat(12, 9, 4).plat(16, 7, 4).plat(10, 5, 3);
-      b.set(11, 4, 'M').set(18, 6, 't').set(5, 12, 'L').set(28, 12, 'g').set(15, 12, 'c').set(35, 12, 'o');
+      b.set(11, 4, 'M').set(5, 12, 'L').set(28, 12, 'g').set(15, 12, 'c').set(35, 12, 'o');
     },
   },
   {
@@ -569,7 +569,7 @@ const DEFS = [
       b.rect(0, 13, 36, 3).rect(4, 13, 3, 3, '.').plat(4, 15, 3);
       b.rect(0, 0, 1, 13).rect(35, 0, 1, 9); // abertura leste (linhas 9-12)
       b.plat(12, 9, 5).plat(20, 6, 5);
-      b.set(30, 12, 't').set(10, 12, 'L').set(14, 5, 'f').set(26, 4, 'f').set(24, 12, 'c');
+      b.set(10, 12, 'L').set(14, 5, 'f').set(26, 4, 'f').set(24, 12, 'c');
     },
   },
   {
@@ -600,7 +600,7 @@ const DEFS = [
       b.rect(0, 16, 40, 2);
       b.rect(6, 6, 33, 10, '~').rect(39, 8, 1, 4, '~');
       b.plat(12, 8, 4).plat(22, 6, 4).plat(30, 9, 4);
-      b.set(24, 5, 't').set(16, 12, 'q').set(26, 11, 'q').set(33, 8, 'q').set(10, 15, 'k').set(20, 15, 'o').set(34, 15, 'k');
+      b.set(16, 12, 'q').set(26, 11, 'q').set(33, 8, 'q').set(10, 15, 'k').set(20, 15, 'o').set(34, 15, 'k');
     },
   },
   {
@@ -626,7 +626,7 @@ const DEFS = [
       b.plat(36, 11, 4).plat(38, 9, 3);
       b.plat(6, 11, 4).plat(11, 9, 4).plat(6, 7, 4).plat(11, 5, 4).plat(6, 3, 4).plat(8, 1, 4); // subida para o Salão de Marta
       b.rect(40, 7, 6, 1); // borda alinhada com a passagem da Torre dos Ventos
-      b.set(14, 12, 'g').set(24, 12, 'g').set(20, 6, 'f').set(9, 12, 't').set(40, 6, 'o');
+      b.set(14, 12, 'g').set(24, 12, 'g').set(20, 6, 'f').set(40, 6, 'o');
     },
   },
   {
@@ -636,7 +636,7 @@ const DEFS = [
       b.rect(0, 13, 46, 3).rect(0, 0, 1, 9).rect(45, 0, 1, 9);
       b.rect(26, 13, 3, 1, '^');
       b.plat(8, 10, 4).plat(14, 8, 4).plat(20, 10, 4).plat(34, 10, 4);
-      b.set(16, 7, 'M').set(6, 12, 'B').set(12, 12, 'p').set(22, 12, 'p').set(32, 12, 'p').set(38, 12, 't').set(18, 12, 'h').set(42, 12, 'k');
+      b.set(16, 7, 'M').set(6, 12, 'B').set(12, 12, 'p').set(22, 12, 'p').set(32, 12, 'p').set(18, 12, 'h').set(42, 12, 'k');
     },
   },
   {
@@ -655,7 +655,7 @@ const DEFS = [
       b.rect(0, 13, 34, 3).rect(2, 13, 3, 3, '.').plat(2, 15, 3);
       b.rect(0, 0, 1, 13).rect(33, 0, 1, 9);
       b.plat(6, 9, 5).plat(24, 9, 5);
-      b.set(28, 12, 't').set(20, 12, 'L').set(10, 6, 'f').set(26, 6, 'f').set(30, 12, 'g').set(8, 8, 'k');
+      b.set(20, 12, 'L').set(10, 6, 'f').set(26, 6, 'f').set(30, 12, 'g').set(8, 8, 'k');
     },
   },
   {
@@ -677,7 +677,7 @@ const DEFS = [
       b.plat(8, 4, 4).plat(24, 4, 4);
       b.plat(14, 5, 4).plat(19, 3, 3).plat(18, 1, 3); // subida para a Ponte Partida
       b.plat(31, 5, 4).plat(35, 3, 3).plat(36, 1, 3); // subida para a Torre dos Ventos
-      b.set(4, 6, 't').set(12, 6, 'f').set(22, 6, 'p').set(28, 3, 'f').set(36, 6, 'h');
+      b.set(12, 6, 'f').set(22, 6, 'p').set(28, 3, 'f').set(36, 6, 'h');
     },
   },
   {
@@ -711,7 +711,7 @@ const DEFS = [
       b.rect(1, 8, 38, 6, '~').rect(0, 9, 1, 3, '~');
       b.plat(8, 6, 4).plat(26, 6, 5);
       b.plat(12, 4, 3).plat(11, 2, 3).plat(12, 1, 3); // subida para o Mirante dos Ventos
-      b.set(28, 5, 't').set(10, 11, 'q').set(20, 10, 'q').set(30, 12, 'q').set(6, 13, 'k').set(24, 13, 'k').set(34, 13, 'o');
+      b.set(10, 11, 'q').set(20, 10, 'q').set(30, 12, 'q').set(6, 13, 'k').set(24, 13, 'k').set(34, 13, 'o');
     },
   },
 
@@ -725,7 +725,7 @@ const DEFS = [
       b.rect(0, 12, 36, 4);
       b.plat(31, 10, 3).plat(33, 8, 2).plat(32, 6, 3); // subida até a abertura da Nascente
       b.plat(13, 10, 4).plat(8, 8, 4).plat(13, 6, 4).plat(8, 4, 4).plat(9, 3, 3).plat(8, 1, 3);
-      b.set(3, 11, 't').set(22, 11, 'g').set(18, 11, 'c').set(26, 11, 'c').set(20, 11, 'L').set(33, 11, 'k').set(30, 11, 'B');
+      b.set(22, 11, 'g').set(18, 11, 'c').set(26, 11, 'c').set(20, 11, 'L').set(33, 11, 'k').set(30, 11, 'B');
     },
   },
   {
@@ -745,7 +745,7 @@ const DEFS = [
       b.rect(0, 2, 1, 10).rect(31, 2, 1, 10);
       b.rect(0, 12, 32, 4);
       b.plat(15, 10, 4).plat(21, 8, 4).plat(15, 6, 4).plat(21, 4, 4).plat(20, 3, 3).plat(20, 1, 3);
-      b.set(3, 11, 'M').set(28, 11, 't').set(10, 11, 'g').set(25, 11, 'c').set(6, 11, 'k').set(13, 11, 'k');
+      b.set(3, 11, 'M').set(10, 11, 'g').set(25, 11, 'c').set(6, 11, 'k').set(13, 11, 'k');
     },
   },
   {
@@ -756,7 +756,7 @@ const DEFS = [
       b.rect(0, 16, 36, 2);
       b.rect(1, 8, 34, 8, '~').rect(0, 8, 1, 4, '~').rect(20, 16, 3, 2, '~');
       b.plat(6, 6, 5).plat(20, 5, 6).plat(28, 6, 4);
-      b.set(22, 4, 'B').set(30, 5, 't').set(10, 12, 'q').set(26, 11, 'q').set(5, 15, 'k').set(14, 15, 'o').set(32, 15, 'k');
+      b.set(22, 4, 'B').set(10, 12, 'q').set(26, 11, 'q').set(5, 15, 'k').set(14, 15, 'o').set(32, 15, 'k');
     },
   },
   {
@@ -767,7 +767,7 @@ const DEFS = [
       b.rect(0, 0, 1, 16).rect(33, 2, 1, 6).rect(33, 12, 1, 4);
       b.rect(0, 14, 34, 2);
       b.rect(1, 2, 32, 12, '~').rect(33, 8, 1, 4, '~').rect(10, 0, 3, 2, '~');
-      b.set(7, 13, 't').set(14, 9, 'q').set(24, 6, 'q').set(28, 12, 'q').set(18, 13, 'k').set(30, 13, 'o');
+      b.set(14, 9, 'q').set(24, 6, 'q').set(28, 12, 'q').set(18, 13, 'k').set(30, 13, 'o');
     },
   },
   {
